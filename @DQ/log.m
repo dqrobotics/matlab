@@ -1,5 +1,10 @@
+% The function log(dq) returns the logarithm of the dual quaternion dq
 function ret = log(dq)
-    non_dual = mod(dq.theta/2,pi)*dq.rotation_axis;
-    dual = dq.t/2;    
+    dq = DQ(dq);
     
-    ret = DQ([0;non_dual;0;dual(2:4)]);
+    primary = (theta(dq)/2)*dq.rotation_axis;
+    dual = translation(dq)*0.5;
+    
+    ret = primary + DQ.E* dual;
+    
+   
