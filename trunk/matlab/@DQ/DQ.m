@@ -20,7 +20,10 @@ classdef DQ
     %       dq.Im
     %
     % CONSTANTS:
-    %
+    %       DQ.E (dual unit)
+    %       DQ.i (imaginary i)
+    %       DQ.j (imaginary j)
+    %       DQ.k (imaginary k)
     % BINARY OPERATIONS: +  (plus)
     %                    -  (minus)
     %                    *  (mtimes)
@@ -30,9 +33,10 @@ classdef DQ
     %                    ' (conjugate)
     %
     %
-    % GENERAL FUNCTIONS:
-    %                    plot
+    % FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+    %                    plot 
     %                    translation
+    %                    rotation_axis
     
     
     
@@ -57,6 +61,9 @@ classdef DQ
     properties (Constant)
         %Dual unit
         E = DQ([0,0,0,0,1,0,0,0]);
+        i = DQ([0,1,0,0]);
+        j = DQ([0,0,1,0]);
+        k = DQ([0,0,0,1]);
         %Absolute values below the threshold are considered zero. This
         %threshold is used in the following functions: display, norm, ne,
         %and eq.
@@ -232,29 +239,17 @@ classdef DQ
         end
         
         function res = theta(obj)
-            %DEPRECATED.
+            % TODO: Put this outside the class
             % Assuming a unit dual quaternion, get the rotation
             % angle
-            disp('Usage of the function theta inside the class definition is deprecated');
+          
             res = 2*acos(obj.q(1,1));
         end
-        
-        function res = rotation_axis(obj)
-            %DEPRECATED.
-            %Assuming a unit dual quaternion, get the
-            %       rotation axis
-            disp('Usage of the function rotation_axis inside the class definition is deprecated');
-            theta = 2*acos(obj.q(1,1));
-            if(theta == 0)
-                res=[0;0;1];
-            else
-                res = obj.q(2:4,1)/sin(theta/2);
-            end
-        end
+       
         
         function res = tplus(obj) %operator tplus used in conjunction with the decompositional multiplication
-            %DEPRECATED.
-            disp('Usage of the function tplus inside the class definition is deprecated');
+            % TODO: Put this outside the class
+          
             res = obj*DQ(obj.n)'*(norm(obj.n)^-1);
         end
     end
