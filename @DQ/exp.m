@@ -2,14 +2,19 @@
 function res=exp(dq)
 dq=DQ(dq);
 
-theta=norm(dq.P.q);
+phi=norm(dq.P.q);
 
-
-
-if(theta ~= 0)
-    prim = DQ(cos(theta)) + (sin(theta)/theta)*dq.P;
+if(phi ~= 0)
+    prim = cos(phi) + (sin(phi)/phi)*dq.P;
 else
-    prim = DQ(0);
+    prim = 1;
 end
 
-res=prim+DQ.E*dq.D*prim;
+if(prim.q(1) < 0)
+   
+    res = -1*(prim+DQ.E*dq.D*prim);
+else
+    res = prim+DQ.E*dq.D*prim;
+end
+
+end

@@ -14,11 +14,16 @@ classdef DQ
     % Type help DQ.(method/constant/operation) for specific help.
     %
     % METHODS: 
-    %       dq.P
+    %       dq.P (or P(dq), the same applies to the other methods.)
     %       dq.D
     %       dq.Re
     %       dq.Im
-    %
+    %       hamiplus4(h)
+    %       haminus4(h)
+    %       hamiplus8(h)
+    %       haminus8(h)
+    %       vec4(h)
+    %       vec8(h)
     % CONSTANTS:
     %       DQ.E (dual unit)
     %       DQ.i (imaginary i)
@@ -29,6 +34,8 @@ classdef DQ
     %                    *  (mtimes)
     %                    == (eq)
     %                    ~  (ne)
+    %                    ^  (mpower), for the moment it is defined only for
+    %                                 unit dual quaternions
     % UNARY OPERATIONS: inv
     %                    ' (conjugate)
     %
@@ -37,6 +44,10 @@ classdef DQ
     %                    plot 
     %                    translation
     %                    rotation_axis
+    %                    theta
+    %                    log
+    %                    exp
+    %                    tplus
     
     
     
@@ -61,8 +72,11 @@ classdef DQ
     properties (Constant)
         %Dual unit
         E = DQ([0,0,0,0,1,0,0,0]);
+        %Imaginary i
         i = DQ([0,1,0,0]);
+        %Imaginary j
         j = DQ([0,0,1,0]);
+        %Imaginary k
         k = DQ([0,0,0,1]);
         %Absolute values below the threshold are considered zero. This
         %threshold is used in the following functions: display, norm, ne,
@@ -133,7 +147,58 @@ classdef DQ
             val = DQ([0,s.q(2),s.q(3),s.q(4),0,s.q(6),s.q(7),s.q(8)]);
         end
         
+        function H = hamiplus4(q)
+            % Return the positive Hamilton operator (4x4) of the quaternion
+            % q
+            q = DQ(q);
+            v = q.q;
+            H = [ v(1) -v(2) -v(3) -v(4);
+                  v(2)  v(1) -v(4)  v(3);
+                  v(3)  v(4)  v(1) -v(2);
+                  v(4) -v(3)  v(2)  v(1)];
+        end
         
+        function H = haminus4(q)
+            % Return the negative Hamilton operator (4x4) of the quaternion
+            % q
+            q = DQ(q);
+            v = q.q;
+            H = [ v(1) -v(2) -v(3) -v(4);
+                  v(2)  v(1)  v(4) -v(3);
+                  v(3) -v(4)  v(1)  v(2);
+                  v(4)  v(3) -v(2)  v(1)];
+        end
+        
+        function H = hamiplus8(dq)
+            % Return the positive Hamilton operator (8x8) of the dual quaternion
+            % dq
+            h = DQ(dq);
+            
+            H = [hamiplus4(h.P), zeros(4,4);
+                 hamiplus4(h.D), hamiplus4(h.P)];
+        end
+        
+        function H = haminus8(dq)
+            % Return the negative Hamilton operator (8x8) of the dual quaternion
+            % dq
+            h = DQ(dq);
+            H = [haminus4(h.P), zeros(4,4);
+                 haminus4(h.D), haminus4(h.P)];
+        end
+        
+        function v = vec4(dq)
+            % Return the vector with the quaternion coefficients (four
+            % coefficients)
+            dq = DQ(dq);
+            v = dq.q(1:4);
+        end
+        
+        function v = vec8(dq)
+            % Return the vector with the dual quaternion coefficients
+            % (eight coefficients).
+            dq = DQ(dq);
+            v = dq.q;
+        end
         %% Deprecated functions. They are here in order to ensure compatibility with old scripts.
         %  However, they are likely to disappear in the next versions. Use
         %  them at your own risk!        
@@ -250,7 +315,7 @@ classdef DQ
         function res = tplus(obj) %operator tplus used in conjunction with the decompositional multiplication
             % TODO: Put this outside the class
           
-            res = obj*DQ(obj.n)'*(norm(obj.n)^-1);
+            res = obj*obj.P';
         end
     end
 end
