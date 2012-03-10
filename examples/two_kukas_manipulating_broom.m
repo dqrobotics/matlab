@@ -97,6 +97,7 @@ two_arms = DQ_cdts(kuka_kine, base1, kuka_kine, base2);
 
 % The relative configuration between the hands must remain constant in order to minimize internal forces
 dqrd = two_arms.xr(theta);
+
 dqad_ant =  two_arms.xa(theta);
 % The sweep motion consists of turning the broom around the torso's y axis
 dqad =dqad_ant .* DQ([cos(pi/16);0;sin(pi/16);0]);
@@ -133,8 +134,14 @@ i=0;
 iter=1;
 j=1;
 
+two_arms.xr(theta)
+two_arms.xa(theta)
+two_arms.x1(theta)
+two_arms.x2(theta)
 
-
+two_arms.Jr(theta)
+two_arms.Ja(theta)
+pause()
 
 %The sweep motion (back and forth) will be performed twice
 while j <=4
@@ -160,6 +167,7 @@ while j <=4
     brooptip = translation(two_arms.x2(theta)*dqbroom);
     set(line_handle1, 'Xdata', [broombase.q(2), brooptip.q(2)], 'Ydata', [broombase.q(3), brooptip.q(3)], 'Zdata', [broombase.q(4),brooptip.q(4)]);
     
+   
  
     % Verify if the sweep direction can be changed
     if(norm(nerror_ant - error) < epsilon)

@@ -31,7 +31,7 @@ if optargin > 0
                         delete(handle.handle_text{i});
                     end 
                    
-            elseif strfind(my_string,'sca')
+            elseif strfind(my_string{1},'sca')
                    scale = cell2mat(varargin(1,j+1));              
             end
         end

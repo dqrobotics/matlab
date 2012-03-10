@@ -26,6 +26,8 @@ classdef DQ_kinematics
     properties
         links;
         theta,d,a,alpha;
+        dummy;
+        n_dummy;
         convention
     end
     
@@ -49,34 +51,52 @@ classdef DQ_kinematics
                 obj.convention='standard';
             else
                 obj.convention=type;
+            end
+            
+            if size(A,1) == 5
+                %There are dummy joints                
+                obj.dummy = A(5,:);
+                obj.n_dummy = sum(obj.dummy == 1);
                 
+            else                
+                obj.dummy = zeros(1,size(A,2));
             end
             
             obj.links = size(A,2);
-            
-            for i = 1:obj.links
-                obj.theta(i)=A(1,i);
-                obj.d(i)=A(2,i);
-                obj.a(i)=A(3,i);
-                obj.alpha(i)=A(4,i);
-            end
+            obj.theta = A(1,:);
+            obj.d = A(2,:);
+            obj.a = A(3,:);
+            obj.alpha = A(4,:);
         end
         
-        function q = fkm(obj,theta)
+        function q = fkm(obj,theta, ith)
             %   dq = fkm(theta) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
             %   end-effector pose.
             %   theta is the vector of joint variables
-            if length(theta) ~= obj.links
+            
+            if nargin == 3
+                n = ith;               
+            else
+                n = obj.links;
+            end
+            
+            if length(theta) ~= (obj.links - obj.n_dummy)
                 error('Incorrect number of joint variables');
             end
+            
             q=DQ(1);
-            for i=1:obj.links
-                q = q*dh2dq(obj,theta(i),i);
+            
+            j = 0;
+            for i=1:n
+                if obj.dummy(i) == 1
+                    q = q*dh2dq(obj,0,i);
+                    j = j + 1;
+                else
+                    q = q*dh2dq(obj,theta(i-j),i);
+                end
             end
         end
-        
-        
         
         function dq = dh2dq(obj,theta,i)
             %   For a given link's DH parameters, calculate the correspondent dual
@@ -93,10 +113,10 @@ classdef DQ_kinematics
             alpha = obj.alpha(i);
             
             if strcmp(obj.convention,'standard')
-                q(1)=cos(theta/2)*cos(alpha/2);
-                q(2)=cos(theta/2)*sin(alpha/2);
-                q(3)=sin(theta/2)*sin(alpha/2);
-                q(4)=sin(theta/2)*cos(alpha/2);
+                q(1)=cos((theta+obj.theta(i))/2)*cos(alpha/2);
+                q(2)=cos((theta+obj.theta(i))/2)*sin(alpha/2);
+                q(3)=sin((theta+obj.theta(i))/2)*sin(alpha/2);
+                q(4)=sin((theta+obj.theta(i))/2)*cos(alpha/2);
                 d2=d/2;
                 a2=a/2;
                 
@@ -106,19 +126,22 @@ classdef DQ_kinematics
                 q(7)=d2*q(2)+a2*q(4);
                 q(8)=d2*q(1)-a2*q(3);
             else
-                
-                q(1)=cos(theta/2)*cos(alpha/2);
-                q(2)=cos(theta/2)*sin(alpha/2);
-                q(3)=-sin(theta/2)*sin(alpha/2);
-                q(4)=sin(theta/2)*cos(alpha/2);
+                h1 = cos((theta+obj.theta(i))/2)*cos(alpha/2);
+                h2 = cos((theta+obj.theta(i))/2)*sin(alpha/2);
+                h3 = sin((theta+obj.theta(i))/2)*sin(alpha/2);
+                h4 = sin((theta+obj.theta(i))/2)*cos(alpha/2);
+                q(1)= h1;
+                q(2)= h2;
+                q(3)= -h3;
+                q(4)= h4;
                 d2=d/2;
                 a2=a/2;
                 
                 
-                q(5)=-d2*q(4)-a2*q(2);
-                q(6)=-d2*q(3)+a2*q(1);
-                q(7)=-(d2*q(2)+a2*q(4));
-                q(8)=d2*q(1)-a2*q(3);
+                q(5)=-d2*h4-a2*h2;
+                q(6)=-d2*h3+a2*h1;
+                q(7)=-(d2*h2+a2*h4);
+                q(8)=d2*h1-a2*h3;
             end
             
             dq=DQ(q);
@@ -143,19 +166,24 @@ classdef DQ_kinematics
             q_effector = obj.fkm(theta);
             
             q = DQ(1);
-            J= zeros(8,obj.links);
+            J= zeros(8,obj.links-obj.n_dummy);
+            ith=0;
             
             for i = 0:obj.links-1
-                %Use the standard DH convention
-                if strcmp(obj.convention,'standard')
-                    p = obj.get_p(q.q);
-                else %Use the modified DH convention
-                    w=DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
-                    p =0.5*q*w*q';
+                %If the joint is not dummy, there is a correspondent
+                if ~obj.dummy(i+1)
+                    %Use the standard DH convention
+                    if strcmp(obj.convention,'standard')
+                        p = obj.get_p(q.q);
+                    else %Use the modified DH convention
+                        w=DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
+                        p =0.5*q*w*q';
+                    end
+                    q = q*obj.dh2dq(theta(i+1),i+1);
+                    j = p * q_effector;
+                    J(:,ith+1) = j.q;
+                    ith = ith+1;
                 end
-                q = q*obj.dh2dq(theta(i+1),i+1);
-                j = p * q_effector;
-                J(:,i+1) = j.q;
             end
         end
         
