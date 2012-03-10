@@ -56,7 +56,7 @@ plot(kuka1, theta');
 fprintf('Performing standard kinematic control using dual quaternion coordinates');
 gain = 0.1;
 theta = thetastart;
-error =epsilon+1;
+error = epsilon+1;
 
 while norm(error) > epsilon
     jacob = kuka_kine.jacobian(theta);
