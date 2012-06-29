@@ -3,21 +3,7 @@ clear all;
 clear classes;
 clc;
 
-disp('WARNING: this example requires Peter Corke"s Robotics Toolbox');
-
-%DH for the Kuka LWR
-%L =LINK([alpha     A   theta   D)
-l1_a=link([pi/2      0       0      0.310], 'standard');
-l2_a=link([-pi/2    0       0      0        ], 'standard');
-l3_a=link([-pi/2    0       0      0.4     ], 'standard');
-l4_a=link([pi/2      0       0      0        ], 'standard');
-l5_a=link([pi/2      0       0      0.39   ], 'standard');
-l6_a=link([-pi/2    0       0      0        ], 'standard');
-l7_a=link([0           0       0      0        ], 'standard');
-
-%Definitions of the arm
-kuka1 =robot({l1_a l2_a l3_a l4_a l5_a l6_a l7_a});
-kuka1.name = 'Kuka 1';
+disp('WARNING: this example requires Peter Corke''s Robotics Toolbox');
 
 %Standard D-H of KUKA-LWR
 kuka_DH_theta=[0, 0, 0, 0, 0, 0, 0];
@@ -29,41 +15,39 @@ kuka_DH_matrix = [kuka_DH_theta;
                   kuka_DH_a;
                   kuka_DH_alpha];
                               
-kuka_kine = DQ_kinematics(kuka_DH_matrix,'standard');
+kuka = DQ_kinematics(kuka_DH_matrix,'standard');
 
-
+%Initial configuration
 thetastart =[0    0.3770    0.1257   -0.5655         0         0         0]';
+%Final configuration
+thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
 theta = thetastart;
 
+epsilon = 0.001; %The error must be bellow this value in order to stop the robot
+gain = 0.1; %Gain of the controllers
+
+xd = kuka.fkm(thetad); %Desired end-effector's pose
+
 figure;
-plotbotopt={'nobase','noname','noshadow','ortho'};
-plot(kuka1, theta',plotbotopt{:});
+axis equal;
+plot(kuka, theta);
+
 grid off;
-%axis off;
 view(-0,0)
 hold on;
 
-epsilon = 0.001; %The error must be bellow this value in order to stop the robot
-thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
-
-
-xd = kuka_kine.fkm(thetad);
-xm = kuka_kine.fkm(theta);
-
-plot(kuka1, theta');
+plot(kuka, theta);
     
 
 fprintf('Performing standard kinematic control using dual quaternion coordinates');
-gain = 0.1;
-theta = thetastart;
+xm = kuka.fkm(theta);
 error = epsilon+1;
-
 while norm(error) > epsilon
-    jacob = kuka_kine.jacobian(theta);
-    xm= kuka_kine.fkm(theta);
+    jacob = kuka.jacobian(theta);
+    xm = kuka.fkm(theta);
     error = vec8(xd-xm);
     theta = theta+pinv(jacob)*gain*error;
-    plot(kuka1, theta');    
+    plot(kuka, theta');    
 end
 
 fprintf('\nNow let us control only the translation part\n');
@@ -72,13 +56,13 @@ pd = [0,0,0,0];
 
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka_kine.jacobian(theta);
-    xm = kuka_kine.fkm(theta);
-    jacobp = kuka_kine.jacobp(jacob,xm);
+    jacob = kuka.jacobian(theta);
+    xm = kuka.fkm(theta);
+    jacobp = kuka.jacobp(jacob,xm);
     pm = translation(xm);
     error = vec4(pd-pm);    
     theta = theta+pinv(jacobp)*gain*error;
-    plot(kuka1, theta');       
+    plot(kuka, theta');       
 end
 
 fprintf('\nNow let us control only the orientation\n')
@@ -88,13 +72,13 @@ rd = DQ(1);
 
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka_kine.jacobian(theta);
-    xm = kuka_kine.fkm(theta);
+    jacob = kuka.jacobian(theta);
+    xm = kuka.fkm(theta);
     jacobr = jacob(1:4,:);
     rm = xm.P;
     error = vec4(rd-rm);    
     theta = theta+pinv(jacobr)*gain*error;
-    plot(kuka1, theta');       
+    plot(kuka, theta');       
 end
 
 
@@ -107,13 +91,13 @@ fprintf('\nNow let us place the end-effector at a distance of 0.2 m from the bas
 dd=0.2^2;
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka_kine.jacobian(theta);
-    xm = kuka_kine.fkm(theta);
-    jacobd = kuka_kine.jacobd(jacob,xm);
+    jacob = kuka.jacobian(theta);
+    xm = kuka.fkm(theta);
+    jacobd = kuka.jacobd(jacob,xm);
     dm = norm(vec4(translation(xm)))^2;
     error = dd-dm;    
     theta = theta+pinv(jacobd)*gain*error;
-    plot(kuka1, theta');       
+    plot(kuka, theta');       
 end
 
 

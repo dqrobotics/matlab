@@ -28,7 +28,12 @@ classdef DQ_kinematics
         theta,d,a,alpha;
         dummy;
         n_dummy;
-        convention
+        convention;
+        base;
+        
+        % Properties for interfacing with Robotics Toolbox  
+        name;
+        robot_RT;
     end
     
     properties (Constant)
@@ -67,7 +72,19 @@ classdef DQ_kinematics
             obj.d = A(2,:);
             obj.a = A(3,:);
             obj.alpha = A(4,:);
+            
+            obj.base = DQ(1); %Default base's pose
+            
+            %Definitions for Robotics Toolbox
+            obj.name = sprintf('%f',rand(1));
+            obj.robot_RT = SerialLink(A','name',obj.name);
+           
         end
+        
+        function set_base(obj,base)
+            obj.base = DQ(base);
+        end
+            
         
         function q = fkm(obj,theta, ith)
             %   dq = fkm(theta) calculates the forward kinematic model and
@@ -96,6 +113,8 @@ classdef DQ_kinematics
                     q = q*dh2dq(obj,theta(i-j),i);
                 end
             end
+            
+            q = obj.base*q; %Takes into account the base displacement
         end
         
         function dq = dh2dq(obj,theta,i)
@@ -185,6 +204,7 @@ classdef DQ_kinematics
                     ith = ith+1;
                 end
             end
+            J = hamiplus8(obj.base)*J; %Takes the base's displacement into account
         end
         
     end
