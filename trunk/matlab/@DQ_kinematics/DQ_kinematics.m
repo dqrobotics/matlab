@@ -98,14 +98,18 @@ classdef DQ_kinematics
         end
             
         
-        function q = fkm(obj,theta, ith)
-            %   dq = fkm(theta) calculates the forward kinematic model and
+       
+        
+        function q = raw_fkm(obj,theta, ith)
+            %   dq = raw_fkm(theta) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
-            %   end-effector pose.
+            %   last joint (the displacements due to the base and the effector are not taken into account).
             %   theta is the vector of joint variables
+            %   This is an auxiliary function to be used mainly with the
+            %   Jacobian function.
             
             if nargin == 3
-                n = ith;               
+                n = ith;
             else
                 n = obj.links;
             end
@@ -119,14 +123,27 @@ classdef DQ_kinematics
             j = 0;
             for i=1:n
                 if obj.dummy(i) == 1
-                    q = q*dh2dq(obj,0,i);
+                    q = q*dh2dq(obj,0,i); %The offset is taken into account inside the method dh2dq
                     j = j + 1;
                 else
                     q = q*dh2dq(obj,theta(i-j),i);
                 end
             end
+        end
+        
+        function q = fkm(obj,theta, ith)
+            %   dq = fkm(theta) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   end-effector pose. This function takes into account the
+            %   displacement due to the base's and effector's poses.
+            %
+            %   theta is the vector of joint variables
             
-            q = obj.base*q*obj.effector; %Takes into account the base displacement
+            if nargin == 3
+                q = obj.base*obj.raw_fkm(theta, ith)*obj.effector; %Takes into account the base displacement
+            else
+                q = obj.base*obj.raw_fkm(theta)*obj.effector;
+            end
         end
         
         function dq = dh2dq(obj,theta,i)
@@ -178,7 +195,7 @@ classdef DQ_kinematics
             dq=DQ(q);
         end
         
-        function p = get_p(obj,q)
+        function p = get_z(obj,q)
             p(1) = 0;
             p(2)=q(2)*q(4) + q(1)*q(3);
             p(3)=q(3)*q(4) - q(1)* q(2);
@@ -194,29 +211,33 @@ classdef DQ_kinematics
         function J = jacobian(obj,theta)
             % J = jacobian(theta) returns the dual quaternion Jacobian, where
             % theta is the vector of joint variables
-            q_effector = obj.fkm(theta);
+            q_effector = obj.raw_fkm(theta);
             
             q = DQ(1);
             J= zeros(8,obj.links-obj.n_dummy);
             ith=0;
             
             for i = 0:obj.links-1
-                %If the joint is not dummy, there is a correspondent
-                if ~obj.dummy(i+1)
+                
+                
                     %Use the standard DH convention
                     if strcmp(obj.convention,'standard')
-                        p = obj.get_p(q.q);
+                        z = obj.get_z(q.q);
                     else %Use the modified DH convention
                         w=DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
-                        p =0.5*q*w*q';
+                        z =0.5*q*w*q';
                     end
-                    q = q*obj.dh2dq(theta(i+1),i+1);
-                    j = p * q_effector;
-                    J(:,ith+1) = j.q;
-                    ith = ith+1;
-                end
+                    
+                    if ~obj.dummy(i+1)
+                        q = q*obj.dh2dq(theta(ith+1),i+1);
+                        j = z * q_effector;
+                        J(:,ith+1) = j.q;
+                        ith = ith+1;                    
+                    else
+                        q = q*obj.dh2dq(0,i+1); %Dummy joints don't contribute to the Jacobian
+                    end
             end
-            J = hamiplus8(obj.base)*J; %Takes the base's displacement into account
+            J = hamiplus8(obj.base)*haminus8(obj.effector)*J; %Takes the base's displacement into account
         end
         
     end
