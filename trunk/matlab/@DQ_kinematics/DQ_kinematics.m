@@ -7,6 +7,8 @@
 %         alpha1 ... alphan]
 % convention is the convention used for the D-H parameters. Accepted values are
 % 'standard' and 'modified'
+% 
+% Please note that the theta_i is already the offset for the i-th joint.
 %
 % Type DQ_kinematics.(method,property) for specific help.
 % Ex.: help DQ_kinematics.fkm
@@ -16,6 +18,8 @@
 %       jacobian
 %       jacobp
 %       jacobd
+%       set_base
+%       set_effector
 %
 % PROPERTIES:
 %       C8
@@ -30,6 +34,7 @@ classdef DQ_kinematics
         n_dummy;
         convention;
         base;
+        effector;
         
         % Properties for interfacing with Robotics Toolbox  
         name;
@@ -74,15 +79,22 @@ classdef DQ_kinematics
             obj.alpha = A(4,:);
             
             obj.base = DQ(1); %Default base's pose
+            obj.effector = DQ(1); %Default effector's pose
             
             %Definitions for Robotics Toolbox
             obj.name = sprintf('%f',rand(1));
-            obj.robot_RT = SerialLink(A','name',obj.name);
+            obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
            
         end
         
         function set_base(obj,base)
+            % dq.set_base(base) sets the pose of the robot's base
             obj.base = DQ(base);
+        end
+        
+        function set_effector(obj,effector)
+            % dq.set_effector(effector) sets the pose of the effector
+            obj.effector = DQ(effector);
         end
             
         
@@ -114,7 +126,7 @@ classdef DQ_kinematics
                 end
             end
             
-            q = obj.base*q; %Takes into account the base displacement
+            q = obj.base*q*obj.effector; %Takes into account the base displacement
         end
         
         function dq = dh2dq(obj,theta,i)
