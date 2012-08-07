@@ -1,4 +1,4 @@
-function plot(obj,theta,varargin)
+function plot(obj,joint_angles,varargin)
     
     robot = obj.robot_RT;
     has_options = 0;
@@ -8,9 +8,27 @@ function plot(obj,theta,varargin)
         has_options = 1;
     end
     
-    if size(theta,2) == 1
-        theta = theta';
+    if size(joint_angles,2) == 1
+        joint_angles = joint_angles';
     end
+    
+    % If there are dummy joints, we must plot them
+    if obj.n_dummy
+        theta = zeros(1,length(obj.theta));
+        counter = 0;
+        for i = 1:length(theta)
+            if obj.dummy(i)
+                theta(i) = obj.theta(i);
+                counter = counter + 1;
+            else
+                theta(i)=joint_angles(i-counter)+obj.theta(i);
+            end
+            
+        end
+    else        
+        theta = joint_angles;
+    end
+    
     
     if has_options
         plot(robot,theta, varargin{:});
@@ -23,6 +41,7 @@ function plot(obj,theta,varargin)
     base = translation(obj.base);
     rr.base = transl(base.q(2:4));
     set(rh, 'UserData', rr);
+    
     if has_options
         plot(robot,theta, varargin{:});
     else
