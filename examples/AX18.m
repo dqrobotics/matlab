@@ -1,4 +1,4 @@
-
+close all;
 clear all;
 clear classes;
 clc;
@@ -20,3 +20,6 @@ ax18 = DQ_kinematics(DH_RobotMatrix,'standard'); % Defines robot model using dua
 theta0=[0 0 0 0 0]; %Initial Position for the Robot Arm
 
 plot(ax18,theta0);
+hold on;
+plot(ax18.fkm(theta0),'scale',100);
+ax18.jacobian(theta0)
