@@ -26,7 +26,7 @@
 %       C4
 
 
-classdef DQ_kinematics
+classdef DQ_kinematics < handle
     properties
         links;
         theta,d,a,alpha;
