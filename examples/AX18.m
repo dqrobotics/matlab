@@ -23,3 +23,9 @@ plot(ax18,theta0);
 hold on;
 plot(ax18.fkm(theta0),'scale',100);
 ax18.jacobian(theta0)
+
+ax18.effector
+
+ax18.set_effector(cos(pi/4)+DQ.i*sin(pi/4))
+
+ax18.effector
