@@ -38,7 +38,6 @@ if optargin > 0
     end
 end
 
-  
     
     
     % create unit vectors and rotate them by the quaternion part of dq.
