@@ -31,9 +31,9 @@ function plot(obj,joint_angles,varargin)
     
     
     if has_options
-        plot(robot,theta, varargin{:});
+        plot(robot,theta+obj.theta, varargin{:});
     else
-        plot(robot,theta);
+        plot(robot,theta+obj.theta);
     end
     %translating the base if necessary
     rh = findobj('Tag', robot.name);
@@ -42,9 +42,9 @@ function plot(obj,joint_angles,varargin)
     rr.base = transl(base.q(2:4));
     set(rh, 'UserData', rr);
     
-    if has_options
-        plot(robot,theta, varargin{:});
+   if has_options
+        plot(robot,theta+obj.theta, varargin{:});
     else
-        plot(robot,theta);
+        plot(robot,theta+obj.theta);
     end
 end
