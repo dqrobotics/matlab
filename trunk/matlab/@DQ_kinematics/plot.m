@@ -17,7 +17,7 @@ function plot(obj,joint_angles,varargin)
         theta = zeros(1,length(obj.theta));
         counter = 0;
         for i = 1:length(theta)
-            if obj.dummy(i)
+            if obj.dummy(i) == 1
                 theta(i) = obj.theta(i);
                 counter = counter + 1;
             else
@@ -30,11 +30,11 @@ function plot(obj,joint_angles,varargin)
     end
     
     
-    if has_options
-        plot(robot,theta+obj.theta, varargin{:});
-    else
-        plot(robot,theta+obj.theta);
-    end
+   % if has_options
+   %     plot(robot,theta+obj.theta, varargin{:});
+   % else
+   %     plot(robot,theta+obj.theta);
+   % end
     %translating the base if necessary
     rh = findobj('Tag', robot.name);
     rr = get(rh, 'UserData');
@@ -43,8 +43,8 @@ function plot(obj,joint_angles,varargin)
     set(rh, 'UserData', rr);
     
    if has_options
-        plot(robot,theta+obj.theta, varargin{:});
+        plot(robot,theta, varargin{:});
     else
-        plot(robot,theta+obj.theta);
+        plot(robot,theta);
     end
 end
