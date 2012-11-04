@@ -3,23 +3,6 @@ close all;
 clear classes;
 clc;
 
-
-%L(i)= LINK([alpha     A   theta        D     sigma offset], CONVENTION)
-
-L{1} = link([ pi     0       0       -0.450     0   0], 'modified');
-L{2} = link([ pi/2   0.150   0       0          0   -pi/2], 'modified');
-L{3} = link([ pi     0.590   0       0          0   pi/2], 'modified');
-L{4} = link([ -pi/2  0.130   0       -0.64707	0	0], 'modified');
-L{5} = link([-pi/2   0       0       0          0   0], 'modified');
-L{6} = link([ pi/2 	 0       0       -0.095     0   0], 'modified');
-L{7} = link([ pi 	 0       0       0          0   pi], 'modified');
-
-cs6 = robot(L, 'Smart Six', 'Comau');
-
-cs6.name = 'Smart Six';
-cs6.manuf = 'Comau';
-
-
 %% Definitions for DQ_kinematics
 comau_DH_theta=  [0, -pi/2, pi/2, 0, 0, 0, pi];
 comau_DH_d =     [-0.45, 0, 0, -0.64707, 0, -0.095, 0];
@@ -39,6 +22,7 @@ comau_kine = DQ_kinematics(comau_DH_matrix, 'modified');
 %% Basic definitions for the simulation
 initial_theta = [0,0,-pi/2,0,pi/2,0]';
 desired_theta = [pi/2,0,-pi/2,0,pi/2,0]';
+
 xd = comau_kine.fkm(desired_theta);
 
 error = 1;
@@ -48,8 +32,9 @@ theta = initial_theta;
 
 figure;
 hold on;
-plot(cs6,[theta;0]');
+plot(comau_kine,theta);
 plot(xd,'scale',0.5);
+
 
 axis equal;
 axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
@@ -61,7 +46,7 @@ while norm(error) > epsilon
     J = comau_kine.jacobian(theta);
     error = vec8(xd-xm);
     theta = theta + pinv(J)*K*error;
-    plot(cs6,[theta;0]');
+   plot(comau_kine,theta);
 end
 
 

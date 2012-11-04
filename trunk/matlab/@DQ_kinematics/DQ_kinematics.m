@@ -38,7 +38,17 @@ classdef DQ_kinematics < handle
         
         % Properties for interfacing with Robotics Toolbox  
         name;
+        plotopt
+        lineopt
+        shadowopt
         robot_RT;
+    end
+    
+      properties (SetAccess = private)
+       
+        handle
+        q
+       
     end
     
     properties (Constant)
@@ -57,12 +67,9 @@ classdef DQ_kinematics < handle
         function obj = DQ_kinematics(A,type)
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
-            elseif nargin==1
-                obj.convention='standard';
-            else
-                obj.convention=type;
             end
             
+            obj.n_dummy = 0; 
             if size(A,1) == 5
                 %There are dummy joints                
                 obj.dummy = A(5,:);
@@ -82,8 +89,23 @@ classdef DQ_kinematics < handle
             obj.effector = DQ(1); %Default effector's pose
             
             %Definitions for Robotics Toolbox
-            obj.name = sprintf('%f',rand(1));
+            obj.name = sprintf('%f',rand(1));            
             obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+            
+            if nargin==1
+                obj.convention='standard';  
+                 obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+            else
+                obj.convention=type;
+               % obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name,'mdh',1);
+            end
+             obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+             
+             
+             %For visualisation
+             obj.lineopt = {'Color', 'black', 'Linewidth', 4};
+            obj.shadowopt = {'Color', 0.7*[1 1 1], 'Linewidth', 3};
+            obj.plotopt = {};
            
         end
         
@@ -138,9 +160,11 @@ classdef DQ_kinematics < handle
             %   displacement due to the base's and effector's poses.
             %
             %   theta is the vector of joint variables
+            %   
+            %   dq = fkm(theta, ith) calculates the FKM up to the ith link.
             
             if nargin == 3
-                q = obj.base*obj.raw_fkm(theta, ith)*obj.effector; %Takes into account the base displacement
+                q = obj.base*obj.raw_fkm(theta, ith); %Takes into account the base displacement
             else
                 q = obj.base*obj.raw_fkm(theta)*obj.effector;
             end
