@@ -90,16 +90,16 @@ classdef DQ_kinematics < handle
             
             %Definitions for Robotics Toolbox
             obj.name = sprintf('%f',rand(1));            
-            obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+           % obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
             
             if nargin==1
                 obj.convention='standard';  
-                 obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+           %      obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
             else
                 obj.convention=type;
                % obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name,'mdh',1);
             end
-             obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
+            % obj.robot_RT = SerialLink(A(1:4,:)','name',obj.name);
              
              
              %For visualisation
