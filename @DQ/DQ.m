@@ -310,6 +310,21 @@ classdef DQ
           
             res = 2*acos(obj.q(1,1));
         end
+        
+        function G = gen(dquat)
+            dq = DQ(dquat);
+            psi_l = [dq.q(5)  dq.q(6)  dq.q(7) dq.q(8);
+                     dq.q(6) -dq.q(5)  dq.q(8) -dq.q(7);
+                     dq.q(7) -dq.q(8) -dq.q(5) dq.q(6);
+                     dq.q(8)  dq.q(7) -dq.q(6) -dq.q(5);
+                    ];
+            omega_l = haminus4(P(dq)');
+            psi_r = omega_l;
+            
+            G = 2*[psi_l psi_r;
+                   omega_l zeros(4,4)];            
+           
+        end
        
         
         function res = tplus(obj) %operator tplus used in conjunction with the decompositional multiplication
