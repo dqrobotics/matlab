@@ -26,8 +26,8 @@ desired_theta = [pi/2,0,-pi/2,0,pi/2,0]';
 xd = comau_kine.fkm(desired_theta);
 
 error = 1;
-epsilon = 0.01;
-K = 0.1;
+epsilon = 0.001;
+K = 2;
 theta = initial_theta;
 
 figure;
