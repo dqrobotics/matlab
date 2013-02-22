@@ -8,8 +8,8 @@ format SHORTE;
 % isotropic damping (beta).
 
 %% Constant Initialization.
-% Controller Step Maximum
-control_step_max = 200;
+% Convergence Tolerance
+convergence_tolerance = 1.e-5;
 % Constants
 pi2 = pi/2;
 % Controller Gains And Dampings
@@ -33,11 +33,14 @@ dofs = schunk.links;
 % Auxiliar variables
 identity = eye(8,8);
 
+x_error = vec8(DQ(inf));
 %% Loops for a given amount of steps
-for i=1:control_step_max
+while (norm(x_error) > convergence_tolerance)
    
     x = schunk.fkm(thetas);
     J = schunk.jacobian(thetas);
+    
+    %% Damping Calculation
     
     [U,S,V] = svd(J);
     sigma_min = S(dofs,dofs);
@@ -48,11 +51,16 @@ for i=1:control_step_max
         lambda = (1-(sigma_min/epsilon)^2)*(lambda_max^2);
     end
     
-    % Base dislocation invariant error
-    error = vec8(1 - x'*xd);
+    %% Jacobian Inversion
     J_inv = (J')/(J*(J') + (beta*beta)*identity + (lambda*lambda)*u_m*(u_m'));
+
+    %% Error Calculation
+    % Base dislocation invariant error
+    %x_error = vec8(1 - x'*xd);
+    % Euclidian Distance
+    x_error = vec8(xd - x);    
     
-    delta_thetas = J_inv*kp*error;
+    delta_thetas = J_inv*kp*x_error;
     thetas = thetas + delta_thetas;
 
 end
