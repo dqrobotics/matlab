@@ -27,7 +27,7 @@ xd = comau_kine.fkm(desired_theta);
 
 error = 1;
 epsilon = 0.001;
-K = 2;
+K = 0.5;
 theta = initial_theta;
 
 figure;

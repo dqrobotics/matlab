@@ -16,9 +16,9 @@ wam_DH_matrix = [wam_DH_theta;
 wam = DQ_kinematics(wam_DH_matrix,'standard');
 
 %Initial configuration
-thetastart =[0    0    0    0        0         0         0]';
+thetastart =[-2.65    -0.604    -0.46    2.68        1.35         1.61         -3.03]';
 %Final configuration
-thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
+thetad = [-2.0    -0.304    -0.3    2.3        1.0         1.0         -2.03]';
 theta = thetastart;
 
 epsilon = 0.001; %The error must be bellow this value in order to stop the robot
