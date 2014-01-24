@@ -3,8 +3,6 @@ clear all;
 clear classes;
 clc;
 
-disp('WARNING: this example requires Peter Corke''s Robotics Toolbox');
-
 %Standard D-H of KUKA-LWR
 kuka_DH_theta=[0, 0, 0, 0, 0, 0, 0];
 kuka_DH_d = [0.310, 0, 0.4, 0, 0.39, 0, 0];
