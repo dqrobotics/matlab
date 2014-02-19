@@ -41,18 +41,16 @@ classdef DQ
     %
     %
     % FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+    %                    exp
+    %                    is_unit
+    %                    log
     %                    plot 
     %                    translation
     %                    rotation_axis
-    %                    theta
-    %                    log
-    %                    exp
-    %                    tplus
-    
-    
-    
-    
-    
+    %                    rotation_angle
+    %                    translation
+    %                    T
+   
     properties
         %dual quaternion vector
         q;
@@ -199,12 +197,14 @@ classdef DQ
             dq = DQ(dq);
             v = dq.q;
         end
+        
+      
         %% Deprecated functions. They are here in order to ensure compatibility with old scripts.
         %  However, they are likely to disappear in the next versions. Use
         %  them at your own risk!        
         function val = n(s,elem)
             %DEPRECATED. Please use P instead.
-            disp('Function n deprecated');
+            warning('Function n deprecated. Please use P(x) instead');
             if nargin == 2
                 if elem > 4 || elem < 1
                     error('Index out of bonds');
@@ -217,7 +217,7 @@ classdef DQ
         
         function val = d(s,elem)
             % Return the dual part of the dual quaternion
-            disp('Function d deprecated');
+            warning('Function d deprecated. Please use D(x) instead');
             if nargin == 2
                 if elem > 4 || elem < 1
                     error('Index out of bonds');
@@ -234,7 +234,7 @@ classdef DQ
             % Return the translation corresponding to the unit dual
             % quaternion, assuming a translation followed by rotation
             % movement.
-            disp('Function t deprecated');
+            warning('Function t deprecated. Please use instead translation(x)');
             aux = 2*DQ(s.d)*DQ(s.n)';
             if nargin == 2
                 if elem > 4 || elem < 1
@@ -250,7 +250,7 @@ classdef DQ
             %DEPRECATED
             % dq.vec(index) %Return the cartesian vector corresponding to the
             % non-dual (index=1) or dual part (index=2)
-            disp('Function vec deprecated');
+            warning('Function vec deprecated');
             if num == 1
                 val = s.q(2:4);
             elseif num == 2
@@ -260,56 +260,14 @@ classdef DQ
             end
         end
         
-        function res = half_tq(obj)
-            %DEPRECATED. Use pow, instead
-            
-            % Assuming a unit dual quaternion, get the half dual
-            % quaternion corresponding to the transformation
-            % translation followed by rotation.
-            
-            disp('Function half_tq deprecated');
-            
-            %Assuming that v is a unit dual quaternion
-            %and that the transformation q'=0.5*t*q is applied.
-            %TODO: Check if v is a unit dual quaternion
-            obj = DQ(obj);
-            %extract obj_2 from obj
-            % [theta,n] = getAngleAxisRotationQuaternion(obj.n);
-            theta = obj.theta;
-            n = obj.rotation_axis;
-            q_r_2 = [cos(0.5*theta*0.5);sin(0.5*theta*0.5)*n];
-            %extract t_r
-            t_r = 2*quaternionMultiplication(obj.d,conjugate(obj.n));
-            q_r_2_dual = 0.5*quaternionMultiplication(t_r*0.5,q_r_2);
-            res = DQ([q_r_2;q_r_2_dual]);
-        end
-        
-        function res = half_qt(obj)
-            % DEPRECATED. Use pow, instead
-            % Assuming a unit dual quaternion, get the half dual
-            % quaternion corresponding to the transformation rotation
-            % followed by translation.
-            disp('Function half_tq deprecated');
-            
-            obj = DQ(obj);
-            %extract obj_2 from obj
-            %             [theta,n] = getAngleAxisRotationQuaternion(obj.n);
-            theta = obj.theta;
-            n = obj.rotation_axis;
-            q_r_2 = [cos(0.5*theta*0.5);sin(0.5*theta*0.5)*n];
-            %extract t_r
-            t_r = 2*quaternionMultiplication(conjugate(obj.n),obj.d);
-            q_r_2_dual = 0.5*quaternionMultiplication(q_r_2,t_r*0.5);
-            res = DQ([q_r_2;q_r_2_dual]);
-        end
         
         function res = theta(obj)
-            % TODO: Put this outside the class
-            % Assuming a unit dual quaternion, get the rotation
-            % angle
-          
-            res = 2*acos(obj.q(1,1));
+            warning('Function theta(x) deprecated. Please use instead rotation_angle(x)');
+            res = rotation_angle(obj);
+           
         end
+        
+       
         
         function G = gen(dquat)
             dq = DQ(dquat);
@@ -327,10 +285,10 @@ classdef DQ
         end
        
         
-        function res = tplus(obj) %operator tplus used in conjunction with the decompositional multiplication
-            % TODO: Put this outside the class
+        function res = tplus(obj) 
+           warning('Function tplus(x) deprecated. Please use instead T(x)');
           
-            res = obj*obj.P';
+            res = T(obj);
         end
     end
 end
