@@ -17,7 +17,7 @@ DH_RobotMatrix = [ DH_Theta(1:i) ; DH_D(1:i) ; DH_A(1:i) ; DH_Alpha(1:i) ; DH_vi
 
 ax18 = DQ_kinematics(DH_RobotMatrix,'standard'); % Defines robot model using dual quaternions
 
-theta0=[0 0 0 0 0]; %Initial Position for the Robot Arm
+theta0=[0 0 0 0 0]'; %Initial Position for the Robot Arm
 
 plot(ax18,theta0);
 hold on;
@@ -32,3 +32,17 @@ ax18.effector
 pause()
 
 plot(ax18.fkm(theta0),'scale',100);
+
+p = translation(ax18.fkm(theta0));
+pd = translation(ax18.fkm([pi/4 -pi/4 pi/2 0 pi/4]));
+theta = theta0;
+
+error = pd - p;
+while norm(vec4(error)) > 0.1
+    x = ax18.fkm(theta);
+    p = translation(x);
+    Jp = ax18.jacobp(ax18.jacobian(theta),x);
+    error = pd - p;
+    theta = theta + pinv(Jp)*0.1*vec4(error);
+    plot(ax18,theta);
+end

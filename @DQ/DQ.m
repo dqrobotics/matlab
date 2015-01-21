@@ -29,6 +29,8 @@ classdef DQ
     %       DQ.i (imaginary i)
     %       DQ.j (imaginary j)
     %       DQ.k (imaginary k)
+    %       C8 (conjugator matrix associated to vec8)
+    %       C4 (conjugator matrix associated to vec4)
     % BINARY OPERATIONS: +  (plus)
     %                    -  (minus)
     %                    *  (mtimes)
@@ -40,7 +42,7 @@ classdef DQ
     %                    ' (conjugate)
     %
     %
-    % FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+    % METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
     %                    exp
     %                    is_unit
     %                    log
@@ -80,6 +82,12 @@ classdef DQ
         %threshold is used in the following functions: display, norm, ne,
         %and eq.
         threshold = 1e-12;
+        % Given the dual quaternion x, the matrix C8 is the one that
+        % satisfies the relation vec8(x') = C8 * vec8(x)
+        C8 = diag([1, -1, -1, -1, 1, -1, -1, -1]);
+        % Given the quaternion x, the matrix C4 is the one that
+        % satisfies the relation vec4(x') = C4 * vec4(x)
+        C4 = diag([1, -1, -1, -1]);
     end
     
    
@@ -262,30 +270,39 @@ classdef DQ
         
         
         function res = theta(obj)
+            %DEPRECATED
+            % Function theta(x) deprecated. Please use instead rotation_angle(x)
             warning('Function theta(x) deprecated. Please use instead rotation_angle(x)');
             res = rotation_angle(obj);
            
         end
         
        
-        
-        function G = gen(dquat)
-            dq = DQ(dquat);
-            psi_l = [dq.q(5)  dq.q(6)  dq.q(7) dq.q(8);
-                     dq.q(6) -dq.q(5)  dq.q(8) -dq.q(7);
-                     dq.q(7) -dq.q(8) -dq.q(5) dq.q(6);
-                     dq.q(8)  dq.q(7) -dq.q(6) -dq.q(5);
-                    ];
-            omega_l = haminus4(P(dq)');
+        function res = G(h)
+            %Given a unit dual quaternion x, a pure dual quaternion xi = w + DQ.E*v, 
+            %where w is the angular velocity and v is the linear velocity, and considering x_dot as the time
+            %derivative of x, then G
+            %is the matrix that satisfies vec(xi)=G*vec(x_dot).
+            %For more informations, see 
+            %        B. V. Adorno, ?Two-arm Manipulation: From Manipulators to Enhanced Human-Robot Collaboration 
+            %          [Contribution à la manipulation à deux bras : des manipulateurs à la collaboration homme-robot],? 
+            %          Université Montpellier 2, 2011.
+            dq = DQ(h);
+            omega_l = 2*haminus4(P(dq)');
+            omega_r = zeros(4);
+            
+            psi_l = 2*hamiplus4(D(dq))*DQ.C4;
             psi_r = omega_l;
             
-            G = 2*[psi_l psi_r;
-                   omega_l zeros(4,4)];            
+            res = [omega_l omega_r;
+                   psi_l psi_r];            
            
         end
        
         
         function res = tplus(obj) 
+           %DEPRECATED
+           % Function tplus(x) deprecated. Please use instead T(x)
            warning('Function tplus(x) deprecated. Please use instead T(x)');
           
             res = T(obj);
