@@ -28,7 +28,7 @@ xd = kuka.fkm(thetad); %Desired end-effector's pose
 
 figure;
 axis equal;
-plot(kuka, theta);
+plot(kuka, theta, 'nobase');
 
 grid off;
 view(-0,0)

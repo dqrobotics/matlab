@@ -1,20 +1,19 @@
-% The function exp(dq) returns the exponential of the dual quaternion dq
-function res=exp(dq)
-dq=DQ(dq);
+% The function exp(g) returns the exponential of the pure dual quaternion g
+function res=exp(g)
+g=DQ(g);
 
-phi=norm(dq.P.q);
+if Re(g) ~= 0
+   error('The exponential operation is defined only for pure dual quaternions');
+end
+
+phi=norm(g.P.q);
 
 if(phi ~= 0)
-    prim = cos(phi) + (sin(phi)/phi)*dq.P;
+    prim = cos(phi) + (sin(phi)/phi)*g.P;
 else
     prim = DQ(1);
 end
 
-if(prim.q(1) < 0)
-   
-    res = -1*(prim+DQ.E*dq.D*prim);
-else
-    res = prim+DQ.E*dq.D*prim;
-end
+res = prim+DQ.E*g.D*prim;
 
 end
