@@ -260,7 +260,7 @@ function o = plot_options(robot, optin)
     o.magscale = 1;
     o.name = true;
     o.delay = 0.1;
-    o.raise = true;
+    o.raise = false;
     o.cylinder = [0 0 0.7];
     o.workspace = [];
 
@@ -503,8 +503,8 @@ function animate(robot, q, opt)
             fkm_j = robot.fkm(q,j);
             
             for k = 1:numcols(xyz)
-                temp = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);      
-                temp = tplus(fkm_j*temp);
+                temp = fkm_j*DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);  
+                temp = temp.T;
                 xyz(1:3,k)=temp.q(6:8)*2;
             end
           
