@@ -46,6 +46,7 @@ while norm(error) > epsilon
     error = vec8(xd-xm);
     theta = theta+pinv(jacob)*gain*error;
     plot(kuka, theta');    
+    drawnow;
 end
 
 fprintf('\nNow let us control only the translation part\n');
@@ -60,7 +61,8 @@ while norm(error) > epsilon
     pm = translation(xm);
     error = vec4(pd-pm);    
     theta = theta+pinv(jacobp)*gain*error;
-    plot(kuka, theta');       
+    plot(kuka, theta'); 
+    drawnow;
 end
 
 fprintf('\nNow let us control only the orientation\n')
@@ -76,7 +78,8 @@ while norm(error) > epsilon
     rm = xm.P;
     error = vec4(rd-rm);    
     theta = theta+pinv(jacobr)*gain*error;
-    plot(kuka, theta');       
+    plot(kuka, theta');  
+    drawnow;
 end
 
 
@@ -95,7 +98,8 @@ while norm(error) > epsilon
     dm = norm(vec4(translation(xm)))^2;
     error = dd-dm;    
     theta = theta+pinv(jacobd)*gain*error;
-    plot(kuka, theta');       
+    plot(kuka, theta');
+    drawnow;
 end
 
 

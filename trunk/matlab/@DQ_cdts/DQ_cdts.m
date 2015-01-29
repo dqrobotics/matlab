@@ -1,9 +1,7 @@
 % CLASS DQ_cdts
-% Usage: cdts = DQ_cdts(robot1,base1,robot2,base2), where:
+% Usage: cdts = DQ_cdts(robot1,robot2), where:
 % - robot1 and robot2 are objects of type DQ_kinematics;
-% - base1 and base2 are dual quaternions representing the pose of each arm
-%   with respect to the world.
-%
+% 
 % By using this class, the cooperative system is described by the
 % cooperative variables xa and xr, and their respective Jacobians Ja and Jr
 %
