@@ -28,7 +28,7 @@ theta=[ initial_theta1; initial_theta2];
 dqrd = two_arms.xr(theta);
 
 % The sweep motion consists of turning the broom around the torso's y axis.
-% So let's use the decompositional multiplication!
+% So let's use the decompositional multiplication! (see )
 dqad_ant =  two_arms.xa(theta);
 dqad = DQ([cos(pi/16);0;sin(pi/16);0]) .* dqad_ant;
 
@@ -43,31 +43,34 @@ t_broom = aux*(1/norm(aux.q))*d_broom;
 broom_base=translation(two_arms.x2(theta));
 broom_tip = broom_base+t_broom;
 
-%Drawing the arms
-opt={'noname','nojaxes'};
-plot(kuka1,initial_theta1',opt{:});
-plot(kuka2,initial_theta2',opt{:});
-
-grid off;
-axis equal;
-axis off;
-
-
+%Broom's color
 my_green = [0,0.7,0];
 
+%% Ploting the system in the initial configuration
+%Drawing the arms
+%opt={'noname','nojaxes'};
+%plot(kuka1,initial_theta1',opt{:});
+%plot(kuka2,initial_theta2',opt{:});
 
-%% Drawing the broom
-plot(kuka1,initial_theta1');
+figure;
 hold on;
-plot(kuka2,initial_theta2');
-view(-153,24)
+grid off;
+axis equal;
+axis ([-0.6,0.6,-0.2,0.8,-0.1,0.6])
+view(-153,24);
+
+% Drawing the arms
+opt={'noname','nojaxes','noshadow','nobase'};
+plot(kuka1,initial_theta1',opt{:});
+plot(kuka2,initial_theta2',opt{:});
+% Drawing the broom;
 line_handle1=line([broom_base.q(2),broom_tip.q(2)],[broom_base.q(3),broom_tip.q(3)],[broom_base.q(4),broom_tip.q(4)],'color',my_green,'linewidth',3);
 
 drawnow;
 
+pause(1);
 
 %% Two-arm control
-
 epsilon = 0.01; %for the stop condition
 error = epsilon+1;
 i=0;
@@ -75,12 +78,11 @@ iter=1;
 j=1;
 
 %The sweep motion (back and forth) will be performed twice
-while j <=4
-    
+while j <= 4    
     %standard control law
     nerror_ant = error;
     jacob = [two_arms.Ja(theta);two_arms.Jr(theta)];
-    taskm=  [vec8(two_arms.xa(theta)); vec8(two_arms.xr(theta))];
+    taskm =  [vec8(two_arms.xa(theta)); vec8(two_arms.xr(theta))];
     
     error = taskd-taskm;
     theta = theta+pinv(jacob)*0.5*error;
@@ -110,6 +112,7 @@ while j <=4
         taskd(1:8,1)=dqad.q;
         j = j+1;
     end
+    drawnow;
 end
 
 
