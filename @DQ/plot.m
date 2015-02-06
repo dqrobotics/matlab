@@ -57,7 +57,7 @@ end
     y_t = translation(y);
     z_t = translation(z);
     
-    handle.handle_axis{1} = plot3([0;x_t.q(2)]+dq_t.q(2), [0; x_t.q(3)]+dq_t.q(3), [0; x_t.q(4)]+dq_t.q(4), 'r','Linewidth',1,'erasemode', 'xor');
+    handle.handle_axis{1} = plot3([0;x_t.q(2)]+dq_t.q(2), [0; x_t.q(3)]+dq_t.q(3), [0; x_t.q(4)]+dq_t.q(4), 'r','Linewidth',1);
     if(~ishold)
         hold on;
     end
@@ -65,11 +65,11 @@ end
 	handle.handle_text{1} = text(dq_t.q(2)+x_t.q(2), dq_t.q(3)+x_t.q(3), dq_t.q(4)+x_t.q(4), 'x');
 	set(handle.handle_text{1} , 'Color', 'k');
 
-	handle.handle_axis{2} =plot3([0;y_t.q(2)]+dq_t.q(2), [0; y_t.q(3)]+dq_t.q(3), [0; y_t.q(4)]+dq_t.q(4), 'g','Linewidth',1,'erasemode', 'xor');
+	handle.handle_axis{2} =plot3([0;y_t.q(2)]+dq_t.q(2), [0; y_t.q(3)]+dq_t.q(3), [0; y_t.q(4)]+dq_t.q(4), 'g','Linewidth',1);
 	handle.handle_text{2}  = text(dq_t.q(2)+y_t.q(2), dq_t.q(3)+y_t.q(3), dq_t.q(4)+y_t.q(4), 'y');
 	set(handle.handle_text{2} , 'Color', 'k');
 
-	handle.handle_axis{3} = plot3([0;z_t.q(2)]+dq_t.q(2), [0; z_t.q(3)]+dq_t.q(3), [0; z_t.q(4)]+dq_t.q(4), 'b','Linewidth',1,'erasemode', 'xor');
+	handle.handle_axis{3} = plot3([0;z_t.q(2)]+dq_t.q(2), [0; z_t.q(3)]+dq_t.q(3), [0; z_t.q(4)]+dq_t.q(4), 'b','Linewidth',1);
 	handle.handle_text{3}  = text(dq_t.q(2)+z_t.q(2), dq_t.q(3)+z_t.q(3), dq_t.q(4)+z_t.q(4), 'z');
 	set(handle.handle_text{3} , 'Color', 'k');
     if(~old_ishold)
