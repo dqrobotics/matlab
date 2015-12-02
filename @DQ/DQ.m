@@ -1,58 +1,82 @@
+% CLASS DQ
+% Define the operations that can be done with dual quaternions
+% Ways of defining a dual quaternion:
+%       dq = DQ %Create a dual quaternion 0+0*i+0*j+0*k+E*(0+0*i+0*j+0*k)
+%       dq = DQ(v) %Where is a 8-, 4-, or 1-dimension vector with
+%               the dual quaternions coefficients. The 4- and 1-dimension vectors are special cases,
+%               where the 4-dimension vector means quaternion definition,
+%               whilst the 1-dimension vector means a scalar, both in dual quaternion space.
+%       dq = 1+ 2*DQ.i + 5*DQ.E*DQ.k %Create the dual quaternion
+%               (1+2i)+E*(5k) in terms of its imaginary components and the
+%               dual unit. This way is closer to the mathematical
+%               definition used on paper.
+% 
+% Type help DQ.(method/constant/operation) for specific help.
+%
+% METHODS: 
+%       dq.P (or P(dq), the same applies to the other methods.)
+%       dq.D
+%       dq.Re
+%       dq.Im
+%       hamiplus4(h)
+%       haminus4(h)
+%       hamiplus8(h)
+%       haminus8(h)
+%       vec4(h)
+%       vec8(h)
+% CONSTANTS:
+%       DQ.E (dual unit)
+%       DQ.i (imaginary i)
+%       DQ.j (imaginary j)
+%       DQ.k (imaginary k)
+%       C8 (conjugator matrix associated to vec8)
+%       C4 (conjugator matrix associated to vec4)
+% BINARY OPERATIONS: +  (plus)
+%                    -  (minus)
+%                    *  (mtimes)
+%                    == (eq)
+%                    ~  (ne)
+%                    ^  (mpower), for the moment it is defined only for
+%                                 unit dual quaternions
+% UNARY OPERATIONS: inv
+%                    ' (conjugate)
+%
+%
+% METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+%                    exp
+%                    is_unit
+%                    log
+%                    plot 
+%                    translation
+%                    rotation_axis
+%                    rotation_angle
+%                    translation
+%                    T
+
+% (C) Copyright 2015 DQ Robotics Developers
+% 
+% This file is part of DQ Robotics.
+% 
+%     DQ Robotics is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU Lesser General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     DQ Robotics is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU Lesser General Public License for more details.
+% 
+%     You should have received a copy of the GNU Lesser General Public License
+%     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
+%
+% DQ Robotics website: dqrobotics.sourceforge.net
+%
+% Contributors to this file:
+%     Bruno Vihena Adorno - adorno@ufmg.br
+
+
 classdef DQ
-    % CLASS DQ
-    % Define the operations that can be done with dual quaternions
-    % Author: Bruno Vilhena Adorno. E-mail: adorno@ieee.org
-    %
-    %
-    % Ways of defining a dual quaternion:
-    %       dq = DQ %Create a dual quaternion 0+0*i+0*j+0*k+E*(0+0*i+0*j+0*k)
-    %       dq = DQ(v) % Where is a 8-, 4-, or 1-dimension vector with
-    %               the dual quaternions coefficients. The 4- and 1-dimension vectors are special cases,
-    %               where the 4-dimension vector means quaternion definition,
-    %               whilst the 1-dimension vector means a scalar, both in dual quaternion space.
-    % 
-    % Type help DQ.(method/constant/operation) for specific help.
-    %
-    % METHODS: 
-    %       dq.P (or P(dq), the same applies to the other methods.)
-    %       dq.D
-    %       dq.Re
-    %       dq.Im
-    %       hamiplus4(h)
-    %       haminus4(h)
-    %       hamiplus8(h)
-    %       haminus8(h)
-    %       vec4(h)
-    %       vec8(h)
-    % CONSTANTS:
-    %       DQ.E (dual unit)
-    %       DQ.i (imaginary i)
-    %       DQ.j (imaginary j)
-    %       DQ.k (imaginary k)
-    %       C8 (conjugator matrix associated to vec8)
-    %       C4 (conjugator matrix associated to vec4)
-    % BINARY OPERATIONS: +  (plus)
-    %                    -  (minus)
-    %                    *  (mtimes)
-    %                    == (eq)
-    %                    ~  (ne)
-    %                    ^  (mpower), for the moment it is defined only for
-    %                                 unit dual quaternions
-    % UNARY OPERATIONS: inv
-    %                    ' (conjugate)
-    %
-    %
-    % METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
-    %                    exp
-    %                    is_unit
-    %                    log
-    %                    plot 
-    %                    translation
-    %                    rotation_axis
-    %                    rotation_angle
-    %                    translation
-    %                    T
-   
     properties
         %dual quaternion vector
         q;
