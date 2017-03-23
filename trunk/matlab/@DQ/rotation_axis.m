@@ -32,7 +32,7 @@ function ret = rotation_axis(dq)
       
     phi = acos(dq.q(1));
         
-    if(phi == 0)
+    if(sin(phi) <= eps) %sin(pi) is not zero due to machine precision, hence if sin(phi) is smaller than eps (i.e., the spacing of floting point numbers) we consider it zero. 
         ret= DQ([0,0,0,1]); %This is just a convention. It could be any rotation axis.
     else        
         ret = dq.P.Im*(sin(phi)^(-1));

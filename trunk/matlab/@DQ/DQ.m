@@ -308,8 +308,8 @@ classdef DQ
             %derivative of x, then G
             %is the matrix that satisfies vec(xi)=G*vec(x_dot).
             %For more informations, see 
-            %        B. V. Adorno, ?Two-arm Manipulation: From Manipulators to Enhanced Human-Robot Collaboration 
-            %          [Contribution à la manipulation à deux bras : des manipulateurs à la collaboration homme-robot],? 
+            %        B. V. Adorno, "Two-arm Manipulation: From Manipulators to Enhanced Human-Robot Collaboration 
+            %          [Contribution à la manipulation à deux bras : des manipulateurs à la collaboration homme-robot]," 
             %          Université Montpellier 2, 2011.
             dq = DQ(h);
             omega_l = 2*haminus4(P(dq)');
