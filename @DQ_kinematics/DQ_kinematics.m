@@ -14,6 +14,7 @@
 % Ex.: help DQ_kinematics.fkm
 %
 % METHODS:
+%       raw_fkm
 %       fkm
 %       jacobian
 %       jacobp

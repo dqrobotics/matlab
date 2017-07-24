@@ -2,7 +2,7 @@
 % Define the operations that can be done with dual quaternions
 % Ways of defining a dual quaternion:
 %       dq = DQ %Create a dual quaternion 0+0*i+0*j+0*k+E*(0+0*i+0*j+0*k)
-%       dq = DQ(v) %Where is a 8-, 4-, or 1-dimension vector with
+%       dq = DQ(v) %Where v is a 8-, 4-, or 1-dimension vector with
 %               the dual quaternions coefficients. The 4- and 1-dimension vectors are special cases,
 %               where the 4-dimension vector means quaternion definition,
 %               whilst the 1-dimension vector means a scalar, both in dual quaternion space.
@@ -309,8 +309,8 @@ classdef DQ
             %is the matrix that satisfies vec(xi)=G*vec(x_dot).
             %For more informations, see 
             %        B. V. Adorno, "Two-arm Manipulation: From Manipulators to Enhanced Human-Robot Collaboration 
-            %          [Contribution à la manipulation à deux bras : des manipulateurs à la collaboration homme-robot]," 
-            %          Université Montpellier 2, 2011.
+            %          [Contribution ? la manipulation ? deux bras : des manipulateurs ? la collaboration homme-robot]," 
+            %          Universit? Montpellier 2, 2011.
             dq = DQ(h);
             omega_l = 2*haminus4(P(dq)');
             omega_r = zeros(4);
