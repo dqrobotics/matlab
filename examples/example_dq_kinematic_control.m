@@ -109,7 +109,22 @@ while ~strcmp(controller_type,'none')
             end
             toc
             fprintf('\n Number of iterations for the parsimonious controller: %f\n', ii);
+            controller_type = 'left_invariant_pseudoinverse';
+            
+        case 'left_invariant_pseudoinverse'
+            tic 
+            while norm(e) > epsilon 
+                [u,e] = kinematic_controller.left_invariant_pseudoinverse_pose_controller(controller_variables);                 
+                controller_variables.q = controller_variables.q + u; %integrates the control input and update the structure controller_variables
+                % Visualization
+                plot(kuka, controller_variables.q);  
+                drawnow;
+                ii = ii + 1;
+            end
+            toc
+            fprintf('\n Number of iterations for the left invariant pseudoinverse pose controller: %f\n', ii);
             controller_type = 'none';
+            
     end
 end
 

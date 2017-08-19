@@ -25,6 +25,7 @@
 % PROPERTIES:
 %       C8
 %       C4
+% See also DQ, DQ_KinematicController
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
