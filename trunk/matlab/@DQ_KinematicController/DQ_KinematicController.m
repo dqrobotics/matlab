@@ -1,4 +1,4 @@
-% CLASS DQ_KinematicControl implement several (first order) kinematic controllers 
+% CLASS DQ_KinematicController implement several (first order) kinematic controllers 
 % for a broad class of robots (i.e., controllers based on the model vec8(xdot) = J * qdot)
 %   
 % Ways of defining a new controller:
@@ -7,6 +7,8 @@
 %
 % Controllers (for more information, type help DQ_KinematicController.<CONTROLLER_NAME>):
 %       pseudoinverse_pose_controller
+%       damped_pseudoinverse_pose_controller
+%       parsimonious_pose_controller
 %
 % All controllers are based on the following data structure:
 %           Minimal structure (i.e., all controllers must have the following
@@ -14,7 +16,16 @@
 %               controller_variables.q: current robot configuration;
 %               controller_variables.K: current gain matrix;
 %               controller_variables.xd: current desired end-effector pose;
-        
+% Specific controllers have specific fields in addition to the minimal
+% structure. Type help DQ_KinematicController.<CONTROLLER_NAME>) for more
+% details.
+%
+% See also DQ_kinematics
+%          DQ_KinematicController.pseudoinverse_pose_controller
+%          DQ_KinematicController.damped_pseudoinverse_pose_controller
+%          DQ_KinematicController.parsimonious_pose_controller
+%          DQ_KinematicController.left_invariant_pseudoinverse_pose_controller
+
 % (C) Copyright 2017 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
@@ -193,8 +204,8 @@ classdef DQ_KinematicController
             % The syntax of linprog has changed starting from version 9.1. Thus we 
             % write code to both recent and older versions in order to guarantee
             % backward compability.    
-            if verLessThan('matlab','8.4')        
-                options = optimoptions('linprog','Algorithm','simplex','Display','off');
+            if verLessThan('matlab','8.5')        
+                options = optimoptions('linprog','Algorithm','dual-simplex','Display','off');
                 [g,fval] = linprog(f,A,b,Aeq,beq,[],[],[],options);      
             else
             % Linear Programming (The default algorithm in matlab is the dual-simplex)
@@ -212,6 +223,34 @@ classdef DQ_KinematicController
                 end
             end            
         end
+        
+        function [u, varargout] = left_invariant_pseudoinverse_pose_controller(obj,controller_variables) 
+        % Pose controller based on the left invariant error (1-x'*xd) and the
+        % pseudoinverse of the projected Jacobian matrix J. More specifically,  
+        % u = pinv(N)*K*vec8(1-x'*xd), where N = haminus8(xd)*DQ.C8*J, with 
+        % K being a positive definite gain matrix, x is the current end-effector
+        % pose, xd is the desired end-effector pose, and J is the robot
+        % Jacobian matrix.
+        %
+        % [u,e] = left_invariant_pseudoinverse_pose_controller(controller_variables)
+        % returns the control input u (joint velocities) and the current error
+        % e = vec8(1-x'*xd), where xd is the desired pose and x is the current one.
+        %
+        % u = = pseudoinverse_pose_controller(controller_variables) returns
+        % only the control input u.
+        %
+        % This controller needs only the minimal structure for controller
+        % variables (see help DQ_KinematicController)
+        
+            J = obj.robot.jacobian(controller_variables.q);
+            x = obj.robot.fkm(controller_variables.q);
+            N = haminus8(controller_variables.xd)*DQ.C8*J;
+            e = vec8(1 - x'*controller_variables.xd);
+            u = pinv(N)*controller_variables.K*e; 
+            if nargout == 2
+                varargout{1} = e;
+            end
+        end 
     end
 end
 

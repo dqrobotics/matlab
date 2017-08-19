@@ -52,6 +52,7 @@
 %                    rotation_angle
 %                    translation
 %                    T
+% See also DQ_kinematics, DQ_KinematicController
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
