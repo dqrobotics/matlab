@@ -1,17 +1,17 @@
 % (C) Copyright 2018 DQ Robotics Developers
-% 
+%
 % This file is part of DQ Robotics.
-% 
+%
 %     DQ Robotics is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU Lesser General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     DQ Robotics is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU Lesser General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
@@ -154,11 +154,20 @@ classdef VrepInterface < handle
             end
         end
         
+        %% Set Joint Target Positions
+        function setJointTargetPositions(obj,handles,thetas,opmode)
+            obj.vrep.simxPauseCommunication(obj.clientID,1)
+            for joint_index=1:length(handles)
+                obj.vrep.simxSetJointTargetPosition(obj.clientID,handles(joint_index),thetas(joint_index),opmode);
+            end
+            obj.vrep.simxPauseCommunication(obj.clientID,0)
+        end
+        
         %% Get Joint Positions
-        function thetas=getJointPositions(obj,handles)
+        function [thetas,retval]=getJointPositions(obj,handles,opmode)
             thetas = zeros(length(handles),1);
             for joint_index=1:length(handles)
-                [~,tmp] = obj.vrep.simxGetJointPosition(obj.clientID,handles(joint_index),obj.vrep.simx_opmode_blocking);
+                [retval,tmp] = obj.vrep.simxGetJointPosition(obj.clientID,handles(joint_index),opmode);
                 thetas(joint_index) = double(tmp);
             end
         end
