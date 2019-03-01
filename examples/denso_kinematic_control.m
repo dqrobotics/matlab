@@ -8,6 +8,7 @@ denso_kine = DQ_DENSO;
 
 % Basic definitions for the simulation
 theta = [0,0,0,0,0,0]';      %initial configuration
+%%
 thetad = [0,0,-pi/2,0,0,0]';  %desired configuration
 
 xd = denso_kine.fkm(thetad);
@@ -36,7 +37,7 @@ end
 
 %% Move Arm
 
-position = [20,0,5];
+position = [0.4,0,0.02];
 
 thetad = [0,0,0,0,0,0]';
 
@@ -64,6 +65,8 @@ p = DQ([0, position(1), position(2), position(3)]);
 
 xd = r + 1/2 * DQ.E * p * r;
 
+epsilon = 0.001;
+K = 0.5;
 error = epsilon+1;
 lambda = 0.5;
 
@@ -76,8 +79,7 @@ while norm(error) > epsilon
     
     jacob_pinv = (transpose(jacob)/(jacob*transpose(jacob) + (lambda^2)*eye(8)));
         
-    dtheta = jacob_pinv*error;
-   
+     
     theta = theta + K*jacob_pinv*error;
     
     dt = 0.01;
