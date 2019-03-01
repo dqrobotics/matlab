@@ -38,6 +38,6 @@ function denso = DQ_DENSO
         denso_DH_alpha;
         ];
 
-    denso = DQ_kinematics(denso_DH_matrix, 'standart');
+    denso = DQ_kinematics(denso_DH_matrix, 'standard');
 
 end
