@@ -348,7 +348,7 @@ classdef DQ_kinematics < handle
                 n = ith;
                 x_effector = obj.raw_fkm(theta,ith);
                 J = obj.raw_jacobian(theta,ith);
-                vec_x_effector_dot = J*theta_dot(:,1:ith);
+                vec_x_effector_dot = J*theta_dot(1:ith);
             else
                 n = obj.links;
                 x_effector = obj.raw_fkm(theta);
