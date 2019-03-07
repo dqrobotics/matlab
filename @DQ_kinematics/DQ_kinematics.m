@@ -85,7 +85,7 @@ classdef DQ_kinematics < handle
     end
     
     
-    %TODO: Re-evaluate the need of redefining these properties below as 
+    %TODO: Re-evaluate the need of redefining these properties below as
     %      they are already declared in DQ.
     properties (Constant)
         % Given the jacobian matrix J that satisfies
@@ -127,7 +127,7 @@ classdef DQ_kinematics < handle
             
             %Definitions for Robotics Toolbox
             obj.name = sprintf('%f',rand(1));
-                        
+            
             if nargin==1
                 obj.convention='standard';
             else
@@ -180,7 +180,7 @@ classdef DQ_kinematics < handle
             for i=1:n
                 if obj.dummy(i) == 1
                     %The offset is taken into account inside the method dh2dq
-                    q = q*dh2dq(obj,0,i); 
+                    q = q*dh2dq(obj,0,i);
                     j = j + 1;
                 else
                     q = q*dh2dq(obj,theta(i-j),i);
@@ -271,7 +271,7 @@ classdef DQ_kinematics < handle
             % x = fkm(theta) and theta is the vector of joint variables.
             % This function does not take into account any base or
             % end-effector displacements and should be used mostly
-            % internally in DQ_kinematics            
+            % internally in DQ_kinematics
             
             if nargin == 3
                 n = ith;
@@ -279,18 +279,18 @@ classdef DQ_kinematics < handle
                 n = obj.links;
             end
             
-            x_effector = obj.raw_fkm(theta);            
+            x_effector = obj.raw_fkm(theta);
             x = DQ(1);
             J= zeros(8,n-obj.n_dummy);
             jth=0;
             
-            for i = 0:n-1                                
+            for i = 0:n-1
                 % Use the standard DH convention
                 if strcmp(obj.convention,'standard')
-                    z = obj.get_z(x.q);
+                    z = DQ(obj.get_z(x.q));
                 else % Use the modified DH convention
-                    w=DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
-                    z =0.5*x*w*x';
+                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
+                    z = 0.5*x*w*x';
                 end
                 
                 if ~obj.dummy(i+1)
@@ -300,32 +300,76 @@ classdef DQ_kinematics < handle
                     jth = jth+1;
                 else
                     % Dummy joints don't contribute to the Jacobian
-                    x = x*obj.dh2dq(0,i+1); 
+                    x = x*obj.dh2dq(0,i+1);
                 end
             end
         end
-                   
+        
         
         function J = jacobian(obj, theta, ith)
             % J = jacobian(theta) returns the Jacobian that satisfies
-            % vec(x_dot) = J * theta_dot, where x = fkm(theta) and 
+            % vec(x_dot) = J * theta_dot, where x = fkm(theta) and
             % theta is the vector of joint variables. It takes into account
             % both base and end-effector displacements (their default
             % values are 1).
-           
+            
             if nargin == 3 && ith < obj.links
                 % If the Jacobian is not related to the mapping between the
-                % end-effector velocities and the joint velocities, it takes 
-                % into account only the base displacement               
-                J = hamiplus8(obj.base)*obj.raw_jacobian(theta, ith); 
+                % end-effector velocities and the joint velocities, it takes
+                % into account only the base displacement
+                J = hamiplus8(obj.base)*obj.raw_jacobian(theta, ith);
             else
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
                 J = hamiplus8(obj.base)*haminus8(obj.effector)*obj.raw_jacobian(theta);
             end
+        end
+        
+        
+        
+        function J_dot = jacobian_dot(obj,theta,theta_dot, ith)
+            % J_dot = jacobian_dot(theta,theta_dot) returns the Jacobian 
+            % time derivative.
+            % J_dot = jacobian_dot(theta,theta_dot,ith) returns the first
+            % ith columns of the Jacobian time derivative.
+            % This function does not take into account any base or
+            % end-effector displacements.
             
+            if nargin == 4
+                n = ith;
+            else
+                n = obj.links;
+            end
             
+            x_effector = obj.raw_fkm(theta);
+            J = obj.raw_jacobian(theta);
+            vec_x_effector_dot = J*theta_dot;
+            
+            x = DQ(1);            
+            J_dot = zeros(8,n-obj.n_dummy);
+            jth=0;
+            
+            for i = 0:n-1
+                % Use the standard DH convention
+                if strcmp(obj.convention,'standard')
+                    w = DQ.k;
+                    z = DQ(obj.get_z(x.q));
+                else % Use the modified DH convention
+                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
+                    z = 0.5*x*w*x';
+                end
+                
+                if ~obj.dummy(i+1)
+                    vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*J(:,1:i)*theta_dot(1:i);
+                    J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot + hamiplus8(z)*vec_x_effector_dot;
+                    x = x*obj.dh2dq(theta(jth+1),i+1);
+                    jth = jth+1;
+                else
+                    % Dummy joints don't contribute to the Jacobian
+                    x = x*obj.dh2dq(0,i+1);                    
+                end
+            end
         end
         
     end
