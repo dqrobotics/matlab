@@ -19,6 +19,7 @@
 %       raw_fkm
 %       fkm
 %       jacobian
+%       jacobian_dot
 %       jacobp
 %       jacobd
 %       set_base
