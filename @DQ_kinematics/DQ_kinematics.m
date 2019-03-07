@@ -370,8 +370,17 @@ classdef DQ_kinematics < handle
                     z = 0.5*x*w*x';
                 end
                 
-                if ~obj.dummy(i+1)
-                    vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_jacobian(theta,i)*theta_dot(1:i);
+                if ~obj.dummy(i+1)                   
+                    % When i = 0 and length(theta) = 1, theta(1,i) returns
+                    % a 1 x 0 vector, differently from the expected
+                    % behavior, which is to return a 0 x 1 matrix.
+                    % Therefore, we have to deal with the case i = 0
+                    % explictly.
+                    if i ~= 0
+                        vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_jacobian(theta,i)*theta_dot(1:i);
+                    else
+                        vec_zdot = zeros(8,1);
+                    end
                     J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot + hamiplus8(z)*vec_x_effector_dot;
                     x = x*obj.dh2dq(theta(jth+1),i+1);
                     jth = jth+1;
