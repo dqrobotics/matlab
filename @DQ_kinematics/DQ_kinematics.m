@@ -160,7 +160,8 @@ classdef DQ_kinematics < handle
         function q = raw_fkm(obj,theta, ith)
             %   dq = raw_fkm(theta) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector are not taken into account).
+            %   last joint (the displacements due to the base and the effector 
+            %   are not taken into account).
             %   theta is the vector of joint variables
             %   This is an auxiliary function to be used mainly with the
             %   Jacobian function.
@@ -267,20 +268,26 @@ classdef DQ_kinematics < handle
         end
         
         function J = raw_jacobian(obj,theta,ith)
-            % J = raw_jacobian(theta) returns the first ith columns of the
-            % Jacobian that satisfies vec(x_dot) = J * theta_dot, where
-            % x = fkm(theta) and theta is the vector of joint variables.
+            % J = raw_jacobian(theta) returns the Jacobian that satisfies 
+            % vec(x_dot) = J * theta_dot, where x = fkm(theta) and theta is the 
+            % vector of joint variables.
+            %
+            % J = raw_jacobian(theta,ith) returns the Jacobian that
+            % satisfies vec(x_ith_dot) = J * theta_dot(1:ith), where 
+            % x_ith = fkm(theta, ith), that is, the fkm up to the i-th link.
+            %
             % This function does not take into account any base or
             % end-effector displacements and should be used mostly
             % internally in DQ_kinematics
             
             if nargin == 3
                 n = ith;
+                x_effector = obj.raw_fkm(theta,ith);
             else
                 n = obj.links;
+                x_effector = obj.raw_fkm(theta);
             end
             
-            x_effector = obj.raw_fkm(theta);
             x = DQ(1);
             J= zeros(8,n-obj.n_dummy);
             jth=0;
