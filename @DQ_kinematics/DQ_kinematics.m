@@ -346,14 +346,16 @@ classdef DQ_kinematics < handle
             
             if nargin == 4
                 n = ith;
+                x_effector = obj.raw_fkm(theta,ith);
+                J = obj.raw_jacobian(theta,ith);
+                vec_x_effector_dot = J*theta_dot(:,1:ith);
             else
                 n = obj.links;
+                x_effector = obj.raw_fkm(theta);
+                J = obj.raw_jacobian(theta);
+                vec_x_effector_dot = J*theta_dot;
             end
-            
-            x_effector = obj.raw_fkm(theta);
-            J = obj.raw_jacobian(theta);
-            vec_x_effector_dot = J*theta_dot;
-            
+                                 
             x = DQ(1);            
             J_dot = zeros(8,n-obj.n_dummy);
             jth=0;
@@ -369,7 +371,7 @@ classdef DQ_kinematics < handle
                 end
                 
                 if ~obj.dummy(i+1)
-                    vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*J(:,1:i)*theta_dot(1:i);
+                    vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_jacobian(theta,i)*theta_dot(1:i);
                     J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot + hamiplus8(z)*vec_x_effector_dot;
                     x = x*obj.dh2dq(theta(jth+1),i+1);
                     jth = jth+1;
