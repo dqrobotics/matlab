@@ -22,6 +22,7 @@
 %       haminus4(h)
 %       hamiplus8(h)
 %       haminus8(h)
+%       vec3(h)
 %       vec4(h)
 %       vec8(h)
 % CONSTANTS:
@@ -222,6 +223,12 @@ classdef DQ
             % Return the vector with the coefficients of the imaginary part 
             % (three coefficients)
             v = dq.q(2:4);
+        end
+        
+        function v = vec6(dq)
+            % Return the vector with the coefficients of the imaginary part 
+            % (six coefficients)
+            v = [dq.q(2:4);dq.q(6:8)];
         end
         
         function v = vec4(dq)
