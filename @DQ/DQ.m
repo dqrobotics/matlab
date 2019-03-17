@@ -79,7 +79,8 @@
 
 classdef DQ
     properties
-        %dual quaternion vector
+        % dual quaternion vector (in future versions this variable will 
+        % be renamed)
         q;
         % Internal properties for handling the graphical representation of
         % the dual quaternion
@@ -215,6 +216,12 @@ classdef DQ
             h = DQ(dq);
             H = [haminus4(h.P), zeros(4,4);
                  haminus4(h.D), haminus4(h.P)];
+        end
+        
+        function v = vec3(dq)
+            % Return the vector with the coefficients of the imaginary part 
+            % (three coefficients)
+            v = dq.q(2:4);
         end
         
         function v = vec4(dq)
