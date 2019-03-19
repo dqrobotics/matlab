@@ -8,36 +8,9 @@ denso_kine = DQ_DENSO;
 
 % Basic definitions for the simulation
 theta = [0,0,0,0,0,0]';      %initial configuration
-%%
-thetad = [0,0,-pi/2,0,0,0]';  %desired configuration
+% Move Arm
 
-xd = denso_kine.fkm(thetad);
-% xd reference
-
-%Plot the desired pose
-plot(xd,'scale',0.5);
-
-error = 1;
-epsilon = 0.001;
-K = 0.5;
-
-%Plot the robot in the initial configuration
-hold on;
-plot(denso_kine,theta);
-
-
-while norm(error) > epsilon  
-    x = denso_kine.fkm(theta);
-    J = denso_kine.jacobian(theta);
-    error = vec8(xd-x);
-    theta = theta + pinv(J)*K*error;
-    plot(denso_kine,theta);
-    drawnow;
-end
-
-%% Move Arm
-
-position = [0.4,0,0.02];
+position = [0.4,0.0,0.02]
 
 thetad = [0,0,0,0,0,0]';
 
@@ -82,16 +55,14 @@ while norm(error) > epsilon
      
     theta = theta + K*jacob_pinv*error;
     
-    dt = 0.01;
-       
-    
     norm(error)
     plot(denso_kine, theta');
+    plot(xm,'scale',0.2);
+    hold on
+    axis equal;
+    axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
+    view(-0.5 ,0);
     drawnow;
 
 end
-
-
-
-
 
