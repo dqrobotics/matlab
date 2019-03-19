@@ -11,7 +11,7 @@ theta = [0,0,0,0,0,0]';
 
 % Move Arm
 
-position = [0.4,0.0,0.2];
+position = [0.4,0.0,0.02];
 
 thetad = [0,0,0,0,0,0]';
 
@@ -53,6 +53,11 @@ p_hamiplus4 =hamiplus4(p);
 
 y = log(r);
 
+axis equal;
+axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
+% zlim(axes1,[-0.69 0.69]);
+
+
 pause(1);
 
 
@@ -88,6 +93,13 @@ while norm(error) > epsilon
     
     norm(error)
     plot(denso_kine, theta');
+    plot(xm,'scale',0.2);
+    hold on
+    axis equal;
+axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
+    view(-0.5 ,0);
+    %pause(0.2)
+
     drawnow;
 
 end
