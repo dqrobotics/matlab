@@ -5,6 +5,8 @@
 %   'scale'
 %   'erase'
 %   'line'
+%   'plane'
+%
 % Examples:
 % plot(dq,'scale',X) will plot the unit dual quaternion dq with the axes scaled
 % by a factor of X.
@@ -17,6 +19,12 @@
 % plot(dq,'line',length) will plot the Plucker line represented by the unit
 % dual quaternion dq. Since a Plucker line is infinite, length is used to
 % determine the size of the "visible" line to be plotted.
+
+% plot(dq,'plane',size) will plot the plane represented by the unit dual
+% quaternion dq = n + DQ.E*d, where 'n' is the pure unit norm quaternion 
+% representing the vector normal to the plane and 'd' is the signed distance of
+% the plane with respect to the origin of the reference frame. Since a plane is 
+% infinite, size is used to determine the size of the visible plane.
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -75,6 +83,9 @@ if optargin > 0
             case 'line'
                 primitive_type = 'line';
                 line_length = cell2mat(varargin(j+1));
+            case 'plane'
+                primitive_type = 'plane';
+                plane_length = cell2mat(varargin(j+1));
             otherwise
                 warning('Unknown plot parameter.')
         end
@@ -133,8 +144,8 @@ switch primitive_type
         if(~old_ishold)
             hold off;
         end
+        
     case 'line'
-        % TODO: Take into account the 'erase' command
         if (dq.Re ~= 0) || (norm(dq) ~= 1)
             error(['The dual quaternion does not represent a Plucker line.'...
                 'It must be imaginary and have unit norm']);
@@ -160,5 +171,48 @@ switch primitive_type
         else
             handle = plot3(arg{:});
         end
+        
+    case 'plane'
+        % A plane is given by plane = n + DQ.E*d, where n is a pure unit
+        % quaternion and d is a real number.
+        if (dq.P.Re ~= 0) || (norm(dq) ~= 1) || (dq.D.Im ~= 0)
+            error(['The dual quaternion does not represent a Plane.'...
+                'It must have unit norm, the primary part must be pure and '...
+                'the dual part must have null imaginary component.']);
+        end
+        
+        % This implementation uses only dual quaternion algebra, mainly for 
+        % pedagogical purposes, but it can be simplified if computional 
+        % efficiency is needed.
+        n = dq.P;
+        d = dq.D;    
+       
+        % Now we obtain a vector orthogonal to n.
+        if n ~= DQ.i
+            v = cross(DQ.i,n);
+            sqr_norm_v = norm(v)*norm(v);
+            v = v*inv(sqr_norm_v)*(plane_length/2);
+        else
+            v = DQ.j; %DQ.k would be another obvious option
+        end
+        
+        % u,v,n are perpedicular
+        u = cross(n,v);
+        
+        p = n*d; % point on the plane
+        
+        
+        p1 = vec3(p + u);
+        p2 = vec3(p + v);
+        p3 = vec3(p - u);
+        p4 = vec3(p - v);
+        
+        arg = mat2cell([p1';p2';p3';p4'],4,[1,1,1]);
+        
+        handle = patch(arg{:},'b');
+        
+        % TODO: implement erase option
+        
+        % TODO: implement color option
 end
 end
