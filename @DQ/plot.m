@@ -24,7 +24,7 @@
 % quaternion dq = n + DQ.E*d, where 'n' is the pure unit norm quaternion 
 % representing the vector normal to the plane and 'd' is the signed distance of
 % the plane with respect to the origin of the reference frame. Since a plane is 
-% infinite, size is used to determine the size of the visible plane.
+% infinite, size is used to determine the diagonal of the visible plane.
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -207,9 +207,15 @@ switch primitive_type
         p3 = vec3(p - u);
         p4 = vec3(p - v);
         
-        arg = mat2cell([p1';p2';p3';p4'],4,[1,1,1]);
+        plane_coordinates = [p1';p2';p3';p4'];
         
-        handle = patch(arg{:},'b');
+        if erase
+            handle = handle_cell{1};
+            set(handle_cell{1},'Vertices',plane_coordinates);
+        else
+            arg = mat2cell(plane_coordinates,4,[1,1,1]);
+            handle = patch(arg{:},'b');
+        end
         
         % TODO: implement erase option
         
