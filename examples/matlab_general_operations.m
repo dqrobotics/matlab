@@ -1,110 +1,184 @@
-clear all;
+% Show the main operations used in the class DQ and basic dual quaternion
+% algebra. 
+
+% (C) Copyright 2015 DQ Robotics Developers
+%
+% This file is part of DQ Robotics.
+%
+%     DQ Robotics is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU Lesser General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+%
+%     DQ Robotics is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU Lesser General Public License for more details.
+%
+%     You should have received a copy of the GNU Lesser General Public License
+%     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
+%
+% DQ Robotics website: dqrobotics.sourceforge.net
+%
+% Contributors to this file:
+%     Bruno Vihena Adorno - adorno@ufmg.br
+
+function matlab_general_operations(varargin)
+% TODO: add C8, ~, exp, is_unit, log, T.
 close all;
 clc;
+index = 1;
+include_namespace_dq;
 
+if isempty(varargin)
+    fprintf(['\nType matlab_general_operations(stop), where stop = 0 if'...
+        '\nyou want to print all commands immediately and stop = 1 if you'... 
+        '\nwant to see the commands step-by-step. \n\n']);
+    return;
+else
+    press_enter = cell2mat(varargin);
+end
 
-fprintf('\nLets start with the declaration of some arbitrary dual quaternions\n');
+global dq;
+global a;
+global b;
+global p;
+global r;
+global x;
+dq = 1 + 2*i_ + 3*j_ + 4*k_ + E_*(5 + 6*i_ + 7*j_ + 8*k_);
+a = i_ + E_*(1 + k_);
+b = -2 + j_ + E_*(i_ + k_);
+r = cos(pi/8) + i_*sin(pi/8);
+p = i_ + j_ + k_;
+x = r + E_*0.5*p*r;
 
-fprintf('\nCOMMAND: dq1 = DQ\n')
-dq1 = DQ
+command_list = {'dq1 = DQ' %1
+                'dq1 = DQ; class(dq1)'
+                'dq2 = 2*DQ(1), class(dq2)'
+                'DQ.i, DQ.j, DQ.k'
+                'DQ.E' %5
+                'DQ.E*DQ.E'
+                 ['1 + 2*DQ.i + 3*DQ.j + 4*DQ.k + DQ.E*(5 + 6*DQ.i +'...
+    '7*DQ.j + 8*DQ.k)']
+                ['dq = 1 + 2*i_ + 3*j_ + 4*k_ '...
+                '+ E_*(5 + 6*i_ + 7*j_ + 8*k_)']
+                'DQ([1,2,3,4,5,6,7,8])'
+                'dq.P' %10
+                'dq.D'
+                'dq.Re'
+                'dq.Im'
+                'dq.P.Re'
+                'dq.D.Im' %15
+                'dq.P(2)'
+                'dq.vec8'
+                'dq.P.vec4, dq.D.vec4'
+                'i_ * a'
+                'a  * i_' %20
+                'a + b'
+                'a - b'
+                'a * b'
+                'hamiplus8(a)*vec8(b)'
+                'haminus8(b)*vec8(a)'
+                '-a'
+                'a'''
+                'a.'''
+                'norm(b)'
+                'inv(b)'
+                'b*inv(b)'
+                'norm(cos(pi/8) + i_*sin(pi/8))'
+                'p = i_ + j_ + k_'      
+                'x = r + E_*0.5*p*r'
+                'norm(x)'
+                'translation(x)'
+                'translation(x) == p'
+                'x.rotation_angle, pi/4'
+                'x.rotation_axis'
+                'plot(DQ(1)); hold on; plot(x);'
+                };
+           
+comments = {'Let us define a zero dual quaternion' %1
+            'Now we verify that dq1 is indeed a dual quaternion and not a double'
+            'A double multiplied by a DQ results in a DQ.'
+            'The imaginary units are given by DQ.i, DQ.j, DQ.k'
+            'The dual unit is available too.' %5
+            'Remember that the dual unit is nilpotent, that is, DQ.E*DQ.E = 0.'
+            ['We can declare dual quaternions using the imaginary and dual'...
+            ' units']
+            ['Alternatively, we can use the include_dq_namespace to use '...
+            'the shortcuts i_,j_,k_,E_']
+            ['We can also use a vector containing the dual quaternion '...
+            'coefficients']
+            'Retrieving the primary part of dq' %10
+            'Retrieving the dual part of dq'
+            'Retrieving the real part of dq'
+            'Retrieving the imaginary part of dq'
+            'Retrieving the real part of the primary part of dq'
+            'Retrieving the imaginary part of the dual part of dq' %15
+            ['Retrieving the coefficient that multiplies the DQ.i unit in the '...
+            'primary part']
+            ['Using vec8 to put the dual quaternion coefficients into a '...
+            'eight-dimensional vector']
+            ['Using vec4 to put the quaternion coefficients into a '...
+            'four-dimensional vector']
+            ['Recall that i_ * i_ = -1 and i_ * k_ = -j = -k_ * i; ' ...
+            'therefore, if a = i_ + E_*(1 + k_), then']
+            'and' %20
+            ['We can use the + and * operations in the usual way. '...
+            'Consider a = i_ + E_*(1 + k_) and b = -2 + j_ + E_*(i_ + k_).'...
+            'Therefore, a + b']
+            'a - b'
+            'a * b'
+            ['The same result can be found using vector algebra and Hamilton'...
+            ' operators. For instance vec8(a*b) is given by']
+            'which is equivalent to'
+            'Given a = i_ + E_*(1 + k_), then -a'
+            'Conjugate of a = Re(a) + Im(a): a''= Re(a) - Im(a)' %25
+            'Sharp conjugate of a = a.P + E_ * a.D: a.'' = a.P - E_ * a.D'
+            'Calculate the dual quaternion norm of b = -2 + j_ + E_*(i_ + k_)'
+            'Calculate the inverse of b = -2 + j_ + E_*(i_ + k_)'
+            'b*inv(b) = inv(b)*b = 1'
+            ['Let us define a unit quaternion r = cos(pi/8) + i_*sin(pi/8)'...
+            ' that represents a rotation of pi/4 rad around the x-axis']
+            'Let us define the pure quaternion p = i_ + j_ + k_'
+            'Let us define the unit dual quaternion x = r + E_*0.5*p*r'
+            'x indeed has unit norm:'
+            'Retrieve the translation from x'
+            'We can use the == to compare if two dual quaternions are equal'
+            'Retrieve the rotation angle'
+            'Retrieve the rotation axis'
+            ['Now it''s time to go visual. First we plot the reference '...
+            'frame and then we plot x']
+            };
+            
+           
+max_index = length(command_list);
+           
+for i =  1:length(command_list) 
+    fprintf('\n---------------------------------------------\n%s',comments{i});
+    fprintf('\n\n%d of %d) ',index,max_index);
+    
+    cmd(command_list{i});
+    if press_enter
+        fprintf('\nPress <ENTER> to continue.\n');
+        pause();
+    end
+    index = index + 1;
+end
 
-fprintf('\nCOMMAND: dq2 = 2*DQ(1)\n')
-dq2 = 2*DQ(1)
+end
 
-fprintf('\nCOMMAND: dq3 = DQ([1,2,3,4])\n')
-dq3 = DQ([1,2,3,4])
+function cmd(text)
+global dq;
+global a;
+global b;
+global r;
+global p;
+global x;
+include_namespace_dq;
+fprintf('COMMAND: %s\n', text);
+eval(text);
+end
 
-fprintf('\nCOMMAND: dq4 = DQ([1,2,3,4,5,6,7,8])\n')
-dq4 = DQ([1,2,3,4,5,6,7,8])
-
-fprintf('\nRetrieving the real part of dq4. COMMAND: dq4.Re\n')
-dq4.Re
-
-fprintf('\nRetrieving the imaginary part of dq4. COMMAND: dq4.Im\n')
-dq4.Im
-
-fprintf('\nRetrieving the primary part of dq4. COMMAND: dq4.P\n')
-dq4.P
-
-fprintf('\nRetrieving the dual part of dq4. COMMAND: dq4.D\n')
-dq4.D
-
-fprintf('\nRetrieving the imaginary part of the dual part of dq4. COMMAND: dq4.Im.D\n')
-dq4.Im.D
-
-fprintf('\nRetrieving the j coefficient of the imaginary part of the dual part of dq4. COMMAND: dq4.Im.D(3)\n')
-dq4.Im.D(3)
-
-fprintf('\nThe dual unit is available too. COMMAND: DQ.E\n')
-DQ.E
-
-fprintf('\nRemember that the dual unit is nilpotent. COMMAND: DQ.E*DQ.E\n')
-DQ.E*DQ.E
-
-fprintf('\nThe imaginary units are also available. COMMAND: DQ.i, DQ.j, DQ.k\n');
-DQ.i, DQ.j, DQ.k
-
-fprintf('\nNow lets perform some operations\n');
-
-fprintf('\nCOMMAND: (dq3+dq4)*dq2\n')
-(dq3+dq4)*dq2
-
-fprintf('\nThe same can be obtained in vector space using the Hamilton operators:\n');
-
-fprintf('\nCOMMAND: hamiplus8(dq3+dq4)*vec8(dq2)\n');
-hamiplus8(dq3+dq4)*vec8(dq2)
-
-fprintf('\nCOMMAND: haminus8(dq2)*vec8(dq3+dq4)\n');
-haminus8(dq2)*vec8(dq3+dq4)
-
-fprintf('\nCOMMAND: dq3+dq4*dq2\n')
-dq3+dq4*dq2
-
-fprintf('\nCOMMAND: dq4*inv(dq4)\n')
-dq4*inv(dq4)
-
-fprintf('\nLets play with unit quaternions\n')
-fprintf('\nCOMMAND: r1 = DQ([cos(pi/4),sin(pi/4),0,0])\n')
-r1 = DQ([cos(pi/8),sin(pi/8),0,0])
-
-fprintf('\nCOMMAND: DQ([cos(-pi/7),0,0,sin(-pi/7)])\n')
-r2 = DQ([cos(-pi/7),0,0,sin(-pi/7)])
-
-fprintf('\nCOMMAND: r3 = r1*r2\n')
-r3 = r1*r2
-
-fprintf('\nCOMMAND: norm(r3)\n')
-norm(r3)
-
-fprintf('\nLets play with unit dual quaternions\n')
-fprintf('\nDeclaring a translation quaternion\n')
-fprintf('\nCOMMAND: p = DQ([0,1,2,3])\n')
-p = DQ([0,1,2,3])
-
-fprintf('\nThe builtin dual unit (DQ.E) is quite handy:\n')
-fprintf('\nCOMMAND: x = r1+DQ.E*p*r1*0.5\n')
-x = r1+DQ.E*p*r1*0.5
-
-fprintf('\nCOMMAND: norm(x)\n')
-norm(x)
-
-fprintf('\nCOMMAND: translation(x)\n')
-translation(x)
-
-
-fprintf('\nCOMMAND: translation(x)==p\n')
-translation(x)==p
-
-fprintf('\nCOMMAND: norm(x*x*x)\n')
-norm(x*x*x)
-
-fprintf('\nNow its time to go visual!\n')
-fprintf('\nCOMMAND: plot(r1) hold on;\n')
-figure; plot(r1); hold on;
-xlabel('x'); ylabel('y'); zlabel('z');
-
-fprintf('\nCOMMAND: plot(x)\n')
-plot(x);
 
 
 
