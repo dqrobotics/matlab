@@ -21,7 +21,8 @@
 % useful for plotting frames in motion (if erase is not used, it will leave a
 % trail).
 %
-% plot(dq, 'name', '$F_0$')
+% plot(dq, 'name', '$F_0$') will plot a frame with name F_0. Since '$' is
+% used, F_0 is interpreted as a latex math formula.
 %
 % plot(dq,'line',length) will plot the Plucker line represented by the unit
 % dual quaternion dq. Since a Plucker line is infinite, length is used to
@@ -33,7 +34,7 @@
 % the plane with respect to the origin of the reference frame. Since a plane is 
 % infinite, size is used to determine the diagonal of the visible plane.
 %
-% plot(dq,'plane', length, 'color', 'r') will plot a red plane.
+% plot(dq,'plane', size, 'color', 'r') will plot a red plane.
 
 
 % (C) Copyright 2015 DQ Robotics Developers
