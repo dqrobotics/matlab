@@ -72,9 +72,9 @@ if optargin > 0
     for j = 1:2:optargin
         
         % Convert the cell to a string in order to use the SWITCH command.
-        my_string = char(varargin(j));
+        primitive_name = char(varargin(j));
         
-        switch lower(my_string)
+        switch lower(primitive_name)
             case 'erase'
                 erase = 1;
                 handle_cell = varargin(j+1);
@@ -96,7 +96,7 @@ end
 % primitives
 switch primitive_type
     case 'frame'
-        % TODO: Document the line.
+
         if erase
             % Retrieve the struct inside the cell
             handle = handle_cell{1};
@@ -106,40 +106,45 @@ switch primitive_type
             end
         end
         
-        % create unit vectors and rotate them by the quaternion part of dq.
-        t1 = 1+DQ.E*[0, scale*0.5, 0, 0];
-        t2 = 1+DQ.E*[0, 0, scale*0.5, 0];
-        t3 = 1+DQ.E*[0, 0, 0, scale*0.5];
+        % Create vectors along the x-, y-, and z-axes.
+        t1 = scale*DQ.i;
+        t2 = scale*DQ.j;
+        t3 = scale*DQ.k;
         
-        %Do a vector rotation
-        x = dq.P*t1*dq.P';
-        y = dq.P*t2*dq.P';
-        z = dq.P*t3*dq.P';
+        % Do a point rotation
+        x = vec3(dq.P*t1*dq.P');
+        y = vec3(dq.P*t2*dq.P');
+        z = vec3(dq.P*t3*dq.P');        
         
         old_ishold = ishold;
         
-        dq_t = translation(dq);
-        x_t  = translation(x);
-        y_t  = translation(y);
-        z_t  = translation(z);
+        dq_t = vec3(translation(dq));
         
-        handle.handle_axis{1} = plot3([0; x_t.q(2)] + dq_t.q(2), ...
-            [0; x_t.q(3)] + dq_t.q(3), [0; x_t.q(4)] + dq_t.q(4), ...
-            'r','Linewidth',1);
+        % Plot the x-axis.
+        % Recall that [0;x(1)] + dq_t(1) = [dq_t(1); x(1) + dq_t(1)]
+        handle.handle_axis{1} = plot3([0;x(1)] + dq_t(1), ...
+            [0;x(2)] + dq_t(2), [0;x(3)] + dq_t(3), 'r','Linewidth',1);
         
         if(~ishold)
             hold on;
         end
         
-        handle.handle_text{1} = text(dq_t.q(2)+x_t.q(2), dq_t.q(3)+x_t.q(3), dq_t.q(4)+x_t.q(4), 'x');
+        handle.handle_text{1} = text(dq_t(1) + x(1), dq_t(2) + x(2),...
+            dq_t(3) + x(3), 'x');
         set(handle.handle_text{1} , 'Color', 'k');
         
-        handle.handle_axis{2} = plot3([0;y_t.q(2)]+dq_t.q(2), [0; y_t.q(3)]+dq_t.q(3), [0; y_t.q(4)]+dq_t.q(4), 'g','Linewidth',1);
-        handle.handle_text{2} = text(dq_t.q(2)+y_t.q(2), dq_t.q(3)+y_t.q(3), dq_t.q(4)+y_t.q(4), 'y');
+        % Plot the y-axis
+        handle.handle_axis{2} = plot3([0;y(1)] + dq_t(1), [0;y(2)] + dq_t(2),...
+            [0; y(3)] + dq_t(3), 'g','Linewidth',1);
+        handle.handle_text{2} = text(y(1) + dq_t(1), y(2) + dq_t(2),...
+            y(3) + dq_t(3), 'y');
         set(handle.handle_text{2}, 'Color', 'k');
         
-        handle.handle_axis{3} = plot3([0;z_t.q(2)]+dq_t.q(2), [0; z_t.q(3)]+dq_t.q(3), [0; z_t.q(4)]+dq_t.q(4), 'b','Linewidth',1);
-        handle.handle_text{3}  = text(dq_t.q(2)+z_t.q(2), dq_t.q(3)+z_t.q(3), dq_t.q(4)+z_t.q(4), 'z');
+        % Plot the z-axis
+        handle.handle_axis{3} = plot3([0;z(1)] + dq_t(1), [0;z(2)] + dq_t(2),...
+            [0,z(3)] + dq_t(3), 'b','Linewidth',1);
+        handle.handle_text{3}  = text(z(1) + dq_t(1), z(2) + dq_t(2),...
+            z(3) + dq_t(3), 'z');
         set(handle.handle_text{3}, 'Color', 'k');
         if(~old_ishold)
             hold off;
