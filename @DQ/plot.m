@@ -86,8 +86,10 @@ if optargin > 0
             case 'plane'
                 primitive_type = 'plane';
                 plane_length = cell2mat(varargin(j+1));
+            case 'name'
+                frame_name = char(varargin(j+1));
             otherwise
-                warning('Unknown plot parameter.')
+                warning('Unknown plot parameter: %s', primitive_name);
         end
     end
 end
@@ -101,8 +103,10 @@ switch primitive_type
             % Retrieve the struct inside the cell
             handle = handle_cell{1};
             for i = 1:3
+                % TODO: Maybe a better option is to move the axes and the
+                % text instead of deleting them.
                 delete(handle.handle_axis{i});
-                delete(handle.handle_text{i});
+                delete(handle.handle_text{i});                
             end
         end
         
@@ -150,6 +154,19 @@ switch primitive_type
             hold off;
         end
         
+        % Plot the frame name in case the option 'name' is used
+        if exist('frame_name','var')
+            if isfield(handle, 'handle_name')
+                set(handle.handle_name,'Position',dq_t'+ scale*0.05);
+            else
+                handle.handle_name = text(dq_t(1) + scale*0.05, dq_t(2) + ...
+                scale*0.05, dq_t(3) + scale*0.05, frame_name,'Interpreter',...
+                'latex');
+            end
+        end
+            
+            
+        
     case 'line'
         if (dq.Re ~= 0) || (norm(dq) ~= 1)
             error(['The dual quaternion does not represent a Plucker line.'...
@@ -172,7 +189,8 @@ switch primitive_type
         
         if erase
             handle = handle_cell{1};
-            set(handle_cell{1}, 'XData', arg{1}','YData', arg{2}','ZData', arg{3}');
+            set(handle_cell{1}, 'XData', arg{1}','YData', arg{2}','ZData',...
+                arg{3}');
         else
             handle = plot3(arg{:});
         end
