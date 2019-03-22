@@ -2,10 +2,15 @@
 % the plot.
 %
 % The following options are available:
-%   'scale'
-%   'erase'
-%   'line'
-%   'plane'
+%   
+%   'scale' - Define the scale for the drawing frames.
+%   'erase' - Whenever a primitive is moved, 'erase' prevents leaving a trail.
+%   'name'  - Define frame names (Latex commands are allowed).
+%   'line'  - Draw a line using dual quaternion representation.
+%   'plane' - Draw a plane using dual quaternion representation.
+%   'color' - Define line and plane colors.   
+%
+% Note: All options require an option attribute.
 %
 % Examples:
 % plot(dq,'scale',X) will plot the unit dual quaternion dq with the axes scaled
@@ -16,15 +21,20 @@
 % useful for plotting frames in motion (if erase is not used, it will leave a
 % trail).
 %
+% plot(dq, 'name', '$F_0$')
+%
 % plot(dq,'line',length) will plot the Plucker line represented by the unit
 % dual quaternion dq. Since a Plucker line is infinite, length is used to
 % determine the size of the "visible" line to be plotted.
-
+%
 % plot(dq,'plane',size) will plot the plane represented by the unit dual
 % quaternion dq = n + DQ.E*d, where 'n' is the pure unit norm quaternion 
 % representing the vector normal to the plane and 'd' is the signed distance of
 % the plane with respect to the origin of the reference frame. Since a plane is 
 % infinite, size is used to determine the diagonal of the visible plane.
+%
+% plot(dq,'plane', length, 'color', 'r') will plot a red plane.
+
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -88,6 +98,8 @@ if optargin > 0
                 plane_length = cell2mat(varargin(j+1));
             case 'name'
                 frame_name = char(varargin(j+1));
+            case 'color'
+                primitive_color = char(varargin(j+1));
             otherwise
                 warning('Unknown plot parameter: %s', primitive_name);
         end
@@ -156,8 +168,11 @@ switch primitive_type
         
         % Plot the frame name in case the option 'name' is used
         if exist('frame_name','var')
+            % Verify if the handle_name field exists, that is, the frame
+            % already has a name
             if isfield(handle, 'handle_name')
                 set(handle.handle_name,'Position',dq_t'+ scale*0.05);
+            % In case the frame does not have a name, create a new one
             else
                 handle.handle_name = text(dq_t(1) + scale*0.05, dq_t(2) + ...
                 scale*0.05, dq_t(3) + scale*0.05, frame_name,'Interpreter',...
@@ -192,7 +207,11 @@ switch primitive_type
             set(handle_cell{1}, 'XData', arg{1}','YData', arg{2}','ZData',...
                 arg{3}');
         else
-            handle = plot3(arg{:});
+            if exist('primitive_color', 'var');
+                handle = plot3(arg{:}, primitive_color);
+            else % Use matlab default colors
+                handle = plot3(arg{:});
+            end
         end
         
     case 'plane'
@@ -237,7 +256,11 @@ switch primitive_type
             set(handle_cell{1},'Vertices',plane_coordinates);
         else
             arg = mat2cell(plane_coordinates,4,[1,1,1]);
-            handle = patch(arg{:},'b');
+            if exist('primitive_color', 'var')
+                handle = patch(arg{:}, primitive_color);
+            else % Use the default color (blue)
+                handle = patch(arg{:}, 'b');
+            end                
         end
         
         % TODO: implement erase option
