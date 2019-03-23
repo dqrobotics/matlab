@@ -24,6 +24,7 @@
 %       haminus8(h)
 %       vec3(h)
 %       vec4(h)
+%       vec6(h)
 %       vec8(h)
 % CONSTANTS:
 %       DQ.E (dual unit)
@@ -132,18 +133,28 @@ classdef DQ
             elseif isa(v,'DQ')
                 obj = v;
             else
+                % All vectors should be column vectors
                 if(size(v,2)~=1)
                     v=v';
                 end
                 
+                % The constructor acts as the mapping between $R^n$ and the
+                % set of dual quaternions:                
                 if(length(v) == 8)
                     obj.q = v;
-                elseif(length(v) == 4) %It's a quaternion
+                elseif(length(v) == 6) % It's a pure dual quaternion
+                    obj.q = [0;v(1:3);0;v(4:6)];
+                elseif(length(v) == 4) % It's a quaternion
                     obj.q = [v;zeros(4,1)];
-                elseif(size(v,1) == 1) %It's a scalar
+                elseif(length(v) == 3) % It's a pure quaternion
+                    obj.q = [0;v;zeros(4,1)];
+                elseif(size(v,1) == 1) % It's a scalar
                     obj.q = [v;zeros(7,1)];
                 else
-                    error('You must input vector with 1, 4, or 8 elements');
+                    error(['The DQ constructor accepts only vectors with 1' ... 
+                        ' (scalar), 3 (pure quaternion), 4 (quaternion), 6' ...
+                        ' (pure dual quaternion) or 8 (dual quaternion)'...
+                        ' elements.']);
                 end
             end
         end
