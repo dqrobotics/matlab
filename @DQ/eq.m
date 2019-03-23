@@ -1,5 +1,6 @@
-%dq1 == dq2 returns 1 if dq1 equals dq2, returns 0
-%otherwise
+% a == b returns 1 if the dual quaternion a equals the dual quaternion b, 
+% otherwise returns 0
+% See also ne
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -24,10 +25,17 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function ret = eq(a,b)
-    a=DQ(a);
-    b=DQ(b);
     
+    if ~isa(a,'DQ');
+        a = DQ(a);
+    end
+    if ~isa(b,'DQ');
+        b = DQ(b);
+    end
+
     ret = 1;
+    % Verify if each coefficient of a is close enough to the corresponding
+    % coefficient of b.
     for i=1:8
         if abs(a.q(i) - b.q(i)) > DQ.threshold
             ret = 0;
