@@ -13,19 +13,6 @@
 % 
 % Type help DQ.(method/constant/operation) for specific help.
 %
-% METHODS: 
-%       dq.P (or P(dq), the same applies to the other methods.)
-%       dq.D
-%       dq.Re
-%       dq.Im
-%       hamiplus4(h)
-%       haminus4(h)
-%       hamiplus8(h)
-%       haminus8(h)
-%       vec3(h)
-%       vec4(h)
-%       vec6(h)
-%       vec8(h)
 % CONSTANTS:
 %       DQ.E (dual unit)
 %       DQ.i (imaginary i)
@@ -33,34 +20,48 @@
 %       DQ.k (imaginary k)
 %       C8 (conjugator matrix associated to vec8)
 %       C4 (conjugator matrix associated to vec4)
-% BINARY OPERATIONS: +  (plus)
-%                    -  (minus)
-%                    *  (mtimes)
-%                    .* (times)
-%                    /  (mrdivide)
-%                    \  (mldivide)
-%                    ./ (rdivide)
-%                    .\ (ldivide)
-%                    == (eq)
-%                    ~  (ne)
-%                    ^  (mpower), for the moment it is defined only for
+%
+% BINARY OPERATIONS: 
+%       +  (plus)
+%       -  (minus)
+%       *  (mtimes)
+%       .* (times)
+%       /  (mrdivide)
+%       \  (mldivide)
+%       ./ (rdivide)
+%       .\ (ldivide)
+%       == (eq)
+%       ~= (ne)
+%       ^  (mpower), for the moment it is defined only for
 %                                 unit dual quaternions
-% UNARY OPERATIONS: inv
-%                   dinv
-%                    '  (ctranspose)
-%                    .' (transpose)
+% UNARY OPERATIONS:
+%       '   (ctranspose)
+%       .'  (transpose)
+%       inv
+%       dinv
+%       P, D, Re, Im
 %
+% GENERAL FUNCTIONS: 
+%       cross
+%       dot       
+%       is_unit
+%       norm
+%       normalize
 %
-% METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
-%                    exp
-%                    is_unit
-%                    log
-%                    plot 
-%                    translation
-%                    rotation_axis
-%                    rotation_angle
-%                    translation
-%                    T
+% VECTOR OPERATIONS ON DUAL QUATERNIONS
+%       hamiplus4(h), haminus4(h), hamiplus8(h), haminus8(h)
+%       vec3(h), vec4(h), vec6(h), vec8(h)
+%                   
+% FUNCTIONS AND METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+%       exp
+%       log
+%       plot 
+%       translation
+%       rotation_axis
+%       rotation_angle
+%       translation
+%       T
+%
 % See also DQ_kinematics, DQ_KinematicController
 
 % (C) Copyright 2015 DQ Robotics Developers
