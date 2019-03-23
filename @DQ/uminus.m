@@ -1,3 +1,6 @@
+% Give H = a + b*DQ.i + c*DQ.j + d*DQ.k + DQ.E*(e + f*DQ.i + g*DQ.j + h*DQ.k), 
+% -H = -a - b*DQ.i - c*DQ.j - d*DQ.k - DQ.E*(-e - f*DQ.i - g*DQ.j - h*DQ.k)
+
 % (C) Copyright 2015 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
@@ -21,9 +24,5 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function res = uminus(dq)
-res = DQ;
-dq = DQ(dq);
-
-res.q=-1*dq.q;
-
+    res = DQ(-1*dq.q);
 end

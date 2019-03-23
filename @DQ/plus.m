@@ -1,4 +1,4 @@
-% dq1 + dq2 returns the sum between dq1 and dq2
+% a + b returns the sum between the dual quaternions a and b
 % Scalars can be used as well; for example, the operation dq + 1 is valid.
 
 % (C) Copyright 2015 DQ Robotics Developers
@@ -24,7 +24,11 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function res = plus(a,b)
-    a = DQ(a);
-    b = DQ(b);
+    if ~isa(a,'DQ');
+        a = DQ(a);
+    end
+    if ~isa(b,'DQ');
+        b = DQ(b);
+    end
     res = DQ(a.q + b.q);
 end

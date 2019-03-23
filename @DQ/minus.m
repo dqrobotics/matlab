@@ -1,5 +1,5 @@
-% dq1 - dq2 returns the substraction between dq1 and dq2
-% Scalars can be used as well; for example, the operation dq - 1 is valid.
+% a - b returns the substraction between the dual quaternions a and b
+% Scalars can be used as well; for example, the operation a - 1 is valid.
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -24,8 +24,11 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function res = minus(a,b)
-a = DQ(a);
-b = DQ(b);
-res = DQ(a.q - b.q);
-
+    if ~isa(a,'DQ');
+        a = DQ(a);
+    end
+    if ~isa(b,'DQ');
+        b = DQ(b);
+    end
+    res = DQ(a.q - b.q);
 end
