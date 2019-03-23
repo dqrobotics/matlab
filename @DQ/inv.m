@@ -30,5 +30,10 @@ function ret = inv(h)
     x = h*h';
     primary = x.P(1);
     dual = x.D(1);
+    % Recall that the inverse of a dual number is found by using Taylor
+    % expansion. See Fact 2.2.1 of ?Adorno, B. V. (2017). Robot Kinematic 
+    % Modeling and Control Based on Dual Quaternion Algebra -- Part I:
+    % Fundamentals. 
+    % https://hal.archives-ouvertes.fr/hal-01478225v1
     ret = h'*(1/primary - DQ.E*(dual/(primary^2)));
 end
