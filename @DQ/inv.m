@@ -1,4 +1,5 @@
-% inv(dq) returns the inverse of the dual quaternion dq.
+% inv(h) returns the inverse of the dual quaternion h, which is given by
+% h'/(norm(h)^2)
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -22,9 +23,12 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function ret = inv(dq)
-    q = dq*dq'; %(norm(dq)^2)
-    
-    q_inv = DQ([1/q.q(1),0,0,0,-q.q(5)/(q.q(1)^2),0,0,0]);
-    ret = dq'*q_inv;
+function ret = inv(h)
+
+    % Calculates norm(h)^2 = a + DQ.E*b, where a is a positive real number
+    % and b is a real number
+    x = h*h';
+    primary = x.P(1);
+    dual = x.D(1);
+    ret = h'*(1/primary - DQ.E*(dual/(primary^2)));
 end
