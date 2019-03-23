@@ -35,12 +35,15 @@
 % BINARY OPERATIONS: +  (plus)
 %                    -  (minus)
 %                    *  (mtimes)
+%                    /  (mrdivide)
+%                    \  (mldivide)
 %                    == (eq)
 %                    ~  (ne)
 %                    ^  (mpower), for the moment it is defined only for
 %                                 unit dual quaternions
 % UNARY OPERATIONS: inv
-%                    ' (conjugate)
+%                    '  (ctranspose)
+%                    .' (transpose)
 %
 %
 % METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
