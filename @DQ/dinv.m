@@ -1,5 +1,10 @@
-%PINV(dq) returns the inverse of dq under the decompositional
-%multiplication (i.e., the group operation of CMI(3))
+% dinv(a) returns the inverse of a under the decompositional
+% multiplication (i.e., the group operation of CMI(3))
+%
+% See Lemma 5 of ?Adorno, B. V. (2017). Robot Kinematic Modeling and Control 
+% Based on Dual Quaternion Algebra -- Part I: Fundamentals. 
+% https://hal.archives-ouvertes.fr/hal-01478225v1
+%
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -23,8 +28,10 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function ret = pinv(dq)
-    dq = DQ(dq);
-    temp = tplus(dq)*tplus(dq');    
-    ret = temp'*dq';
+function ret = dinv(x)
+    if ~isa(x,'DQ')
+        x = DQ(x);
+    end
+    
+    ret = T(x)'*P(x)';
 end

@@ -1,5 +1,6 @@
 % inv(h) returns the inverse of the dual quaternion h, which is given by
 % h'/(norm(h)^2)
+% See also dinv
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 

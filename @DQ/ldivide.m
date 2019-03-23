@@ -1,6 +1,6 @@
-% Left dual quaternion divide.
-% a\b is equivalent to inv(a)*b
-% See also mrdivide, rdivide, ldivide
+% Left dual quaternion decompositional divide.
+% a.\b is equivalent to dinv(a)*b
+% See also rdivide, mrdivide, mldivide
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -24,7 +24,7 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function res = mldivide(a,b)
+function res = ldivide(a,b)
     if ~isa(a,'DQ');
         a = DQ(a);
     end
@@ -32,5 +32,5 @@ function res = mldivide(a,b)
         b = DQ(b);
     end
     
-    res = inv(a)*b;
+    res = dinv(a) .* b;
 end

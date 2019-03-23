@@ -35,13 +35,17 @@
 % BINARY OPERATIONS: +  (plus)
 %                    -  (minus)
 %                    *  (mtimes)
+%                    .* (times)
 %                    /  (mrdivide)
 %                    \  (mldivide)
+%                    ./ (rdivide)
+%                    .\ (ldivide)
 %                    == (eq)
 %                    ~  (ne)
 %                    ^  (mpower), for the moment it is defined only for
 %                                 unit dual quaternions
 % UNARY OPERATIONS: inv
+%                   dinv
 %                    '  (ctranspose)
 %                    .' (transpose)
 %

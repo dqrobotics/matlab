@@ -1,6 +1,6 @@
 % Right dual quaternion divide.
 % a/b is equivalent to a*inv(b)
-% See also mldivide
+% See also mldivide, rdivide, ldivide
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
