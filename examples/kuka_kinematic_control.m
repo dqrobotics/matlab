@@ -48,7 +48,7 @@ error = epsilon+1;
 while norm(error) > epsilon
     jacob = kuka.jacobian(theta);
     xm = kuka.fkm(theta);
-    jacobp = kuka.jacobp(jacob,xm);
+    jacobp = kuka.position_jacobian(jacob,xm);
     pm = translation(xm);
     error = vec4(pd-pm);    
     theta = theta+pinv(jacobp)*gain*error;
@@ -65,7 +65,7 @@ error = epsilon+1;
 while norm(error) > epsilon
     jacob = kuka.jacobian(theta);
     xm = kuka.fkm(theta);
-    jacobr = jacob(1:4,:);
+    jacobr = kuka.rotation_jacobian(jacob);
     rm = xm.P;
     error = vec4(rd-rm);    
     theta = theta+pinv(jacobr)*gain*error;
@@ -79,13 +79,13 @@ fprintf('\nNow let us place the end-effector at a distance of 0.2 m from the bas
 %Technically speaking, we're controlling the square of the distance,
 %otherwise the distance Jacobian can have singularities. See discussion on page 76 of 
 %ADORNO, B. V., Two-arm manipulation: from manipulators to enhanced human-robot
-% collaboration, Université Montpellier 2, Montpellier, France, 2011.
+% collaboration, Universit? Montpellier 2, Montpellier, France, 2011.
 dd=0.2^2;
 error = epsilon+1;
 while norm(error) > epsilon
     jacob = kuka.jacobian(theta);
     xm = kuka.fkm(theta);
-    jacobd = kuka.jacobd(jacob,xm);
+    jacobd = kuka.distance_jacobian(jacob,xm);
     dm = norm(vec4(translation(xm)))^2;
     error = dd-dm;    
     theta = theta+pinv(jacobd)*gain*error;

@@ -251,7 +251,7 @@ function retval = rt_plot(robot, tg, varargin)
     % save the last joint angles away in the graphical robot
     for r=rh'
         rr = get(r, 'UserData');
-        rr.q = tg(end,:);
+        rr.configuration = tg(end,:);
         set(r, 'UserData', rr);
     end
 

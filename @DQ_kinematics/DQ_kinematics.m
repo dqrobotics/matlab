@@ -18,6 +18,7 @@
 % METHODS:
 %       raw_fkm
 %       fkm
+%       raw_jacobian
 %       jacobian
 %       jacobian_derivative
 %       distance_jacobian
@@ -27,9 +28,6 @@
 %       set_base
 %       set_effector
 %
-% PROPERTIES:
-%       C8
-%       C4
 % See also DQ, DQ_KinematicController
 
 % (C) Copyright 2015 DQ Robotics Developers
@@ -62,6 +60,8 @@ classdef DQ_kinematics < handle
     properties
         links;
         theta,d,a,alpha;
+        % Dummy and n_dummy are deprecated and will be removed in the near
+        % future
         dummy;
         n_dummy;
         convention;
@@ -78,29 +78,12 @@ classdef DQ_kinematics < handle
         robot_RT;
     end
     
-    properties (SetAccess = private)
-        
+    properties (SetAccess = private)        
         handle
-        %TODO: rename this property to avoid confusion with robot
-        %configuration
-        q
+        % Robot configuration (i.e., joint angles, in case of revolute
+        % joints, and joint displacements, in case of prismatic joints)
+        configuration
         
-    end
-    
-    
-    %TODO: Re-evaluate the need of redefining these properties below as
-    %      they are already declared in DQ.
-    properties (Constant)
-        % Given the jacobian matrix J that satisfies
-        % vec(dot_x) = J * dot_theta, where x is a dual quaternion, the
-        % following relation is established:
-        % vec(dot_x') = C8 * J * dot_theta, where x' is the conjugate of x.
-        C8 = diag([1, -1, -1, -1, 1, -1, -1, -1]);
-        % Given the jacobian matrix J that satisfies
-        % vec(dot_r) = J * dot_theta, where r is a quaternion, the following
-        % relation is established: vec(dot_r') = C4 * J * dot_theta, where
-        % r' is the conjugate of r.
-        C4 = diag([1, -1, -1, -1]);
     end
     
     methods
@@ -128,7 +111,7 @@ classdef DQ_kinematics < handle
             obj.base = DQ(1); %Default base's pose
             obj.effector = DQ(1); %Default effector's pose
             
-            %Definitions for Robotics Toolbox
+            % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
             if nargin==1
@@ -155,9 +138,6 @@ classdef DQ_kinematics < handle
             
             obj.effector = DQ(effector);
         end
-        
-        
-        
         
         function q = raw_fkm(obj,theta, ith)
             %   dq = raw_fkm(theta) calculates the forward kinematic model and
@@ -445,7 +425,7 @@ classdef DQ_kinematics < handle
                     ' a unit dual quaternion']);
                 x = DQ(x);
             end
-            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ_kinematics.C4*J(1:4,:);
+            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ.C4*J(1:4,:);
         end
         
         function Jr = rotation_jacobian(J)
@@ -456,7 +436,5 @@ classdef DQ_kinematics < handle
         % the time derivative of the joint vector.
             Jr = J(1:4,:);
         end
-        
-        
     end
 end
