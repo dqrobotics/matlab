@@ -19,9 +19,11 @@
 %       raw_fkm
 %       fkm
 %       jacobian
-%       jacobian_dot
-%       jacobp
-%       jacobd
+%       jacobian_derivative
+%       distance_jacobian
+%       position_jacobian
+%       rotation_jacobian
+%
 %       set_base
 %       set_effector
 %
@@ -335,8 +337,15 @@ classdef DQ_kinematics < handle
         end
         
         
-        
         function J_dot = jacobian_dot(obj,theta,theta_dot, ith)
+            warning(['The function jacobian_dot is deprecated and will be '...
+                'removed in the future. Please use jacobian_derivative() '...
+                'instead']);
+            J_dot = jacobian_derivative(obj,theta,theta_dot, ith);
+        end
+        
+        
+        function J_dot = jacobian_derivative(obj,theta,theta_dot, ith)
             % J_dot = jacobian_dot(theta,theta_dot) returns the Jacobian 
             % time derivative.
             % J_dot = jacobian_dot(theta,theta_dot,ith) returns the first
@@ -396,27 +405,58 @@ classdef DQ_kinematics < handle
     methods(Static)
         
         function Jp = jacobp(J,x)
-            %Given the dual quaternion Jacobian J and the corresponding
-            %dual quaternion, Jp = jacobp(J,x) returns the translation Jacobian; that it,
-            %the Jacobian that satisfies the relation dot_p = Jp * dot_theta,
-            %where dot_p is the time derivative of the
-            %translation quaternion and dot_theta is the time derivative of
-            %the joint vector.
-            x = DQ(x);
-            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ_kinematics.C4*J(1:4,:);
+            warning(['The function jacobp is deprecated and will be removed'... 
+                'in the future. Please use position_jacobian() instead']);
+            Jp = DQ_kinematics.position_jacobian(J,x);
         end
         
         function Jd = jacobd(J,x)
+            warning(['The function jacobd is deprecated and will be removed'... 
+                'in the future. Please use distance_jacobian() instead']);
+            Jd = DQ_kinematics.distance_jacobian(J,x);
+        end
+        
+        function Jd = distance_jacobian(J,x)
             %Given the dual quaternion Jacobian J and the corresponding
             %dual quaternion, Jd = jacobd(J,x) returns the distance Jacobian; that it,
             %the Jacobian that satisfies the relation dot_(d^2) = Jd * dot_theta,
             %where dot_(d^2) is the time derivative of the
             %square of the distance between the end-effector and the base and dot_theta is the time derivative of
             %the joint vector.
-            x = DQ(x);
+            if ~isa(x,'DQ')
+                warning(['The second argument of distance_jacobian should be'...
+                    ' a unit dual quaternion']);
+                x = DQ(x);
+            end
             p = translation(x);
-            Jp = DQ_kinematics.jacobp(J,x);
-            Jd=2*vec4(p)'*Jp;
+            Jp = DQ_kinematics.position_jacobian(J,x);
+            Jd = 2*vec4(p)'*Jp;
         end
+        
+        function Jp = position_jacobian(J,x)
+        % Given the Jacobian J and the corresponding dual quaternion x, such
+        % that vec8(x_dot) = J*q_dot, Jp = position_jacobian(J,x) returns the 
+        % translation Jacobian; that it, the Jacobian that satisfies the 
+        % relation p_dot = Jp * q_dot, where p_dot is the time derivative of the
+        % translation quaternion and q_dot is the time derivative of the joint
+        % vector.
+            if ~isa(x,'DQ')
+                warning(['The second argument of position_jacobian should be'...
+                    ' a unit dual quaternion']);
+                x = DQ(x);
+            end
+            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ_kinematics.C4*J(1:4,:);
+        end
+        
+        function Jr = rotation_jacobian(J)
+        % Given the Jacobian J that satisfies vec8(x_dot) = J*q_dot, 
+        % rotation_jacobian returns the Jacobian Jr that satisfies 
+        % vec4(r_dot) = Jr * q_dot, where r_dot is the time derivative of
+        % the rotation quaternion r in x = r + DQ.E*(1/2)*p*r and q_dot is
+        % the time derivative of the joint vector.
+            Jr = J(1:4,:);
+        end
+        
+        
     end
 end
