@@ -181,6 +181,10 @@ classdef DQ_kinematics < handle
             %   theta is the vector of joint variables
             %
             %   dq = fkm(theta, ith) calculates the FKM up to the ith link.
+            %   If ith is the last link, it DOES NOT take into account the
+            %   trasformation given by set_effector. If you want to take
+            %   into account that transformation, use dq = fkm(theta)
+            %   instead.
             
             if nargin == 3
                 q = obj.base*obj.raw_fkm(theta, ith); %Takes into account the base displacement
