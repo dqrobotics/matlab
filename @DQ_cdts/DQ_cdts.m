@@ -105,7 +105,7 @@ classdef DQ_cdts
             % x = xr(theta) returns the relative Jacobian,
             % where theta is the joint position of the resultant system;
             % that is, theta = [theta1;theta2]
-            jac = [hamiplus8(obj.x2(theta)')*obj.jacobian1(theta), haminus8(obj.x1(theta))*DQ_kinematics.C8*obj.jacobian2(theta)];
+            jac = [hamiplus8(obj.x2(theta)')*obj.jacobian1(theta), haminus8(obj.x1(theta))*DQ.C8*obj.jacobian2(theta)];
         end
         
         function jac = Ja(obj, theta)
@@ -119,7 +119,7 @@ classdef DQ_cdts
             xr=obj.xr(theta);
             
             jacob_r2 = 0.5*haminus4(xr.P'*(xr.P)^0.5)*jacobr(1:4,:);
-            jacobp_r = DQ_kinematics.jacobp(jacobr,xr);
+            jacobp_r = DQ_kinematics.position_jacobian(jacobr,xr);
             
             jacob_xr_2 = [jacob_r2; 0.25*(haminus4(xr.P^0.5)*jacobp_r+hamiplus4(translation(xr))*jacob_r2)];
             
