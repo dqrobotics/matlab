@@ -56,11 +56,11 @@ figure;
 hold on;
 grid off;
 axis equal;
-axis ([-0.6,0.6,-0.2,0.8,-0.1,0.6])
+axis ([-0.6,0.6,-0.2,0.8,-0.1,0.7])
 view(-153,24);
 
 % Drawing the arms
-opt={'noname','nojaxes','noshadow','nobase'};
+opt={'noname'};
 plot(kuka1,initial_theta1',opt{:});
 plot(kuka2,initial_theta2',opt{:});
 % Drawing the broom;

@@ -1,3 +1,25 @@
+% plot(robot,q,options) plots the robot of type DQ_kinematics. 
+% q is the vector of joint configurations
+% options is an optional argument that has variable size and accept any
+% number of the following pairs:
+%
+%  'workspace', W          size of robot 3D workspace, where
+%                          W = [xmn, xmx ymn ymx zmn zmx]
+%  'cylinder', C           color for joint cylinders, C=[r g b]
+%  'mag', scale            annotation scale factor
+%  'perspective'|'ortho'   type of camera view
+%  'render'|'norender'     controls shaded rendering after drawing
+%  'loop'|'noloop'         controls endless loop mode
+%  'base'|'nobase'         controls display of base plane
+%  'wrist'|'nowrist'       controls display of wrist
+%  'shadow'|'noshadow'     controls display of shadow
+%  'name'|'noname'         display the robot's name 
+%  'xyz'|'noa'             wrist axis label
+%  'joints'|'nojoints'     controls display of joints
+%
+% See also DQ/plot
+
+
 % (C) Copyright 2015 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
@@ -19,55 +41,36 @@
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
-%     Part of this file was derived from Peter Corke's Robotic Toolbox (http://www.petercorke.com)
+%     
+%     Part of this file was adapted from Peter Corke's Robotic Toolbox (2011 
+%     version) - http://www.petercorke.com
 
-function plot(obj,joint_angles,varargin)
-    
-%     robot = obj.robot_RT;
+function plot(robot,q,varargin)    
     has_options = 0;
     if nargin < 2
-        error('Usage: plot(robot,theta,[options])');
+        fprintf(['\nUsage: plot(robot, q,[options])'...
+                 '\ntype ''help DQ_kinematics/plot'' for more information\n']);
+        return;
     elseif nargin >= 3
         has_options = 1;
     end
     
-    if size(joint_angles,2) == 1
-        joint_angles = joint_angles';
+    if ~isvector(q)
+        error('The first argument must be the vector of joint configurations.');
     end
     
-    % If there are dummy joints, we must plot them
-    if obj.n_dummy
-        theta = zeros(1,length(obj.theta));
-        counter = 0;
-        for i = 1:length(theta)
-            if obj.dummy(i) == 1
-                theta(i) = obj.theta(i);
-                counter = counter + 1;
-            else
-                theta(i)=joint_angles(i-counter)+obj.theta(i);
-            end
-            
-        end
-    else        
-        theta = joint_angles;
+    % The joint configuration vector must be a row vector
+    if ~isrow(q)
+        q = q';
     end
-    
     
     if has_options
-        rt_plot(obj,joint_angles, varargin{:});
+        dq_kinematics_plot(robot,q, varargin{:});
     else
-        rt_plot(obj,joint_angles);
+        dq_kinematics_plot(robot,q);
     end
 end
 
-
-%SerialLink.ploT Graphical display and animation
-%
-% R.plot(Q, options) displays a graphical animation of a robot based on 
-% the kinematic model.  A stick figure polyline joins the origins of
-% the link coordinate frames. The robot is displayed at the joint angle Q, or 
-% if a matrix it is animated as the robot moves along the trajectory.
-%
 % The graphical robot object holds a copy of the robot object and
 % the graphical element is tagged with the robot's name (.name property).
 % This state also holds the last joint configuration which can be retrieved,
@@ -101,7 +104,6 @@ end
 %
 % The robot is displayed as a basic stick figure robot with annotations 
 % such as:
-% - shadow on the floor
 % - XYZ wrist axes and labels
 % - joint cylinders and axes
 % which are controlled by options.
@@ -110,22 +112,7 @@ end
 % the workspace dimensions.  This dimension can be changed by setting the 
 % multiplicative scale factor using the 'mag' option.
 %
-% Options::
-%  'workspace', W          size of robot 3D workspace, W = [xmn, xmx ymn ymx zmn zmx]
-%  'delay', d              delay betwen frames for animation (s)
-%  'cylinder', C           color for joint cylinders, C=[r g b]
-%  'mag', scale            annotation scale factor
-%  'perspective'|'ortho'   type of camera view
-%  'raise'|'noraise'       controls autoraise of current figure on plot
-%  'render'|'norender'     controls shaded rendering after drawing
-%  'loop'|'noloop'         controls endless loop mode
-%  'base'|'nobase'         controls display of base 'pedestal'
-%  'wrist'|'nowrist'       controls display of wrist
-%  'shadow'|'noshadow'     controls display of shadow
-%  'name'|'noname'         display the robot's name 
-%  'xyz'|'noa'             wrist axis label
-%  'jaxes'|'nojaxes'       control display of joint axes
-%  'joints'|'nojoints'     controls display of joints
+
 %
 % The options come from 3 sources and are processed in order:
 % - Cell array of options returned by the function PLOTBOTOPT.
@@ -142,7 +129,6 @@ end
 % kept in a structure which can be stored within the .handle element of a
 % robot object:
 %   h.robot     the robot stick figure
-%   h.shadow    the robot's shadow
 %   h.x     wrist vectors
 %   h.y
 %   h.z
@@ -159,35 +145,7 @@ end
 %  This enables us to find all robots with a given name, in all figures,
 % and update them.
 
-
-
-% Copyright (C) 1993-2011, by Peter I. Corke
-%
-% This file is part of The Robotics Toolbox for Matlab (RTB).
-% 
-% RTB is free software: you can redistribute it and/or modify
-% it under the terms of the GNU Lesser General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% RTB is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU Lesser General Public License for more details.
-% 
-% You should have received a copy of the GNU Leser General Public License
-% along with RTB.  If not, see <http://www.gnu.org/licenses/>.
-%
-% http://www.petercorke.com
-
-function retval = rt_plot(robot, tg, varargin)
-    % opts = PLOT(robot, options)
-    %  just convert options list to an options struct
-    if (nargin == 2) && iscell(tg)
-        retval = plot_options(robot, varargin{:});
-        return;
-    end
-    
+function dq_kinematics_plot(robot, q, varargin)
     % process options
     if (nargin > 2) && isstruct(varargin{1})
         % options is a struct
@@ -197,93 +155,299 @@ function retval = rt_plot(robot, tg, varargin)
         opt = plot_options(robot, varargin);
     end
 
-
+    % Virtual (dummy) joints will be removed in the future
     n = robot.links-robot.n_dummy;
 
-    if length(tg) ~= n
+    if length(q) ~= n
         error('Insufficient number of joints')
     end
 
-    % get handle of any existing robot of same name
-    rh = findobj('Tag', robot.name);
-
-    if isempty(rh) || isempty( get(gcf, 'Children'))
-        % no robot of this name exists
-
-        % create one
-        ax = newplot();
-        h = create_new_robot(robot, opt);
-
-        % save the handles in the passed robot object, and
-        % attach it to the robot as user data.
-        robot.handle = h;
-        set(h.robot, 'Tag', robot.name);
-        set(h.robot, 'UserData', robot);
-
-        rh = h.robot;
-    end
-
-    if ishold && isempty( findobj(gca, 'Tag', robot.name))
-        % if hold is on and no robot of this name in current axes
-        h = create_new_robot(robot, opt);
-        % save the handles in the passed robot object, and
-        % attach it to the robot as user data.
-        robot.handle = h;
-        set(h.robot, 'Tag', robot.name);
-        set(h.robot, 'UserData', robot);
-
-        rh = h.robot;
-    end
+    % get handles of all existing robot with the same name
+    robot_handle = findobj('Tag', robot.name);
     
-    if opt.raise
-        figure(gcf);
+    % Condition to verify that no robot with this name exists
+    condition1 = isempty(robot_handle) || isempty(get(gcf, 'Children'));
+    % Condition to verify if hold is on and no robot of this name is in the 
+    % current axes
+    condition2 = ishold && isempty(findobj(gca, 'Tag', robot.name));
+    if condition1 || condition2
+        % no robot with this name exists
+        h = create_new_robot(robot, opt);
+        % save the handle in the robot object and attach it to the robot 
+        % as user data.
+        robot.handle = h;
+        set(h.robot, 'Tag', robot.name);
+        set(h.robot, 'UserData', robot);
+        robot_handle = h.robot;        
     end
 
-
-
-    for r=rh'
-        animate( get(r, 'UserData'), tg, opt);
-
+    % Update all robots with the same name. This is very useful when we
+    % want to visualize the same robot from different points of view
+    for r = robot_handle'
+        update_robot( get(r, 'UserData'), q);
     end
 
-
-
-    % save the last joint angles away in the graphical robot
-    for r=rh'
+    % save the joint angles away in all the graphical robots with the
+    % same name
+    for r = robot_handle'
         rr = get(r, 'UserData');
-        rr.configuration = tg(end,:);
-        set(r, 'UserData', rr);
+        rr.configuration = q;
+        set(robot_handle, 'UserData', rr);
     end
+end
 
-    if nargout > 0
-        retval = robot;
+
+% h = create_new_robot(robot, opt) uses data from robot object and options
+% to create a graphical robot in the current figure.
+%
+% Returns a structure of handles to graphical objects.
+%
+% If current figure is empty, draw robot in it
+% If current figure has hold on, add robot to it
+% Otherwise, create new figure and draw robot in it.
+%   
+% The handle is composed of the following fields:
+% h.mag             Robot scale
+% h.robot           the line segment that represents the robot
+% h.x               the line segment that represents the end-effector x-axis
+% h.y               the line segment that represents the end-effector y-axis
+% h.z               the line segment that represents the end-effector z-axis
+% h.xt              text for the end-effector x-axis
+% h.yt              text for the end-effector y-axis
+% h.zt              text for the end-effector z-axis
+% h.joint(i)        the i-th joint (cylinder for revolute joints)
+% h.base_handle     the robot base plane 
+% h.name_handle     the robot name
+function h = create_new_robot(robot, opt)
+    h.mag = opt.mag;
+
+    if ~ishold
+        % if current figure has hold on, then draw robot here
+        % otherwise, create a new figure
+        axis(opt.workspace);
+    end
+    xlabel('X')
+    ylabel('Y')
+    zlabel('Z')
+    set(gca, 'SortMethod', 'depth');
+    grid on
+
+    % Draw a small plane representing the robot base
+    if opt.base
+        plane = robot.base.'*DQ.k*robot.base';
+        % Since the plane is infinite, the plot function draws the part
+        % closest to the origin of the reference frame. We first
+        % consider the plane that passes through the origin and is aligned with 
+        % the one that supports the base
+        base_handle = plot(plane.P,'plane',opt.mag,'color','b');
+        % We then translate the 'visible' plane to the base frame
+        base_translation = vec3(translation(robot.base));
+        plane_vertices = get(base_handle, 'Vertices');
+        for i = 1:3
+            plane_vertices(:,i) = plane_vertices(:,i) + base_translation(i);
+        end        
+        set(base_handle, 'Vertices', plane_vertices);
+        h.base_handle = base_handle;
+    end
+     
+    % Write the robot name.
+    if opt.name        
+        b = vec3(translation(robot.base));
+        h.name_handle = text(b(1), b(2) - opt.mag, b(3), [' ' robot.name],...
+            'FontAngle', 'italic','FontWeight', 'bold');
     end
     
-end
-%PLOT_OPTIONS
-%
-%   o = PLOT_OPTIONS(robot, options)
-%
-% Returns an options structure
+    % create a line that we will subsequently modify using the function 
+    % update_robot(). 
+    h.robot = line(robot.lineopt{:});
+    
+    % create end-effector frame
+    if opt.wrist,   
+        h.x = line('xdata', [0;0], ...
+            'ydata', [0;0], ...
+            'zdata', [0;0], ...
+            'color', 'red');
+        h.y = line('xdata', [0;0], ...
+            'ydata', [0;0], ...
+            'zdata', [0;0], ...
+            'color', 'green');
+        h.z = line('xdata', [0;0], ...
+            'ydata', [0;0], ...
+            'zdata', [0;0], ...
+            'color', 'blue');
+        h.xt = text(0, 0, opt.wristlabel(1), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+        h.yt = text(0, 0, opt.wristlabel(2), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+        h.zt = text(0, 0, opt.wristlabel(3), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
 
+    end
+
+    % Display cylinders (revolute each joint, as well as axis centerline.
+    for i = 1:robot.links
+        if opt.joints
+            %TODO: implement prismatic joints
+            N = 8;
+            % define the vertices of the unit cylinder with radius opt.mag/4
+            % the z coordinates of the bottom and top faces are 0 and 1,
+            % respectively. Furthermore, xc, yc, and zc have 2 rows: the
+            % first corresponds to the bottom coordinates and the second to
+            % the top coordinates.
+            [xc,yc,zc] = cylinder(opt.mag/4, N);            
+            
+            % Scale the cylinder
+            % when zc == 0, make it -opt.mag/2, except for the first joint
+            if i~= 1
+                zc(zc==0) = -opt.mag/2;
+            end
+            % when zc == 1, make it opt.mag/2
+            zc(zc==1) = opt.mag/2;
+
+            % Create vertex color data. Each vertex receive a RGB triplet.
+            % Red value is stored in cdata(:,:,1), green in cdata(:,:,2)
+            % and blue in cdata
+            cdata = zeros(size(xc,1),size(xc,2),3);
+            for j=1:3
+                cdata(:,:,j) = opt.cylinder(j);
+            end
+            % render the surface
+            h.joint(i) = surface(xc,yc,zc,cdata);
+          
+            % set the surfaces to be smooth and translucent
+            set(h.joint(i), 'FaceColor', 'interp');
+            set(h.joint(i), 'EdgeColor', 'none');
+            set(h.joint(i), 'FaceAlpha', 0.7);
+
+            % build a matrix of coordinates so we
+            % can transform the cylinder in update_robot()
+            % and hang it off the cylinder
+            xyz = [xc(:)'; yc(:)'; zc(:)'; ones(1,2*N+2)];
+            
+            set(h.joint(i), 'UserData', xyz);
+        end
+    end
+end
+
+
+% update_robot(robot, q) moves an existing graphical robot to the configuration
+% specified by the joint coordinates q. Graphics are defined by the handle 
+% structure robot.handle.
+function update_robot(robot, q)
+    % Dummy (virtual) joints will be removed in the near future
+    n = robot.links-robot.n_dummy;
+    
+    h = robot.handle;
+    mag = h.mag;
+    base = vec3(translation(robot.base));
+    
+    % Initialize the vector containing the origin of each frame along the
+    % kinematic chain
+    x = zeros(n+1,1);
+    y = zeros(n+1,1);
+    z = zeros(n+1,1);
+    % The first element corresponds to the origin of the base frame
+    x(1) = base(1);
+    y(1) = base(2);
+    z(1) = base(3);
+
+    % compute the link transforms, and record the origin of each frame
+    % for the graphics update.    
+    for j=1:n    
+        t = vec3(translation(robot.fkm(q,j)));
+        x(j+1) = t(1);    
+        y(j+1) = t(2);
+        z(j+1) = t(3);
+    end
+    
+    % Update the coordinates of each frame along the kinematic chain   
+    set(h.robot,'xdata', x, 'ydata', y, 'zdata', z);
+   
+    % display the joints as cylinders
+    if isfield(h, 'joint')       
+        for j=1:n
+            % get coordinate data from the cylinder. The UserData is never
+            % updated.
+            xyz = get(h.joint(j), 'UserData');
+            
+            %The joints are located at the beginning of each link
+            fkm_j = robot.fkm(q,j-1);
+            
+            for k = 1:size(xyz,2)
+                % 1 + DQ.E*(1/2)*p, where p = xyz(1:3,k);
+                cylinder_position = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);
+                xyz(1:3,k) = vec3(translation(fkm_j*cylinder_position));
+            end
+            
+            % Now that all cylinder vertices are transformed, update the
+            % cylinder drawing. Transform xc, yc, and zc to matrices of
+            % two rows and ncols columns (i.e., half the number of vertices
+            % as each column stores the bottom and top vertices).
+            ncols = size(xyz,2)/2;
+            xc = reshape(xyz(1,:), 2, ncols);
+            yc = reshape(xyz(2,:), 2, ncols);
+            zc = reshape(xyz(3,:), 2, ncols);
+            
+            set(h.joint(j), 'Xdata', xc, 'Ydata', yc, 'Zdata', zc);
+        end
+    end
+
+   
+    % display the wrist axes and labels   
+    % compute the wrist axes, based on final link transformation plus the
+    % tool transformation.
+    if isfield(h, 'x')
+        % get the end-effector pose (considering the final transformation given
+        % by set_end_effector()
+        t = robot.fkm(q);
+        t1 = vec3(translation(t));        
+        
+        % The following transformations use the Hamilton operators to
+        % improve performance as Matlab is optimized for matrix operations.
+        
+        % Recall that, given a rotation t.P, the point transformation of any
+        % point p is given by t.P*p*t.P'. In terms of Hamilton operators,
+        % the transformation is given by 
+        % vec4(t.P*p*t.P') = hamiplus4(t.P)*haminus4(t.P')*vec4(p).
+        
+        % H(1,2:4) is always 0.
+        H = hamiplus4(t.P)*haminus4(t.P');
+        
+        % We can simplify the calculations as follows
+        xv = t1 + H(2:4,2)*mag; % p = [0; mag; 0; 0]
+        yv = t1 + H(2:4,3)*mag; % p = [0; 0; mag; 0]
+        zv = t1 + H(2:4,4)*mag; % p = [0; 0; 0; mag]
+        
+        
+        % update the wrist axes       
+        set(h.x,'xdata',[t1(1) xv(1)], 'ydata', [t1(2) xv(2)], ...
+            'zdata', [t1(3) xv(3)]);
+        set(h.y,'xdata',[t1(1) yv(1)], 'ydata', [t1(2) yv(2)], ...
+             'zdata', [t1(3) yv(3)]);
+        set(h.z,'xdata',[t1(1) zv(1)], 'ydata', [t1(2) zv(2)], ...
+             'zdata', [t1(3) zv(3)]);
+         
+        % update the axes' name positions 
+        set(h.xt, 'Position', xv);
+        set(h.yt, 'Position', yv);
+        set(h.zt, 'Position', zv);
+    end
+end
+
+
+% o = PLOT_OPTIONS(robot, options) returns an options structure
 function o = plot_options(robot, optin)
     % process a cell array of options and return a struct
 
     % define all possible options and their default values
-    o.erasemode = 'normal';
+  %  o.erasemode = 'normal';
     o.joints = true;
     o.wrist = true;
     o.loop = false;
-    o.shadow = true;
+  %  o.shadow = false;
     o.wrist = true;
-    o.jaxes = true;
     o.base = true;
     o.wristlabel = 'xyz';
     o.perspective = true;
     o.magscale = 1;
     o.name = true;
-    o.delay = 0.1;
-    o.raise = false;
     o.cylinder = [0 0 0.7];
     o.workspace = [];
 
@@ -291,11 +455,11 @@ function o = plot_options(robot, optin)
     %   1. the M-file plotbotopt if it exists
     %   2. robot.plotopt
     %   3. command line arguments
-    if exist('plotbotopt', 'file') == 2
-        options = [plotbotopt robot.plotopt optin];
-    else
+%     if exist('plotbotopt', 'file') == 2
+%         options = [plotbotopt robot.plotopt optin];
+%     else
         options = [robot.plotopt optin];
-    end
+ %   end
 
     % parse the options
     [o,args] = tb_optparse(o, options);
@@ -318,261 +482,6 @@ function o = plot_options(robot, optin)
     end
     o.mag = o.magscale * reach/10;
 end
-
-%CREATE_NEW_ROBOT
-% 
-%   h = CREATE_NEW_ROBOT(robot, opt)
-%
-% Using data from robot object and options create a graphical robot in
-% the current figure.
-%
-% Returns a structure of handles to graphical objects.
-%
-% If current figure is empty, draw robot in it
-% If current figure has hold on, add robot to it
-% Otherwise, create new figure and draw robot in it.
-%   
-
-% h.mag
-% h.zmin
-% h.robot   the line segment that is the robot
-% h.shadow  the robot's shadow
-% h.x       the line segment that is T6 x-axis
-% h.y       the line segment that is T6 x-axis
-% h.z       the line segment that is T6 x-axis
-% h.xt      text for T6 x-axis
-% h.yt      text for T6 y-axis
-% h.zt      text for T6 z-axis
-% h.joint(i)        the joint i cylinder or box
-% h.jointaxis(i)    the line segment that is joint i axis
-% h.jointlabel(i)   text for joint i label
-
-function h = create_new_robot(robot, opt)
-    h.mag = opt.mag;
-
-    %
-    % setup an axis in which to animate the robot
-    %
-    % handles not provided, create graphics
-    %disp('in creat_new_robot')
-    if ~ishold
-        % if current figure has hold on, then draw robot here
-        % otherwise, create a new figure
-        axis(opt.workspace);
-    end
-    xlabel('X')
-    ylabel('Y')
-    zlabel('Z')
-    set(gca, 'drawmode', 'fast');
-    grid on
-
-
-    zlim = get(gca, 'ZLim');
-    h.zmin = zlim(1);
-
-    if opt.base
-        b = translation(robot.base);
-        line('xdata', [b.q(2);b.q(2)], ...
-            'ydata', [b.q(3);b.q(3)], ...
-            'zdata', [h.zmin;b.q(4)], ...
-            'LineWidth', 4, ...
-            'color', 'red');
-    end
-    
-    if opt.name
-        b = translation(robot.base);
-        text(b.q(2), b.q(3)-opt.mag, [' ' robot.name], 'FontAngle', 'italic', 'FontWeight', 'bold')
-    end
-    % create a line which we will
-    % subsequently modify.  Set erase mode to xor for fast
-    % update
-    %
-    h.robot = line(robot.lineopt{:});
-    
-    if opt.shadow
-        h.shadow = line(robot.shadowopt{:}, ...
-            'Erasemode', opt.erasemode);
-    end
-
-    if opt.wrist,   
-        h.x = line('xdata', [0;0], ...
-            'ydata', [0;0], ...
-            'zdata', [0;0], ...
-            'color', 'red');
-        h.y = line('xdata', [0;0], ...
-            'ydata', [0;0], ...
-            'zdata', [0;0], ...
-            'color', 'green');
-        h.z = line('xdata', [0;0], ...
-            'ydata', [0;0], ...
-            'zdata', [0;0], ...
-            'color', 'blue');
-        h.xt = text(0, 0, opt.wristlabel(1), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-        h.yt = text(0, 0, opt.wristlabel(2), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-        h.zt = text(0, 0, opt.wristlabel(3), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-
-    end
-
-    %
-    % display cylinders (revolute) or boxes (pristmatic) at
-    % each joint, as well as axis centerline.
-    %
-    
-    for i=1:robot.links
-        
-        if opt.joints
-
-            % cylinder or box to represent the joint
-            %if L(i).sigma == 0
-                N = 8;
-            %else
-             %   N = 4;
-            %end
-            % define the vertices of the cylinder
-            [xc,yc,zc] = cylinder(opt.mag/4, N);
-            zc(zc==0) = -opt.mag/2;
-            zc(zc==1) = opt.mag/2;
-
-            % create vertex color data
-            cdata = zeros(size(xc));
-            for j=1:3
-                cdata(:,:,j) = opt.cylinder(j);
-            end
-            % render the surface
-            h.joint(i) = surface(xc,yc,zc,cdata);
-            
-            % set the surfaces to be smoothed and translucent
-            set(h.joint(i), 'FaceColor', 'interp');
-            set(h.joint(i), 'EdgeColor', 'none');
-            set(h.joint(i), 'FaceAlpha', 0.7);
-
-            % build a matrix of coordinates so we
-            % can transform the cylinder in animate()
-            % and hang it off the cylinder
-            xyz = [xc(:)'; yc(:)'; zc(:)'; ones(1,2*N+2)]; 
-            set(h.joint(i), 'UserData', xyz);
-        end
-
-        if opt.jaxes
-            % add a dashed line along the axis
-            h.jointaxis(i) = line('xdata', [0;0], ...
-                'ydata', [0;0], ...
-                'zdata', [0;0], ...
-                'color', 'blue', ...
-                'linestyle', ':');
-            h.jointlabel(i) = text(0, 0, 0, num2str(i), 'HorizontalAlignment', 'Center');
-        end
-    end
-end
-%ANIMATE   move an existing graphical robot
-%
-%   animate(robot, q)
-%
-% Move the graphical robot to the pose specified by the joint coordinates q.
-% Graphics are defined by the handle structure robot.handle.
-
-function animate(robot, q, opt)
-
-    n = robot.links-robot.n_dummy;
-    h = robot.handle;
-    
-    mag = h.mag;
-
-    b = translation(robot.base);
-    x = b.q(2);
-    y = b.q(3);
-    z = b.q(4);
-
-    xs = b.q(2);
-    ys = b.q(3);
-    zs = h.zmin;
-
-    % compute the link transforms, and record the origin of each frame
-    % for the animation.    
-    for j=1:n
-    
-        t = translation(robot.fkm(q,j));
-
-        x = [x; t.q(2)];    
-        y = [y; t.q(3)];
-        z = [z; t.q(4)];
-        xs = [xs; t.q(2)];
-        ys = [ys; t.q(3)];
-        zs = [zs; h.zmin];
-    end
-
-    t = robot.fkm(q);
-
-    %
-    % draw the robot stick figure and the shadow
-    %
-    set(h.robot,'xdata', x, 'ydata', y, 'zdata', z);
-    if isfield(h, 'shadow')
-        set(h.shadow,'xdata', xs, 'ydata', ys, 'zdata', zs);
-    end
-    
-
-    %
-    % display the joints as cylinders with rotation axes
-    %
-      if isfield(h, 'joint')
-       %  xyz_line = [0 0; 0 0; -2*mag 2*mag; 1 1];
- 
-         for j=1:n
-             
-           %  if robot.dummy(j)==0
-             % get coordinate data from the cylinder
-            xyz = get(h.joint(j), 'UserData');
-            fkm_j = robot.fkm(q,j);
-            
-            for k = 1:numcols(xyz)
-                temp = fkm_j*DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);  
-                temp = temp.T;
-                xyz(1:3,k)=temp.q(6:8)*2;
-            end
-          
-            ncols = numcols(xyz)/2;
-            xc = reshape(xyz(1,:), 2, ncols);
-            yc = reshape(xyz(2,:), 2, ncols);
-            zc = reshape(xyz(3,:), 2, ncols);
-
-            set(h.joint(j), 'Xdata', xc, 'Ydata', yc, ...
-                'Zdata', zc);
-           %  end
-
-        end
-    end
-
-    %
-    % display the wrist axes and labels
-    %
-    if isfield(h, 'x')
-        %
-        % compute the wrist axes, based on final link transformation
-        % plus the tool transformation.
-        %
-        
-        t1 = translation(t);
-        
-        xv = translation(t*DQ([1 0 0 0 0 mag 0 0]));
-        yv = translation(t*DQ([1 0 0 0 0 0 mag 0]));
-        zv = translation(t*DQ([1 0 0 0 0 0 0 mag]));
-
-        %
-        % update the line segments, wrist axis and links
-        %
-        set(h.x,'xdata',[t1.q(2) xv.q(2)], 'ydata', [t1.q(3) xv.q(3)], ...
-            'zdata', [t1.q(4) xv.q(4)]);
-        set(h.y,'xdata',[t1.q(2) yv.q(2)], 'ydata', [t1.q(3) yv.q(3)], ...
-             'zdata', [t1.q(4) yv.q(4)]);
-        set(h.z,'xdata',[t1.q(2) zv.q(2)], 'ydata', [t1.q(3) zv.q(3)], ...
-             'zdata', [t1.q(4) zv.q(4)]);
-        set(h.xt, 'Position', xv.q(2:4));
-        set(h.yt, 'Position', yv.q(2:4));
-        set(h.zt, 'Position', zv.q(2:4));
-    end
-end
-
 
 %OPTPARSE Standard option parser for Toolbox functions
 %
@@ -768,13 +677,3 @@ function [opt,others] = tb_optparse(in, argv)
         others = arglist;
     end
 end
-
-%
-% NUMCOLS(m)
-%
-%	Return the number of columns in the matrix m
-%
-function c = numcols(m)
-	[x,c] = size(m);
-end
-

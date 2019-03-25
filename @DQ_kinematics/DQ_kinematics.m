@@ -78,7 +78,9 @@ classdef DQ_kinematics < handle
         robot_RT;
     end
     
-    properties (SetAccess = private)        
+    properties (SetAccess = private)   
+        % Handle used to access the robot's graphics information. It's used
+        % mainly in the plot function.
         handle
         % Robot configuration (i.e., joint angles, in case of revolute
         % joints, and joint displacements, in case of prismatic joints)
@@ -121,8 +123,7 @@ classdef DQ_kinematics < handle
             end
             
             %For visualisation
-            obj.lineopt = {'Color', 'black', 'Linewidth', 4};
-            obj.shadowopt = {'Color', 0.7*[1 1 1], 'Linewidth', 3};
+            obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
             obj.plotopt = {};
             
         end
