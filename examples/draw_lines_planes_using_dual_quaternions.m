@@ -48,17 +48,17 @@ p = i_ + j_ + k_;
 x = r + E_*0.5*p*r;
 
 % Plot the reference frame
-plot(DQ(1));
+plot(DQ(1), 'name', '$\mathcal{F}_0$');
 hold on;
 axis([-4, 4, -4, 4, -4, 4])
-handle_x = plot(x);
+handle_x = plot(x, 'name', '$\mathcal{F}_1$');
 
 % Define a plane, with respect to the local frame, perpendicular to the z-axis 
 % with 2 units of distance from the xy-plane.
 plane = k_ + E_* 2;
 % Plot the plane and get its handle. The handle will be used to move the
 % plane in subsequent plots.
-handle_plane = plot(x.'*plane*x','plane',5);
+handle_plane = plot(x.'*plane*x','plane',5, 'color', 'g');
 
 % Draw four lines, with respect to the local frame, perpendicular to and 2 units 
 % of distance from the z-axis and with 1 unit of distance from the xy-plane. 
@@ -78,7 +78,7 @@ handle_l4 = plot(x*l4*x','line', 8);
 % linear interpolation. All geometrical objects will be moved accordingly
 for ii = 1:-0.01:0
       y = x^ii;
-      handle_x = plot(y, 'erase', handle_x);
+      handle_x = plot(y, 'erase', handle_x, 'name', '$\mathcal{F}_1$');
       handle_l1 = plot(y*l1*y', 'erase', handle_l1, 'line',8);
       handle_l2 = plot(y*l2*y', 'erase', handle_l2, 'line',8);
       handle_l3 = plot(y*l3*y', 'erase', handle_l3, 'line',8);
