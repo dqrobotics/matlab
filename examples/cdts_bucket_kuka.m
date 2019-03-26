@@ -35,7 +35,7 @@ taskd=[vec8(dqad);vec8(dqrd)];
 
 
 %% Drawing the arms  
-opt={'noname','nojaxes','noshadow','nobase'};
+opt={'noname'};
 plot(kuka1,initial_theta1',opt{:}); 
 hold on;
 plot(kuka2,initial_theta2',opt{:});
