@@ -68,14 +68,10 @@ classdef DQ_kinematics < handle
         base;
         effector;
         
-        % Properties for interfacing with Robotics Toolbox. Those are
-        % legacy properties and are likely to disappear in the near
-        % future.
+        % Properties for the plot function
         name;
         plotopt
         lineopt
-        shadowopt
-        robot_RT;
     end
     
     properties (SetAccess = private)   
@@ -392,6 +388,18 @@ classdef DQ_kinematics < handle
     end
     
     methods(Static)
+        
+        function ret = C4()
+             warning(['DQ_kinematics.C4 is deprecated and will be removed'... 
+                'in the future. Please use DQ.C4 instead']);
+            ret = DQ.C4;
+        end
+        
+        function ret = C8()
+             warning(['DQ_kinematics.C8 is deprecated and will be removed'... 
+                'in the future. Please use DQ.C8 instead']);
+            ret = DQ.C8;
+        end
         
         function Jp = jacobp(J,x)
             warning(['The function jacobp is deprecated and will be removed'... 
