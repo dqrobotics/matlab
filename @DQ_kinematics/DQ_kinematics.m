@@ -84,7 +84,7 @@ classdef DQ_kinematics < handle
         handle
         % Robot configuration (i.e., joint angles, in case of revolute
         % joints, and joint displacements, in case of prismatic joints)
-        configuration
+        q
         
     end
     
@@ -326,7 +326,11 @@ classdef DQ_kinematics < handle
             warning(['The function jacobian_dot is deprecated and will be '...
                 'removed in the future. Please use jacobian_derivative() '...
                 'instead']);
-            J_dot = jacobian_derivative(obj,theta,theta_dot, ith);
+            if nargin == 4
+                J_dot = jacobian_derivative(obj,theta,theta_dot, ith);
+            else
+                J_dot = jacobian_derivative(obj,theta,theta_dot);
+            end
         end
         
         
