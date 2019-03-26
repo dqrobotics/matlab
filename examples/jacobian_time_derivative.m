@@ -26,7 +26,7 @@ for t = 0:T:T_end
     % This is the analytical time derivative of the joint trajectories. 
     theta_dot = T*cos(t)*ones(7,1);
     % Calculation of the analytical Jacobian time derivative.    
-    jacob_dot = kuka.jacobian_dot(theta,theta_dot);
+    jacob_dot = kuka.jacobian_derivative(theta,theta_dot);
     % First-order numerical approximation of the Jacobian time derivative.
     jacob_diff = (kuka.raw_jacobian(theta + theta_dot*T) - kuka.raw_jacobian(theta))/T;
     % We store the Frobenius norm of the difference between the two
