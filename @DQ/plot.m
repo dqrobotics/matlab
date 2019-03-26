@@ -68,11 +68,7 @@ if norm(dq) ~= 1
 end
 
 optargin = length(varargin);
-
-
 erase = 0; % Only erase the primitive only if there is a corresponding argument.
-
-
 primitive_type = 'frame'; % The default primitive is a coordinate system.
 scale = 1; % Variable for scaling coordinate systems.
 
@@ -180,8 +176,6 @@ switch primitive_type
                 'latex');
             end
         end
-            
-            
         
     case 'line'
         if (dq.Re ~= 0) || (norm(dq) ~= 1)
@@ -234,7 +228,7 @@ switch primitive_type
         if n ~= DQ.i
             v = cross(DQ.i,n);
             sqr_norm_v = norm(v)*norm(v);
-            v = v*inv(sqr_norm_v)*(plane_length/2);
+            v = (v/sqr_norm_v)*(plane_length/2);
         else
             v = DQ.j; %DQ.k would be another obvious option
         end
@@ -243,7 +237,6 @@ switch primitive_type
         u = cross(n,v);
         
         p = n*d; % point on the plane
-        
         
         p1 = vec3(p + u);
         p2 = vec3(p + v);
