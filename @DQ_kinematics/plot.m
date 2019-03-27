@@ -6,19 +6,61 @@
 %  'workspace', W          size of robot 3D workspace, where
 %                          W = [xmn, xmx ymn ymx zmn zmx]
 %  'cylinder', C           color for joint cylinders, C=[r g b]
-%  'mag', scale            annotation scale factor
-%  'perspective'|'ortho'   type of camera view
-%  'render'|'norender'     controls shaded rendering after drawing
-%  'loop'|'noloop'         controls endless loop mode
+%  'scale', scale          annotation scale factor
 %  'base'|'nobase'         controls display of base plane
 %  'wrist'|'nowrist'       controls display of wrist
-%  'shadow'|'noshadow'     controls display of shadow
 %  'name'|'noname'         display the robot's name 
 %  'xyz'|'noa'             wrist axis label
 %  'joints'|'nojoints'     controls display of joints
 %
+% The graphical robot object holds a copy of the robot object and
+% the graphical element is tagged with the robot's name (.name property).
+%
+% 1) Figure behavior:
+%
+% If no robot of this name is currently displayed then a robot will
+% be drawn in the current figure.  If hold is enabled (hold on) then the
+% robot will be added to the current figure.
+%
+% If the robot already exists then that graphical model will be found 
+% and moved.
+%
+% 2) Multiple views of the same robot:
+%
+% If one or more plots of this robot already exist then these will all
+% be moved according to the argument 'q'.  All robots in all windows with 
+% the same name will be moved.
+%
+% NOTE: Since each kinematic robot stores just one graphical handle, 
+% if we want to plot the same robot in different views, we must declare 
+% different robots with the same name. Otherwise, if just one robot is declared,
+% but plotted in different windows/views, the kinematic robot will store 
+% the handle of the last view only. Therefore, only the last view will be 
+% updated
+%
+% 3) Multiple robots in the same figure:
+%
+% Multiple robots (i.e., with different names) can be displayed in the same 
+% plot, by using "hold on" before calls to plot(robot).  
+%
+% 4) Graphical robot state:
+%
+% The configuration of the robot as displayed is stored in the DQ_kinematics
+% object and can be accessed by the read only object property 'q'.
+%
+% 5) Graphical annotations and options:
+%
+% The robot is displayed as a basic stick figure robot with annotations 
+% such as:
+% - XYZ wrist axes and labels,
+% - joint cylinders,
+% which are controlled by options.
+%
+% The size of the annotations is determined using a simple heuristic from 
+% the workspace dimensions.  This dimension can be changed by setting the 
+% multiplicative scale factor using the 'scale' option.
+%
 % See also DQ/plot
-
 
 % (C) Copyright 2015 DQ Robotics Developers
 % 
@@ -71,87 +113,25 @@ function plot(robot,q,varargin)
     end
 end
 
-% The graphical robot object holds a copy of the robot object and
-% the graphical element is tagged with the robot's name (.name property).
-% This state also holds the last joint configuration which can be retrieved,
-% see PLOT(robot) below.
-%
-% Figure behaviour::
-% If no robot of this name is currently displayed then a robot will
-% be drawn in the current figure.  If hold is enabled (hold on) then the
-% robot will be added to the current figure.
-%
-% If the robot already exists then that graphical model will be found 
-% and moved.
-%
-% Multiple views of the same robot::
-%
-% If one or more plots of this robot already exist then these will all
-% be moved according to the argument Q.  All robots in all windows with 
-% the same name will be moved.
-%
-% Multiple robots in the same figure::
-%
-% Multiple robots can be displayed in the same plot, by using "hold on"
-% before calls to plot(robot).  
-%
-% Graphical robot state::
-%
-% The configuration of the robot as displayed is stored in the SerialLink object
-% and can be accessed by the read only object property R.q.
-%
-% Graphical annotations and options::
-%
-% The robot is displayed as a basic stick figure robot with annotations 
-% such as:
-% - XYZ wrist axes and labels
-% - joint cylinders and axes
-% which are controlled by options.
-%
-% The size of the annotations is determined using a simple heuristic from 
-% the workspace dimensions.  This dimension can be changed by setting the 
-% multiplicative scale factor using the 'mag' option.
-%
 
-%
-% The options come from 3 sources and are processed in order:
-% - Cell array of options returned by the function PLOTBOTOPT.
-% - Cell array of options given by the 'plotopt' option when creating the
-%   SerialLink object.
-% - List of arguments in the command line.
-%
-% See also plotbotopt, SerialLink.fkine.
-
-
-% HANDLES:
-%
-%  A robot comprises a bunch of individual graphical elements and these are 
-% kept in a structure which can be stored within the .handle element of a
-% robot object:
-%   h.robot     the robot stick figure
-%   h.x     wrist vectors
-%   h.y
-%   h.z
-%   h.xt        wrist vector labels
-%   h.yt
-%   h.zt
-%
-%  The plot function returns a new robot object with the handle element set.
-%
-% For the h.robot object we additionally: 
-%   - save this new robot object as its UserData
+% dq_kinematics_plot(robot, q, varargin) creates a new robot, if it does
+% not exist, otherwise it updates all robots with the same name.
+% 
+% In case a robot is created, the function create_new_robot() provides a
+% handle 'h' to the graphical robot. Then, for the h.robot object we 
+% additionally: 
+%   - save this new kinematic robot object as its UserData
 %   - tag it with the name field from the robot object
 %
 %  This enables us to find all robots with a given name, in all figures,
-% and update them.
-
+%  and update them.
 function dq_kinematics_plot(robot, q, varargin)
     % process options
     if (nargin > 2) && isstruct(varargin{1})
-        % options is a struct
+        % options is a struct. 
         opt = varargin{1};
     else
-        % options is a list of options
+        % options is a list of options; we need to transform it to a struct
         opt = plot_options(robot, varargin);
     end
 
@@ -159,14 +139,14 @@ function dq_kinematics_plot(robot, q, varargin)
     n = robot.links-robot.n_dummy;
 
     if length(q) ~= n
-        error('Insufficient number of joints')
+        error('Incorrect number of joints. The correct number is %d', n);
     end
 
     % get handles of all existing robot with the same name
-    robot_handle = findobj('Tag', robot.name);
+    graphic_robot_handle = findobj('Tag', robot.name);
     
     % Condition to verify that no robot with this name exists
-    condition1 = isempty(robot_handle) || isempty(get(gcf, 'Children'));
+    condition1 = isempty(graphic_robot_handle) || isempty(get(gcf, 'Children'));
     % Condition to verify if hold is on and no robot of this name is in the 
     % current axes
     condition2 = ishold && isempty(findobj(gca, 'Tag', robot.name));
@@ -174,31 +154,30 @@ function dq_kinematics_plot(robot, q, varargin)
         % no robot with this name exists
         h = create_new_robot(robot, opt);
         % save the handle in the robot object and attach it to the robot 
-        % as user data.
+        % as user data. This way, the data will be available to the
+        % update_robot() function.
         robot.handle = h;
         set(h.robot, 'Tag', robot.name);
         set(h.robot, 'UserData', robot);
-        robot_handle = h.robot;        
+        graphic_robot_handle = h.robot;        
     end
 
     % Update all robots with the same name. This is very useful when we
     % want to visualize the same robot from different points of view
-    for r = robot_handle'
-        update_robot( get(r, 'UserData'), q);
-    end
-
-    % save the joint angles away in all the graphical robots with the
-    % same name
-    for r = robot_handle'
+    % Each element of graphic_robot_handle has a graphic line robot
+    for r = graphic_robot_handle'    
+        % Inside the graphic line robot, we store the 'real' robot. We use
+        % it in order to plot the robot.
         rr = get(r, 'UserData');
-        rr.configuration = q;
-        set(robot_handle, 'UserData', rr);
+        update_robot(rr, q);
+        % save the joint angles away in all the graphical robots with the
+        % same name
+        rr.q = q;
     end
 end
 
-
 % h = create_new_robot(robot, opt) uses data from robot object and options
-% to create a graphical robot in the current figure.
+% to create a graphical robot.
 %
 % Returns a structure of handles to graphical objects.
 %
@@ -235,11 +214,11 @@ function h = create_new_robot(robot, opt)
     % Draw a small plane representing the robot base
     if opt.base
         plane = robot.base.'*DQ.k*robot.base';
-        % Since the plane is infinite, the plot function draws the part
+        % Since the plane is infinite, the DQ.plot function draws the part
         % closest to the origin of the reference frame. We first
         % consider the plane that passes through the origin and is aligned with 
         % the one that supports the base
-        base_handle = plot(plane.P,'plane',opt.mag,'color','b');
+        base_handle = plot(plane.P,'plane',opt.mag,'color','k');
         % We then translate the 'visible' plane to the base frame
         base_translation = vec3(translation(robot.base));
         plane_vertices = get(base_handle, 'Vertices');
@@ -334,6 +313,12 @@ function update_robot(robot, q)
     % Dummy (virtual) joints will be removed in the near future
     n = robot.links-robot.n_dummy;
     
+    % Get the handle to the graphical robot. Since each kinematic robot
+    % stores just one graphical handle, if we want to plot the same robot
+    % in different views, we must declare different robots with the same
+    % name. Otherwise, if just one robot is declared, but plotted in
+    % different windows/views, the kinematic robot will store the handle of
+    % the last view only.
     h = robot.handle;
     mag = h.mag;
     base = vec3(translation(robot.base));
@@ -357,14 +342,17 @@ function update_robot(robot, q)
         z(j+1) = t(3);
     end
     
-    % Update the coordinates of each frame along the kinematic chain   
+    % Update the coordinates of each frame along the kinematic chain. This 
+    % updates the line drawing that represents the robot kinematic chain.
     set(h.robot,'xdata', x, 'ydata', y, 'zdata', z);
    
     % display the joints as cylinders
     if isfield(h, 'joint')       
         for j=1:n
-            % get coordinate data from the cylinder. The UserData is never
-            % updated.
+            % get coordinate data from the cylinder. The corresponding UserData 
+            % is never updated. Therefore, we must translate and rotate
+            % each cylinder according to the new frames along the kinematic
+            % chain
             xyz = get(h.joint(j), 'UserData');
             
             %The joints are located at the beginning of each link
@@ -372,8 +360,8 @@ function update_robot(robot, q)
             
             for k = 1:size(xyz,2)
                 % 1 + DQ.E*(1/2)*p, where p = xyz(1:3,k);
-                cylinder_position = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);
-                xyz(1:3,k) = vec3(translation(fkm_j*cylinder_position));
+                cylinder_vertex = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);
+                xyz(1:3,k) = vec3(translation(fkm_j*cylinder_vertex));
             end
             
             % Now that all cylinder vertices are transformed, update the
@@ -413,8 +401,7 @@ function update_robot(robot, q)
         % We can simplify the calculations as follows
         xv = t1 + H(2:4,2)*mag; % p = [0; mag; 0; 0]
         yv = t1 + H(2:4,3)*mag; % p = [0; 0; mag; 0]
-        zv = t1 + H(2:4,4)*mag; % p = [0; 0; 0; mag]
-        
+        zv = t1 + H(2:4,4)*mag; % p = [0; 0; 0; mag]        
         
         % update the wrist axes       
         set(h.x,'xdata',[t1(1) xv(1)], 'ydata', [t1(2) xv(2)], ...
@@ -434,53 +421,47 @@ end
 
 % o = PLOT_OPTIONS(robot, options) returns an options structure
 function o = plot_options(robot, optin)
-    % process a cell array of options and return a struct
-
+    % process a cell array of options and return a struct   
     % define all possible options and their default values
-  %  o.erasemode = 'normal';
-    o.joints = true;
-    o.wrist = true;
-    o.loop = false;
-  %  o.shadow = false;
-    o.wrist = true;
-    o.base = true;
-    o.wristlabel = 'xyz';
-    o.perspective = true;
-    o.magscale = 1;
-    o.name = true;
-    o.cylinder = [0 0 0.7];
-    o.workspace = [];
+    o.joints = true; % Plot the joints
+    o.wrist = true; % Plot the end-effector coordinates   
+    o.base = true; % Plot a small plane perpendicular to the first joint
+    o.wristlabel = 'xyz'; % Axes names. Another option is 'nsa'
+    o.scale = 1; % Scale the drawing
+    o.name = true; % Write the robot name
+    o.cylinder = [0 0 0.7]; % The joint colors   
+    o.workspace = [];  % Define the robot workspace. If not defined, a 
+                       % heuristic is used to determine the robot workspace
+                       % based on its size.
 
-    % build a list of options from all sources
-    %   1. the M-file plotbotopt if it exists
-    %   2. robot.plotopt
-    %   3. command line arguments
-%     if exist('plotbotopt', 'file') == 2
-%         options = [plotbotopt robot.plotopt optin];
-%     else
-        options = [robot.plotopt optin];
- %   end
-
+    % Plot options can be stored in the robot as a cell array. If this
+    % information is available, we use it together with the options passed to 
+    % the plot function.
+    options = [robot.plotopt optin];
+    
     % parse the options
-    [o,args] = tb_optparse(o, options);
-    if length(args) > 0
-        error(['unknown option: ' args{1}]);
+    if ~isempty(options)
+        [o,args] = tb_optparse(o, options);
+        if ~isempty(args)
+            error(['unknown option: ' args{1}]);
+        end
     end
 
+     % simple heuristic to figure the maximum reach of the robot
     if isempty(o.workspace)
-        %
-        % simple heuristic to figure the maximum reach of the robot
-        %        
         reach = 0;
         for i=1:robot.links
+            % Since the maximum reaching distance are given by the link offset 
+            % and link length, we add them.
             reach = reach + abs(robot.a(i)) + abs(robot.d(i));
         end
-        o.workspace = [-reach reach -reach reach -reach reach];
-        o.mag = reach/10;
+        o.workspace = [-reach reach -reach reach -reach reach];      
     else
         reach = min(abs(o.workspace));
     end
-    o.mag = o.magscale * reach/10;
+    % The size of the joints will depend on the size of the workspace. This
+    % can be adjusted by using the parameter 'scale'
+    o.mag = o.scale * reach/15;
 end
 
 %OPTPARSE Standard option parser for Toolbox functions
@@ -537,77 +518,80 @@ end
 %   'setopt', S         sets opt <- S
 %   'showopt'           displays opt and arglist
 
-function [opt,others] = tb_optparse(in, argv)
+function [opt,others] = tb_optparse(default, options)
 
     arglist = {};
 
     argc = 1;
-    opt = in;
-    try
-        opt.verbose = false;
-        opt.debug = 0;
-    end
+    opt = default;
+%     try
+%         opt.verbose = false;
+%         opt.debug = 0;
+%     end
 
-    showopt = false;
+%     showopt = false;
 
-    while argc <= length(argv)
-        option = argv{argc};
+    while argc <= length(options)
+        current_option = options{argc};
         assigned = false;
         
-        if isstr(option)
+        if ischar(current_option)
 
-            switch option
+        %    switch current_option
             % look for hardwired options
-            case 'verbose'
-                opt.verbose = true;
-                assigned = true;
-            case 'verbose=2'
-                opt.verbose = 2;
-                assigned = true;
-            case 'verbose=3'
-                opt.verbose = 3;
-                assigned = true;
-            case 'verbose=4'
-                opt.verbose = 4;
-                assigned = true;
-            case 'debug'
-                opt.debug = argv{argc+1};
-                argc = argc+1;
-                assigned = true;
-            case 'setopt'
-                new = argv{argc+1};
-                argc = argc+1;
-                assigned = true;
+%             case 'verbose'
+%                 opt.verbose = true;
+%                 assigned = true;
+%             case 'verbose=2'
+%                 opt.verbose = 2;
+%                 assigned = true;
+%             case 'verbose=3'
+%                 opt.verbose = 3;
+%                 assigned = true;
+%             case 'verbose=4'
+%                 opt.verbose = 4;
+%                 assigned = true;
+%             case 'debug'
+%                 opt.debug = options{argc+1};
+%                 argc = argc+1;
+%                 assigned = true;
+%             case 'setopt'
+%                 new = options{argc+1};
+%                 argc = argc+1;
+%                 assigned = true;
+% 
+% 
+%                 % copy matching field names from new opt struct to current one
+%                 for f = fieldnames(new)
+%                     if isfield(opt, f{1})
+%                         % Given the field opt.f{1}, fill it with the
+%                         % corresponding value in new.f{1}
+%                         opt = setfield(opt, f{1}, getfield(new, f{1}));
+%                     end
+%                 end
+%             case 'showopt'
+%                 showopt = true;
+%                 assigned = true;
 
-
-                % copy matching field names from new opt struct to current one
-                for f=fieldnames(new)'
-                    if isfield(opt, f{1})
-                        opt = setfield(opt, f{1}, getfield(new, f{1}));
-                    end
-                end
-            case 'showopt'
-                showopt = true;
-                assigned = true;
-
-            otherwise
+         %       otherwise
+         %       disp('aeeee')
                 % does the option match a field in the opt structure?
-                if isfield(opt, option)
-                    val = getfield(opt, option);
+                if isfield(opt, current_option)
+                    val = getfield(opt, current_option);
                     if islogical(val)
                         % a logical variable can only be set by an option
-                        opt = setfield(opt, option, true);
+                        opt = setfield(opt, current_option, true);
                     else
                         % otherwise grab its value from the next arg
-                        opt = setfield(opt, option, argv{argc+1});
+                        opt = setfield(opt, current_option, options{argc+1});
                         argc = argc+1;
                     end
                     assigned = true;
-                elseif length(option)>2 && strcmp(option(1:2), 'no') && isfield(opt, option(3:end))
-                    val = getfield(opt, option(3:end));
+                elseif length(current_option)>2 && strcmp(current_option(1:2), 'no') && isfield(opt, current_option(3:end))
+                    val = getfield(opt, current_option(3:end));
                     if islogical(val)
                         % a logical variable can only be set by an option
-                        opt = setfield(opt, option(3:end), false);
+                        opt = setfield(opt, current_option(3:end), false);
                         assigned = true;
                     end
                 else
@@ -619,11 +603,11 @@ function [opt,others] = tb_optparse(in, argv)
                                 if isempty(val{i})
                                     continue;
                                 end
-                                if strcmp(option, val{i})
-                                    opt = setfield(opt, field{1}, option);
+                                if strcmp(current_option, val{i})
+                                    opt = setfield(opt, field{1}, current_option);
                                     assigned = true;
                                     break;
-                                elseif val{i}(1) == '#' && strcmp(option, val{i}(2:end))
+                                elseif val{i}(1) == '#' && strcmp(current_option, val{i}(2:end))
                                     opt = setfield(opt, field{1}, i);
                                     assigned = true;
                                     break;
@@ -637,15 +621,15 @@ function [opt,others] = tb_optparse(in, argv)
 
 
                 end
-            end % switch
+           % end % switch
         end
         if ~assigned
             % non matching options are collected
             if nargout == 2
-                arglist = [arglist argv(argc)];
+                arglist = [arglist options(argc)];
             else
-                if isstr(argv{argc})
-                    error(['unknown options: ' argv{argc}]);
+                if isstr(options{argc})
+                    error(['unknown options: ' options{argc}]);
                 end
             end
         end
@@ -654,8 +638,8 @@ function [opt,others] = tb_optparse(in, argv)
     end % while
 
     % if enumerator value not assigned, set the default value
-    for field=fieldnames(in)'
-        if iscell(getfield(in, field{1})) && iscell(getfield(opt, field{1}))
+    for field=fieldnames(default)'
+        if iscell(getfield(default, field{1})) && iscell(getfield(opt, field{1}))
             val = getfield(opt, field{1});
             if isempty(val{1})
                 opt = setfield(opt, field{1}, val{1});
@@ -667,11 +651,11 @@ function [opt,others] = tb_optparse(in, argv)
         end
     end
                         
-    if showopt
-        fprintf('Options:\n');
-        opt
-        arglist
-    end
+%     if showopt
+%         fprintf('Options:\n');
+%         opt
+%         arglist
+%     end
 
     if nargout == 2
         others = arglist;
