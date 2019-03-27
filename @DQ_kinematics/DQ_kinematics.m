@@ -404,7 +404,7 @@ classdef DQ_kinematics < handle
         function Jp = jacobp(J,x)
             warning(['The function jacobp is deprecated and will be removed'... 
                 'in the future. Please use position_jacobian() instead']);
-            Jp = DQ_kinematics.position_jacobian(J,x);
+            Jp = DQ_kinematics.translation_jacobian(J,x);
         end
         
         function Jd = jacobd(J,x)
@@ -430,7 +430,7 @@ classdef DQ_kinematics < handle
             Jd = 2*vec4(p)'*Jp;
         end
         
-        function Jp = position_jacobian(J,x)
+        function Jp = translation_jacobian(J,x)
         % Given the Jacobian J and the corresponding dual quaternion x, such
         % that vec8(x_dot) = J*q_dot, Jp = position_jacobian(J,x) returns the 
         % translation Jacobian; that it, the Jacobian that satisfies the 
