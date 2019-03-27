@@ -260,7 +260,7 @@ function h = create_new_robot(robot, opt)
 
     end
 
-    % Display cylinders (revolute each joint, as well as axis centerline.
+    % Display cylinders (revolute each joint).
     for i = 1:robot.links
         if opt.joints
             %TODO: implement prismatic joints
@@ -307,8 +307,9 @@ end
 
 
 % update_robot(robot, q) moves an existing graphical robot to the configuration
-% specified by the joint coordinates q. Graphics are defined by the handle 
-% structure robot.handle.
+% specified by the joint coordinates q. The parameter 'robot' is the
+% kinematic robot, and graphics are defined by the handle structure robot.handle, 
+% which stores the 'graphical robot' as robot.handle.robot.
 function update_robot(robot, q)
     % Dummy (virtual) joints will be removed in the near future
     n = robot.links-robot.n_dummy;
@@ -419,7 +420,9 @@ function update_robot(robot, q)
 end
 
 
-% o = PLOT_OPTIONS(robot, options) returns an options structure
+% o = plot_options(robot, options) returns an options structure. 
+% 'robot' is the kinematic robot and 'options' is an array cell with the plot
+% options.
 function o = plot_options(robot, optin)
     % process a cell array of options and return a struct   
     % define all possible options and their default values
@@ -441,13 +444,16 @@ function o = plot_options(robot, optin)
     
     % parse the options
     if ~isempty(options)
-        [o,args] = tb_optparse(o, options);
+        [o,args] = parse_options(o, options);        
         if ~isempty(args)
-            error(['unknown option: ' args{1}]);
+            error(['Unknown options: ', args{:}]);
         end
     end
 
-     % simple heuristic to figure the maximum reach of the robot
+    % NOTE: The calculations below happen all the time. Maybe we should
+    % store it in the graphical robot in order to do it just once.
+    
+    % simple heuristic to figure the maximum reach of the robot
     if isempty(o.workspace)
         reach = 0;
         for i=1:robot.links
@@ -464,176 +470,97 @@ function o = plot_options(robot, optin)
     o.mag = o.scale * reach/15;
 end
 
-%OPTPARSE Standard option parser for Toolbox functions
-%
-% [OPTOUT,ARGS] = TB_OPTPARSE(OPT, ARGLIST) is a generalized option parser for
-% Toolbox functions.  It supports options that have an assigned value, boolean 
-% or enumeration types (string or int).
+% [opt, others] = parse_options(default, options) parses the cell array inside
+% 'options' and returns the corresponding structure 'opt'. The default
+% parameters are given by 'default'.
 %
 % The software pattern is:
-%
-%       function(a, b, c, varargin)
 %       opt.foo = true;
 %       opt.bar = false;
 %       opt.blah = [];
-%       opt.choose = {'this', 'that', 'other'};
-%       opt.select = {'#no', '#yes'};
-%       opt = tb_optparse(opt, varargin);
 %
 % Optional arguments to the function behave as follows:
 %   'foo'           sets opt.foo <- true
-%   'nobar'         sets opt.foo <- false
+%   'nofoo'         sets opt.foo <- false
 %   'blah', 3       sets opt.blah <- 3
-%   'blah', {x,y}   sets opt.blah <- {x,y}
-%   'that'          sets opt.choose <- 'that'
-%   'yes'           sets opt.select <- 2 (the second element)
 %
 % and can be given in any combination.
 %
-% If neither of 'this', 'that' or 'other' are specified then opt.choose <- 'this'.
-% If neither of 'no' or 'yes' are specified then opt.select <- 1.
-%
-% Note:
-% - that the enumerator names must be distinct from the field names.
-% - that only one value can be assigned to a field, if multiple values
+% NOTE:
+% 1) The enumerator names must be distinct from the field names.
+% 2) Only one value can be assigned to a field, if multiple values
 %    are required they must be converted to a cell array.
 %
 % The allowable options are specified by the names of the fields in the
 % structure opt.  By default if an option is given that is not a field of 
-% opt an error is declared.  
-%
-% Sometimes it is useful to collect the unassigned options and this can be 
-% achieved using a second output argument
-%           [opt,arglist] = tb_optparse(opt, varargin);
-% which is a cell array of all unassigned arguments in the order given in
-% varargin.
-%
-% The return structure is automatically populated with fields: verbose and
-% debug.  The following options are automatically parsed:
-%   'verbose'           sets opt.verbose <- true
-%   'verbose=2'         sets opt.verbose <- 2 (very verbose)
-%   'verbose=3'         sets opt.verbose <- 3 (extremeley verbose)
-%   'verbose=4'         sets opt.verbose <- 4 (ridiculously verbose)
-%   'debug', N          sets opt.debug <- N
-%   'setopt', S         sets opt <- S
-%   'showopt'           displays opt and arglist
-
-function [opt,others] = tb_optparse(default, options)
+% opt an error is declared.
+function [opt,others] = parse_options(default, options)
 
     arglist = {};
 
     argc = 1;
     opt = default;
-%     try
-%         opt.verbose = false;
-%         opt.debug = 0;
-%     end
-
-%     showopt = false;
 
     while argc <= length(options)
         current_option = options{argc};
+      %  pause
         assigned = false;
-        
+
         if ischar(current_option)
-
-        %    switch current_option
-            % look for hardwired options
-%             case 'verbose'
-%                 opt.verbose = true;
-%                 assigned = true;
-%             case 'verbose=2'
-%                 opt.verbose = 2;
-%                 assigned = true;
-%             case 'verbose=3'
-%                 opt.verbose = 3;
-%                 assigned = true;
-%             case 'verbose=4'
-%                 opt.verbose = 4;
-%                 assigned = true;
-%             case 'debug'
-%                 opt.debug = options{argc+1};
-%                 argc = argc+1;
-%                 assigned = true;
-%             case 'setopt'
-%                 new = options{argc+1};
-%                 argc = argc+1;
-%                 assigned = true;
-% 
-% 
-%                 % copy matching field names from new opt struct to current one
-%                 for f = fieldnames(new)
-%                     if isfield(opt, f{1})
-%                         % Given the field opt.f{1}, fill it with the
-%                         % corresponding value in new.f{1}
-%                         opt = setfield(opt, f{1}, getfield(new, f{1}));
-%                     end
-%                 end
-%             case 'showopt'
-%                 showopt = true;
-%                 assigned = true;
-
-         %       otherwise
-         %       disp('aeeee')
-                % does the option match a field in the opt structure?
-                if isfield(opt, current_option)
-                    val = getfield(opt, current_option);
-                    if islogical(val)
-                        % a logical variable can only be set by an option
-                        opt = setfield(opt, current_option, true);
-                    else
-                        % otherwise grab its value from the next arg
-                        opt = setfield(opt, current_option, options{argc+1});
-                        argc = argc+1;
-                    end
-                    assigned = true;
-                elseif length(current_option)>2 && strcmp(current_option(1:2), 'no') && isfield(opt, current_option(3:end))
-                    val = getfield(opt, current_option(3:end));
-                    if islogical(val)
-                        % a logical variable can only be set by an option
-                        opt = setfield(opt, current_option(3:end), false);
-                        assigned = true;
-                    end
+            % does the current_option match a field in the opt structure?            
+            if isfield(opt, current_option)
+                % If yes, then val = opt.(current_option)
+                val = getfield(opt, current_option);
+                
+                %  In case the parameter is something like 'base', the 
+                %  corresponding options field must be true. Therefore,
+                %  opt.base = true
+                if islogical(val)                   
+                    opt = setfield(opt, current_option, true);
                 else
-                    % the option doesnt match a field name
-                    for field=fieldnames(opt)'
-                        val = getfield(opt, field{1});
-                        if iscell(val)
-                            for i=1:length(val)
-                                if isempty(val{i})
-                                    continue;
-                                end
-                                if strcmp(current_option, val{i})
-                                    opt = setfield(opt, field{1}, current_option);
-                                    assigned = true;
-                                    break;
-                                elseif val{i}(1) == '#' && strcmp(current_option, val{i}(2:end))
-                                    opt = setfield(opt, field{1}, i);
-                                    assigned = true;
-                                    break;
-                                end
-                            end
-                            if assigned
-                                break;
-                            end
-                        end
-                    end
-
-
+                    % otherwise grab its value from the next arg
+                    % opt.(current_option) = options{argc + 1}
+                    opt = setfield(opt, current_option, options{argc+1});
+                    argc = argc+1;
                 end
-           % end % switch
-        end
-        if ~assigned
-            % non matching options are collected
-            if nargout == 2
-                arglist = [arglist options(argc)];
-            else
-                if isstr(options{argc})
-                    error(['unknown options: ' options{argc}]);
+                assigned = true;
+            % The current option is a string, but does not correspond to an 
+            % options field. We verify if the first two letters is 'no' and
+            % the remainder of the string corresponds to an options field.
+            % In this case, it means that we must assign 'false'to the
+            % corresponding field.
+            elseif length(current_option) > 2 && ...
+                strcmp(current_option(1:2), 'no') && ...
+                isfield(opt, current_option(3:end))
+            
+                val = getfield(opt, current_option(3:end));
+              
+                % We only update the corresponding field if its attribute
+                % is a logical value. For example, 'nobase' implies opt.base
+                % = false
+                if islogical(val)
+                    % a logical variable can only be set by an option
+                    opt = setfield(opt, current_option(3:end), false);
+                    assigned = true;
                 end
-            end
+            end           
         end
         
+        % non matching options are collected arglist returns the unrecognized 
+        % options.
+        if ~assigned
+            % This is a non-exhaustive list of invalid command types.
+            if ~ischar(options{argc})                
+                if isnumeric(options{argc})
+                    numeric_string = num2str(options{argc});
+                    arglist = [arglist, ' ''[', numeric_string,']'','];
+                elseif iscell(options{argc})
+                    arglist = [arglist, ' ''', '<INVALID CELL>',''','];
+                end
+            else
+                arglist = [arglist, ' ''', options(argc),''','];
+            end            
+        end
         argc = argc + 1;
     end % while
 
@@ -649,15 +576,8 @@ function [opt,others] = tb_optparse(default, options)
                 opt = setfield(opt, field{1}, val{1});
             end
         end
-    end
-                        
-%     if showopt
-%         fprintf('Options:\n');
-%         opt
-%         arglist
-%     end
+    end 
 
-    if nargout == 2
-        others = arglist;
-    end
+    others = arglist;    
 end
+
