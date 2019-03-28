@@ -24,7 +24,7 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function matlab_general_operations(varargin)
-% TODO: add C8, ~, exp, is_unit, log, T.
+% TODO: add C8, ~, exp, is_unit, log, T, cross, dot.
 close all;
 clc;
 index = 1;
@@ -72,13 +72,14 @@ command_list = {'dq1 = DQ' %1
                 'dq.P(2)'
                 'dq.vec8'
                 'dq.P.vec4, dq.D.vec4'
-                'i_ * a'
-                'a  * i_' %20
-                'a + b'
+                'i_ * a' % 19.1
+                'a  * i_'% 19.2
+                'a + b'  % 20
                 'a - b'
                 'a * b'
-                'hamiplus8(a)*vec8(b)'
-                'haminus8(b)*vec8(a)'
+                'hamiplus8(a)*vec8(b)'%23
+                'haminus8(b)*vec8(a)'%23.1
+                'a/b , a*inv(b), a\b, inv(a)*b'
                 '-a'
                 'a'''
                 'a.'''
@@ -121,16 +122,18 @@ comments = {'Let us define a zero dual quaternion' %1
             ['Using vec4 to put the quaternion coefficients into a '...
             'four-dimensional vector']
             ['Recall that i_ * i_ = -1 and i_ * k_ = -j = -k_ * i; ' ...
-            'therefore, if a = i_ + E_*(1 + k_), then']
-            'and' %20
+            'therefore, if a = i_ + E_*(1 + k_), then'] %19.1
+            'and' %19.2
             ['We can use the + and * operations in the usual way. '...
             'Consider a = i_ + E_*(1 + k_) and b = -2 + j_ + E_*(i_ + k_).'...
-            'Therefore, a + b']
+            'Therefore, a + b'] %20
             'a - b'
             'a * b'
             ['The same result can be found using vector algebra and Hamilton'...
-            ' operators. For instance vec8(a*b) is given by']
-            'which is equivalent to'
+            ' operators. For instance vec8(a*b) is given by'] %23
+            'which is equivalent to'%23.1
+            ['Right and left divisions work as well: a/b is equivalent to '...
+            'a*inv(b) and a\b is equivalent to inv(a)*b']%23.2
             'Given a = i_ + E_*(1 + k_), then -a'
             'Conjugate of a = Re(a) + Im(a): a''= Re(a) - Im(a)' %25
             'Sharp conjugate of a = a.P + E_ * a.D: a.'' = a.P - E_ * a.D'
