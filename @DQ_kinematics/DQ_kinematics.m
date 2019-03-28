@@ -47,7 +47,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
@@ -57,6 +57,8 @@
 % affected methods are: FKM and Jacobian.
 
 classdef DQ_kinematics < handle
+    % DQ_kinematics inherits the HANDLE superclass to avoid unnecessary copies
+    % when passing DQ_kinematics objects as arguments to methods.
     properties
         n_links;
         theta,d,a,alpha;
