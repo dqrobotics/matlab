@@ -28,6 +28,7 @@ clc;
 
 % Create a new DQ_kinematics object with KUKA LWR parameters
 kuka = DQ_KUKA;
+kuka.name = 'KUKA';
 
 % Initial configuration
 q = [0; 0.3770; 0.1257; -0.5655; 0; 0; 0];
@@ -54,7 +55,8 @@ epsilon = 0.001;
 % Setting up the visualization
 figure;
 axis equal;
-plot(kuka, q, 'nobase');
+% In order to speed up the simulation, we do not plot the joints.
+plot(kuka, q, 'nobase', 'nojoints');
 view(-0,0);
 grid off;
 
