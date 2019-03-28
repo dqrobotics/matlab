@@ -12,9 +12,9 @@ clc;
 %% Basic definitions for the two-arm system
 kuka1 = DQ_KUKA;
 kuka2 = DQ_KUKA;
-kuka1.base = 1+DQ.E*0.5*DQ([0,-0.4,0,0]);
-kuka2.base =  1+DQ.E*0.5*DQ([0, 0.4,0,0]);
-two_arms = DQ_cdts(kuka1, kuka2);
+kuka1.base = 1 + DQ.E*0.5*DQ([0,-0.4,0,0]);
+kuka2.base =  1 + DQ.E*0.5*DQ([0, 0.4,0,0]);
+two_arms = DQ_CooperativeDualTaskSpace(kuka1, kuka2);
 
 
 %% Initial configurations
@@ -25,11 +25,11 @@ theta=[ initial_theta1; initial_theta2];
 %% Task definitions for moving the bucket, which is already grasped.
 % The relative configuration between the hands must remain constant in
 % order to minimize internal forces.
-dqrd = two_arms.xr(theta);
+dqrd = two_arms.relative_pose(theta);
 
 %Translate the bucket in the direction [-0.1,-0.1,-0,1] using the world
 %frame as reference, but maintain the orientation constant.
-dqad_ant =  two_arms.xa(theta);
+dqad_ant =  two_arms.absolute_pose(theta);
 dqad = (1+DQ.E*0.5*(-0.1*DQ.i-0.1*DQ.j-0.1*DQ.k)) * dqad_ant; 
 taskd=[vec8(dqad);vec8(dqrd)];
 
@@ -59,17 +59,19 @@ while norm(nerror_ant - err) > epsilon
 
     %standard control law
     nerror_ant = err;
-    jacob = [two_arms.Ja(theta);two_arms.Jr(theta)];
-    taskm=  [vec8(two_arms.xa(theta)); vec8(two_arms.xr(theta))];
-    err = taskd-taskm;
-    theta = theta+pinv(jacob)*0.5*err;
+    jacob = [two_arms.absolute_pose_jacobian(theta); ...
+             two_arms.relative_pose_jacobian(theta)];
+    taskm=  [vec8(two_arms.absolute_pose(theta)); ...
+             vec8(two_arms.relative_pose(theta))];
+    err = taskd - taskm;
+    theta = theta + pinv(jacob)*0.5*err;
 
     % Plot the arms    
     plot(kuka1,theta(1:7)');    
     plot(kuka2,theta(8:14)');
     %plot small coordinate systems such that one does not mistake with the desired absolute pose,
     %which is the big frame
-    plot(two_arms.xa(theta),'scale',0.1); 
+    plot(two_arms.absolute_pose(theta),'scale',0.1); 
     drawnow;
 end
 

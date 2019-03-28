@@ -14,22 +14,23 @@ kuka1 = DQ_KUKA;
 kuka2 = DQ_KUKA;
 kuka1.base = 1+DQ.E*0.5*DQ([0,-0.4,0,0]);
 kuka2.base =  1+DQ.E*0.5*DQ([0, 0.4,0,0]);
-two_arms = DQ_cdts(kuka1, kuka2);
+two_arms = DQ_CooperativeDualTaskSpace(kuka1, kuka2);
 
 
 %% Initial conditions
-initial_theta1 = [-1.6965    2.2620    1.5708    1.4451   -0.4398    0.0628         0]';
-initial_theta2 = [1.6336    -0.8168    1.5708    1.5080   -0.2513         0         0]';
+initial_theta1 = [-1.6965, 2.2620, 1.5708, 1.4451, -0.4398, 0.0628, 0]';
+initial_theta2 = [1.6336, -0.8168, 1.5708, 1.5080, -0.2513, 0, 0]';
 theta=[ initial_theta1; initial_theta2];
 
 %% Task definitions for grabbing the broom.
 
-% The relative configuration between the hands must remain constant in order to minimize internal forces
-dqrd = two_arms.xr(theta);
+% The relative configuration between the hands must remain constant in order 
+% to minimize internal forces
+dqrd = two_arms.relative_pose(theta);
 
 % The sweep motion consists of turning the broom around the torso's y axis.
 % So let's use the decompositional multiplication! (see )
-dqad_ant =  two_arms.xa(theta);
+dqad_ant =  two_arms.absolute_pose(theta);
 dqad = DQ([cos(pi/16);0;sin(pi/16);0]) .* dqad_ant;
 
 taskd=[dqad.q;dqrd.q];
@@ -37,10 +38,10 @@ taskd=[dqad.q;dqrd.q];
 %% Definition for DRAWING the broom (with respect to the right hand)
 d_broom = 0.9;
 
-aux = translation(two_arms.x1(theta))-translation(two_arms.x2(theta));
+aux = translation(two_arms.pose1(theta))-translation(two_arms.pose2(theta));
 t_broom = aux*(1/norm(aux.q))*d_broom;
 
-broom_base=translation(two_arms.x2(theta));
+broom_base=translation(two_arms.pose2(theta));
 broom_tip = broom_base+t_broom;
 
 %Broom's color
@@ -64,7 +65,9 @@ opt={'noname'};
 plot(kuka1,initial_theta1',opt{:});
 plot(kuka2,initial_theta2',opt{:});
 % Drawing the broom;
-line_handle1=line([broom_base.q(2),broom_tip.q(2)],[broom_base.q(3),broom_tip.q(3)],[broom_base.q(4),broom_tip.q(4)],'color',my_green,'linewidth',3);
+line_handle1=line([broom_base.q(2), broom_tip.q(2)], [broom_base.q(3), ...
+                   broom_tip.q(3)],[broom_base.q(4),broom_tip.q(4)],'color',...
+                   my_green,'linewidth',3);
 
 drawnow;
 
@@ -81,8 +84,10 @@ j=1;
 while j <= 4    
     %standard control law
     nerror_ant = error;
-    jacob = [two_arms.Ja(theta);two_arms.Jr(theta)];
-    taskm =  [vec8(two_arms.xa(theta)); vec8(two_arms.xr(theta))];
+    jacob = [two_arms.absolute_pose_jacobian(theta);...
+             two_arms.relative_pose_jacobian(theta)];
+    taskm =  [vec8(two_arms.absolute_pose(theta));...
+              vec8(two_arms.relative_pose(theta))];
     
     error = taskd-taskm;
     theta = theta+pinv(jacob)*0.5*error;
@@ -94,13 +99,15 @@ while j <= 4
     plot(kuka2,theta(8:14)');
     
     % Plot the broom
-    aux = translation(two_arms.x1(theta))-translation(two_arms.x2(theta));
+    aux = translation(two_arms.pose1(theta))-translation(two_arms.pose2(theta));
     t_broom = aux*(1/norm(aux.q))*d_broom;
 
-    broom_base=translation(two_arms.x2(theta));
+    broom_base=translation(two_arms.pose2(theta));
     broom_tip = broom_base+t_broom;
 
-    set(line_handle1, 'Xdata', [broom_base.q(2), broom_tip.q(2)], 'Ydata', [broom_base.q(3), broom_tip.q(3)], 'Zdata', [broom_base.q(4),broom_tip.q(4)]);
+    set(line_handle1, 'Xdata', [broom_base.q(2), broom_tip.q(2)], 'Ydata', ...
+        [broom_base.q(3), broom_tip.q(3)], 'Zdata',...
+        [broom_base.q(4),broom_tip.q(4)]);
     
     % Verify if the sweep direction can be changed
     if(norm(nerror_ant - error) < epsilon)
