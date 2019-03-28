@@ -58,7 +58,7 @@
 
 classdef DQ_kinematics < handle
     properties
-        links;
+        n_links;
         theta,d,a,alpha;
         % Dummy and n_dummy are deprecated and will be removed in the near
         % future
@@ -100,7 +100,7 @@ classdef DQ_kinematics < handle
                 obj.dummy = zeros(1,size(A,2));
             end
             
-            obj.links = size(A,2);
+            obj.n_links = size(A,2);
             obj.theta = A(1,:);
             obj.d = A(2,:);
             obj.a = A(3,:);
@@ -148,10 +148,10 @@ classdef DQ_kinematics < handle
             if nargin == 3
                 n = ith;
             else
-                n = obj.links;
+                n = obj.n_links;
             end
             
-            if length(theta) ~= (obj.links - obj.n_dummy)
+            if length(theta) ~= (obj.n_links - obj.n_dummy)
                 error('Incorrect number of joint variables');
             end
             
@@ -267,7 +267,7 @@ classdef DQ_kinematics < handle
                 n = ith;
                 x_effector = obj.raw_fkm(theta,ith);
             else
-                n = obj.links;
+                n = obj.n_links;
                 x_effector = obj.raw_fkm(theta);
             end
             
@@ -314,7 +314,7 @@ classdef DQ_kinematics < handle
             % both base and end-effector displacements (their default
             % values are 1).
             
-            if nargin == 3 && ith < obj.links
+            if nargin == 3 && ith < obj.n_links
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
@@ -354,7 +354,7 @@ classdef DQ_kinematics < handle
                 J = obj.raw_pose_jacobian(theta,ith);
                 vec_x_effector_dot = J*theta_dot(1:ith);
             else
-                n = obj.links;
+                n = obj.n_links;
                 x_effector = obj.raw_fkm(theta);
                 J = obj.raw_pose_jacobian(theta);
                 vec_x_effector_dot = J*theta_dot;

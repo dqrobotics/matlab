@@ -136,7 +136,7 @@ function dq_kinematics_plot(robot, q, varargin)
     end
 
     % Virtual (dummy) joints will be removed in the future
-    n = robot.links-robot.n_dummy;
+    n = robot.n_links-robot.n_dummy;
 
     if length(q) ~= n
         error('Incorrect number of joints. The correct number is %d', n);
@@ -261,7 +261,7 @@ function h = create_new_robot(robot, opt)
     end
 
     % Display cylinders (revolute each joint).
-    for i = 1:robot.links
+    for i = 1:robot.n_links
         if opt.joints
             %TODO: implement prismatic joints
             N = 8;
@@ -312,7 +312,7 @@ end
 % which stores the 'graphical robot' as robot.handle.robot.
 function update_robot(robot, q)
     % Dummy (virtual) joints will be removed in the near future
-    n = robot.links-robot.n_dummy;
+    n = robot.n_links-robot.n_dummy;
     
     % Get the handle to the graphical robot. Since each kinematic robot
     % stores just one graphical handle, if we want to plot the same robot
@@ -456,7 +456,7 @@ function o = plot_options(robot, optin)
     % simple heuristic to figure the maximum reach of the robot
     if isempty(o.workspace)
         reach = 0;
-        for i=1:robot.links
+        for i=1:robot.n_links
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
             reach = reach + abs(robot.a(i)) + abs(robot.d(i));
