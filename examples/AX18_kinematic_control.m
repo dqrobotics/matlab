@@ -28,7 +28,7 @@ plot(xd, 'scale', 0.1);
 error = xd - x;
 while norm(vec4(error)) > 0.01
     x = ax18.fkm(theta);   
-    J = ax18.jacobian(theta);
+    J = ax18.pose_jacobian(theta);
     error = xd - x;    
     theta = theta + pinv(J)*0.05*vec8(error);
     plot(ax18,theta);   

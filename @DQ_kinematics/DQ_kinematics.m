@@ -18,9 +18,9 @@
 % METHODS:
 %       raw_fkm
 %       fkm
-%       raw_jacobian
-%       jacobian
-%       jacobian_derivative
+%       raw_pose_jacobian
+%       pose_jacobian
+%       pose_jacobian_derivative
 %       distance_jacobian
 %       position_jacobian
 %       rotation_jacobian
@@ -250,12 +250,12 @@ classdef DQ_kinematics < handle
             p(8)=q(4)*q(8)-q(3)*q(7)-q(2)*q(6)+q(1)*q(5);
         end
         
-        function J = raw_jacobian(obj,theta,ith)
-            % J = raw_jacobian(theta) returns the Jacobian that satisfies 
+        function J = raw_pose_jacobian(obj,theta,ith)
+            % J = raw_pose_jacobian(theta) returns the Jacobian that satisfies 
             % vec(x_dot) = J * theta_dot, where x = fkm(theta) and theta is the 
             % vector of joint variables.
             %
-            % J = raw_jacobian(theta,ith) returns the Jacobian that
+            % J = raw_pose_jacobian(theta,ith) returns the Jacobian that
             % satisfies vec(x_ith_dot) = J * theta_dot(1:ith), where 
             % x_ith = fkm(theta, ith), that is, the fkm up to the i-th link.
             %
@@ -296,9 +296,19 @@ classdef DQ_kinematics < handle
             end
         end
         
+        function J = jacobian(obj,theta, ith)
+            warning(['The function jacobian() is deprecated and will be '...
+                'removed in the future. Please use pose_jacobian() '...
+                'instead']);
+            if nargin == 4
+                J = pose_jacobian(obj,theta, ith);
+            else
+                J = pose_jacobian(obj,theta);
+            end
+        end
         
-        function J = jacobian(obj, theta, ith)
-            % J = jacobian(theta) returns the Jacobian that satisfies
+        function J = pose_jacobian(obj, theta, ith)
+            % J = pose_jacobian(theta) returns the Jacobian that satisfies
             % vec(x_dot) = J * theta_dot, where x = fkm(theta) and
             % theta is the vector of joint variables. It takes into account
             % both base and end-effector displacements (their default
@@ -308,29 +318,29 @@ classdef DQ_kinematics < handle
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
-                J = hamiplus8(obj.base)*obj.raw_jacobian(theta, ith);
+                J = hamiplus8(obj.base)*obj.raw_pose_jacobian(theta, ith);
             else
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.base)*haminus8(obj.effector)*obj.raw_jacobian(theta);
+                J = hamiplus8(obj.base)*haminus8(obj.effector)*obj.raw_pose_jacobian(theta);
             end
         end
         
         
         function J_dot = jacobian_dot(obj,theta,theta_dot, ith)
             warning(['The function jacobian_dot is deprecated and will be '...
-                'removed in the future. Please use jacobian_derivative() '...
+                'removed in the future. Please use pose_jacobian_derivative() '...
                 'instead']);
             if nargin == 4
-                J_dot = jacobian_derivative(obj,theta,theta_dot, ith);
+                J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith);
             else
-                J_dot = jacobian_derivative(obj,theta,theta_dot);
+                J_dot = pose_jacobian_derivative(obj,theta,theta_dot);
             end
         end
         
         
-        function J_dot = jacobian_derivative(obj,theta,theta_dot, ith)
+        function J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith)
             % J_dot = jacobian_dot(theta,theta_dot) returns the Jacobian 
             % time derivative.
             % J_dot = jacobian_dot(theta,theta_dot,ith) returns the first
@@ -341,12 +351,12 @@ classdef DQ_kinematics < handle
             if nargin == 4
                 n = ith;
                 x_effector = obj.raw_fkm(theta,ith);
-                J = obj.raw_jacobian(theta,ith);
+                J = obj.raw_pose_jacobian(theta,ith);
                 vec_x_effector_dot = J*theta_dot(1:ith);
             else
                 n = obj.links;
                 x_effector = obj.raw_fkm(theta);
-                J = obj.raw_jacobian(theta);
+                J = obj.raw_pose_jacobian(theta);
                 vec_x_effector_dot = J*theta_dot;
             end
                                  
@@ -371,7 +381,7 @@ classdef DQ_kinematics < handle
                     % Therefore, we have to deal with the case i = 0
                     % explictly.
                     if i ~= 0
-                        vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_jacobian(theta,i)*theta_dot(1:i);
+                        vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_pose_jacobian(theta,i)*theta_dot(1:i);
                     else
                         vec_zdot = zeros(8,1);
                     end
@@ -426,7 +436,7 @@ classdef DQ_kinematics < handle
                 x = DQ(x);
             end
             p = translation(x);
-            Jp = DQ_kinematics.position_jacobian(J,x);
+            Jp = DQ_kinematics.translation_jacobian(J,x);
             Jd = 2*vec4(p)'*Jp;
         end
         

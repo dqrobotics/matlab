@@ -5,6 +5,7 @@ clc;
 
 %Create a new DQ_kinematics object with KUKA LWR parameters
 kuka = DQ_KUKA;
+kuka.name = 'KUKA';
 
 %Initial configuration
 thetastart =[0    0.3770    0.1257   -0.5655         0         0         0]';
@@ -19,7 +20,7 @@ xd = kuka.fkm(thetad); %Desired end-effector's pose
 
 figure;
 axis equal;
-plot(kuka, theta, 'nobase');
+plot(kuka, theta);
 
 grid off;
 view(-0,0)
@@ -32,7 +33,7 @@ fprintf('Performing standard kinematic control using dual quaternion coordinates
 xm = kuka.fkm(theta);
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka.jacobian(theta);
+    jacob = kuka.pose_jacobian(theta);
     xm = kuka.fkm(theta);
     error = vec8(xd-xm);
     theta = theta+pinv(jacob)*gain*error;
@@ -46,9 +47,9 @@ pd = [0,0,0,0];
 
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka.jacobian(theta);
+    jacob = kuka.pose_jacobian(theta);
     xm = kuka.fkm(theta);
-    jacobp = kuka.position_jacobian(jacob,xm);
+    jacobp = kuka.translation_jacobian(jacob,xm);
     pm = translation(xm);
     error = vec4(pd-pm);    
     theta = theta+pinv(jacobp)*gain*error;
@@ -63,7 +64,7 @@ rd = DQ(1);
 
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka.jacobian(theta);
+    jacob = kuka.pose_jacobian(theta);
     xm = kuka.fkm(theta);
     jacobr = kuka.rotation_jacobian(jacob);
     rm = xm.P;
@@ -83,7 +84,7 @@ fprintf('\nNow let us place the end-effector at a distance of 0.2 m from the bas
 dd=0.2^2;
 error = epsilon+1;
 while norm(error) > epsilon
-    jacob = kuka.jacobian(theta);
+    jacob = kuka.pose_jacobian(theta);
     xm = kuka.fkm(theta);
     jacobd = kuka.distance_jacobian(jacob,xm);
     dm = norm(vec4(translation(xm)))^2;
