@@ -47,7 +47,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
@@ -57,6 +57,8 @@
 % affected methods are: FKM and Jacobian.
 
 classdef DQ_kinematics < handle
+    % DQ_kinematics inherits the HANDLE superclass to avoid unnecessary copies
+    % when passing DQ_kinematics objects as arguments to methods.
     properties
         n_links;
         theta,d,a,alpha;
@@ -296,17 +298,6 @@ classdef DQ_kinematics < handle
             end
         end
         
-        function J = jacobian(obj,theta, ith)
-            warning(['The function jacobian() is deprecated and will be '...
-                'removed in the future. Please use pose_jacobian() '...
-                'instead']);
-            if nargin == 4
-                J = pose_jacobian(obj,theta, ith);
-            else
-                J = pose_jacobian(obj,theta);
-            end
-        end
-        
         function J = pose_jacobian(obj, theta, ith)
             % J = pose_jacobian(theta) returns the Jacobian that satisfies
             % vec(x_dot) = J * theta_dot, where x = fkm(theta) and
@@ -326,19 +317,6 @@ classdef DQ_kinematics < handle
                 J = hamiplus8(obj.base)*haminus8(obj.effector)*obj.raw_pose_jacobian(theta);
             end
         end
-        
-        
-        function J_dot = jacobian_dot(obj,theta,theta_dot, ith)
-            warning(['The function jacobian_dot is deprecated and will be '...
-                'removed in the future. Please use pose_jacobian_derivative() '...
-                'instead']);
-            if nargin == 4
-                J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith);
-            else
-                J_dot = pose_jacobian_derivative(obj,theta,theta_dot);
-            end
-        end
-        
         
         function J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith)
             % J_dot = jacobian_dot(theta,theta_dot) returns the Jacobian 
@@ -394,6 +372,36 @@ classdef DQ_kinematics < handle
                 end
             end
         end
+        
+        function J = jacobian(obj,theta, ith)
+            warning(['The function jacobian() is deprecated and will be '...
+                'removed in the future. Please use pose_jacobian() '...
+                'instead']);
+            if nargin == 4
+                J = pose_jacobian(obj,theta, ith);
+            else
+                J = pose_jacobian(obj,theta);
+            end
+        end        
+        
+        function J_dot = jacobian_dot(obj,theta,theta_dot, ith)
+            warning(['The function jacobian_dot is deprecated and will be '...
+                'removed in the future. Please use pose_jacobian_derivative() '...
+                'instead']);
+            if nargin == 4
+                J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith);
+            else
+                J_dot = pose_jacobian_derivative(obj,theta,theta_dot);
+            end
+        end
+        
+        function ret = links(obj)
+            warning(['The function links is deprecated and will be '...
+                'removed in the future. Please use n_links '...
+                'instead']);
+            ret = obj.n_links;
+        end
+            
         
     end
     
