@@ -28,9 +28,40 @@ clc;
 
 robot_struct.robot_type = 'holonomic';
 
-mobile_base = DQ_MobileBase(robot_struct);
+holonomic_base = DQ_HolonomicBase(robot_struct);
 
-mobile_base.this_robot_type
-q = [1,1,pi];
-pose = mobile_base.fkm(q);
+% mobile_base.this_robot_type
+q = [1,1,0]';
+
+
+T = 0.001;
+gain = 50;
+xd = holonomic_base.fkm([10,10,pi]);
+%xd = holonomic_base.fkm([1,1,pi]);
+plot(xd);
+hold on;
+handle = plot(holonomic_base.fkm(q));
+% axis([-100,100,-100,100,0,1]);
+axis square;
+xlabel('X');
+ylabel('Y');
+x_error = vec8(xd - holonomic_base.fkm(q));
+
+while norm(x_error) > 0.001    
+    x = holonomic_base.fkm(q);
+    J = holonomic_base.pose_jacobian(q);
+    N = haminus8(xd)*DQ.C8*J;
+    x_error = vec8(1 - x'*xd);
+    
+    u = pinv(N)*gain*x_error;
+    q = q + T*u;
+    
+  % handle = plot(x, 'erase', handle);
+  
+   plot(holonomic_base,q);
+   pause(0.1);
+   drawnow;
+    
+end
+
 
