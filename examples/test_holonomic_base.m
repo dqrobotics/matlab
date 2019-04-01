@@ -26,42 +26,50 @@ clear all;
 close all;
 clc;
 
-robot_struct.robot_type = 'holonomic';
-
-holonomic_base = DQ_HolonomicBase(robot_struct);
+holonomic_base = DQ_HolonomicBase();
 
 % mobile_base.this_robot_type
 q = [1,1,0]';
-
-
 T = 0.001;
 gain = 50;
-xd = holonomic_base.fkm([10,10,pi]);
+xd = holonomic_base.fkm([10,10,-3*pi/2]);
 %xd = holonomic_base.fkm([1,1,pi]);
 plot(xd);
 hold on;
 handle = plot(holonomic_base.fkm(q));
-% axis([-100,100,-100,100,0,1]);
+axis([0,20,-15,15,0,1]);
 axis square;
 xlabel('X');
 ylabel('Y');
-x_error = vec8(xd - holonomic_base.fkm(q));
+x_error = 10;
 
-while norm(x_error) > 0.001    
+while norm(x_error) > 0.001
+    if rand(1) > 0.30
+        xd = -xd;
+    end
+
     x = holonomic_base.fkm(q);
     J = holonomic_base.pose_jacobian(q);
-    N = haminus8(xd)*DQ.C8*J;
-    x_error = vec8(1 - x'*xd);
+    N = -haminus8(xd)*DQ.C8*J;
+    
+    x_error_positive = vec8(x'*xd - 1);
+    x_error_negative = vec8(x'*xd + 1);
+    
+    if norm(x_error_positive) <= norm(x_error_negative)
+       x_error = x_error_positive;
+         disp('Positive');
+    else
+         x_error = x_error_negative;
+        disp('Negative');
+    end
     
     u = pinv(N)*gain*x_error;
     q = q + T*u;
     
-  % handle = plot(x, 'erase', handle);
-  
-   plot(holonomic_base,q);
-   pause(0.1);
-   drawnow;
-    
+    % handle = plot(x, 'erase', handle);
+    plot(holonomic_base,q);
+    % pause()
+    drawnow;
 end
 
 
