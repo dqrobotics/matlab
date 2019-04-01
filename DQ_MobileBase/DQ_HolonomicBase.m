@@ -1,18 +1,13 @@
 % CLASS DQ_HolonomicBase 
 % This class inherits from DQ_MobileBase
 % 
-% Usage: robot_kine = DQ_MobileBase(robot_parameters)
-% - 'robot_parameters' is a struct containing all parameters needed to
-% obtain the mobile base kinematic model. It must contain at least the
-% field 'robot.type' to correctly identify the robot type.
+% Usage: robot = DQ_MobileBase()
 %
 % METHODS:
-%       raw_fkm
 %       fkm
-%       raw_pose_jacobian
 %       pose_jacobian
 %
-% See also DQ_kinematics
+% See also DQ_kinematics, DQ_MobileBase
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -37,13 +32,24 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 classdef DQ_HolonomicBase < DQ_MobileBase
-    properties
-        kinematic_parameters;     
-    end
     methods
-        function obj = DQ_HolonomicBase(kinematic_parameters)
-            obj = obj@DQ_MobileBase;
-            obj.kinematic_parameters = kinematic_parameters;
+        function obj = DQ_HolonomicBase()
+            obj = obj@DQ_MobileBase;            
+        end
+        
+        % pose = fkm(q) returns the pose of a mobile base given the 
+        % configuration q = [x,y,phi]'. 
+        function pose = fkm(~, q)
+            x = q(1);
+            y = q(2);
+            phi = q(3);
+            
+            include_namespace_dq
+            
+            real_part = cos(phi/2) + k_*sin(phi/2);
+            dual_part = (1/2)*i_*(x*cos(phi/2) + y*sin(phi/2)) + ...
+                        (1/2)*j_*(-x*sin(phi/2) + y*cos(phi/2));            
+            pose = real_part + E_*dual_part;
         end
         
         % J = robot.pose_jacobian(q) returns, given the configuration 
@@ -81,17 +87,10 @@ classdef DQ_HolonomicBase < DQ_MobileBase
     end
     
     methods (Access = protected)
-        function h = create_new_robot(robot, opt)
+        function h = create_new_robot(~, opt)
             % h = CREATE_NEW_ROBOT(robot, opt) uses data from robot object and
             % options to create a graphical robot. It returns a structure of handles
-            % to graphical objects.
-            
-            % It must implement the following behaviors
-            %
-            % If current figure is empty, draw robot in it
-            % If current figure has hold on, add robot to it
-            % Otherwise, create new figure and draw robot in it.
-            %
+            % to graphical objects.            
             % The handle is composed of the following fields:
             % h.scale	robot scale
             % h.robot	the geometrical primitive that represents the robot
@@ -139,15 +138,13 @@ classdef DQ_HolonomicBase < DQ_MobileBase
         end
         
         function update_robot(robot, q)
-           
-
             % Get the handle to the graphical robot. Since each kinematic robot
             % stores just one graphical handle, if we want to plot the same robot
             % in different views, we must declare different robots with the same
             % name. Otherwise, if just one robot is declared, but plotted in
             % different windows/views, the kinematic robot will store the handle of
             % the last view only.
-            h = robot.handle
+            h = robot.handle;
             mag = h.scale;
             side = h.scale;
             % base = vec3(translation(robot.base));

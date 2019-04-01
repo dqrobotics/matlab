@@ -2,18 +2,13 @@
 % This is an abstract class that provides the basic functionalities that
 % all concrete classes must implement. 
 % 
-% Abstract methods: pose_jacobian
+% ABSTRACT METHODS: fkm
+%                   pose_jacobian
+%                   create_new_robot (Protected)
+%                   update_robot     (Protected)
 %
-% Usage: robot_kine = DQ_MobileBase(robot_parameters)
-% - 'robot_parameters' is a struct containing all parameters needed to
-% obtain the mobile base kinematic model. It must contain at least the
-% field 'robot.type' to correctly identify the robot type.
+% CONCRETE METHODS: plot
 %
-% METHODS:
-%       raw_fkm
-%       fkm
-%       raw_pose_jacobian
-%       pose_jacobian
 %
 % See also DQ_kinematics
 
@@ -58,7 +53,61 @@ classdef (Abstract) DQ_MobileBase < handle
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
         end
+                
         function plot(robot,q,varargin)
+        % plot(robot,q,options) plots the robot of type DQ_MobileBase. 
+        % q is the vector of joint configurations
+        % options is an optional argument that has variable size and accept any
+        % number of the following parameters:
+        %
+        %  'cylinder', C           color for mobile base color, C=[r g b]
+        %  'scale', scale          annotation scale factor
+        %  'frame'|'noframe'       controls display of base frame
+        %  'name'|'noname'         display the robot's name 
+        %
+        % The graphical robot object holds a copy of the robot object and
+        % the graphical element is tagged with the robot's name (.name property).
+        %
+        % 1) Figure behavior:
+        %
+        % If no robot of this name is currently displayed then a robot will
+        % be drawn in the current figure.  If hold is enabled (hold on) then the
+        % robot will be added to the current figure.
+        %
+        % If the robot already exists then that graphical model will be found 
+        % and moved.
+        %
+        % 2) Multiple views of the same robot:
+        %
+        % If one or more plots of this robot already exist then these will all
+        % be moved according to the argument 'q'.  All robots in all windows with 
+        % the same name will be moved.
+        %
+        % NOTE: Since each kinematic robot stores just one graphical handle, 
+        % if we want to plot the same robot in different views, we must declare 
+        % different robots with the same name. Otherwise, if just one robot is declared,
+        % but plotted in different windows/views, the kinematic robot will store 
+        % the handle of the last view only. Therefore, only the last view will be 
+        % updated
+        %
+        % 3) Multiple robots in the same figure:
+        %
+        % Multiple robots (i.e., with different names) can be displayed in the same 
+        % plot, by using "hold on" before calls to plot(robot).  
+        %
+        % 4) Graphical robot state:
+        %
+        % The configuration of the robot as displayed is stored in the
+        % DQ_MobileBase object and can be accessed by the read only object
+        % property 'q'.
+        %
+        % 5) Graphical annotations and options:
+        %
+        % The robot is displayed according to the concrete method
+        % create_new_robot() in each subclasses.
+        %
+        % See also DQ/plot, DQ_kinematics/plot
+            
             has_options = 0;
             if nargin < 2
                 fprintf(['\nUsage: plot(robot, q,[options])'...
@@ -70,8 +119,8 @@ classdef (Abstract) DQ_MobileBase < handle
             end
 
             if ~isvector(q)
-                error(['The first argument must be the vector of joint '...
-                    'configurations.']);
+                error(['The first argument must be the vector of '...
+                       'configurations.']);
             end
 
             % The joint configuration vector must be a row vector
@@ -95,6 +144,10 @@ classdef (Abstract) DQ_MobileBase < handle
          % time derivative of the unit dual quaternion that represents the
          % mobile-base pose.
          J = pose_jacobian(obj, q);
+         
+         % pose = fkm(obj,q) returns the pose of a mobile base given the 
+         % configuration q = [x,y,phi]'. 
+         pose = fkm(obj,q)
     end
     
     methods (Abstract, Access = protected)
@@ -123,30 +176,8 @@ classdef (Abstract) DQ_MobileBase < handle
         % UPDATE_ROBOT(robot, q) moves an existing graphical robot to the 
         % configuration specified by q. The parameter 'robot' is a DQ_MobileBase
         % object, and graphics are defined by the handle structure robot.handle, 
-%       % which stores the 'graphical robot' as robot.handle.robot.
+       % which stores the 'graphical robot' as robot.handle.robot.
         update_robot(rr, q);
-    end
-        
-    methods(Static)       
-        % pose = fkm(q) returns the pose of a mobile base given the 
-        % configuration q = [x,y,phi]'. 
-        % Since every mobile base currently supported by 
-        % the library has the same configuration space, 
-        % the fkm is the same independently of the type of mobile base. In case 
-        % of mobile robots with different configuration spaces (e.g., trailer 
-        % robots), they must overload this method.
-        function pose = fkm(q)
-            x = q(1);
-            y = q(2);
-            phi = q(3);
-            
-            include_namespace_dq
-            
-            real_part = cos(phi/2) + k_*sin(phi/2);
-            dual_part = (1/2)*i_*(x*cos(phi/2) + y*sin(phi/2)) + ...
-                        (1/2)*j_*(-x*sin(phi/2) + y*cos(phi/2));            
-            pose = real_part + E_*dual_part;
-        end
     end
 end
 
@@ -231,7 +262,6 @@ function o = plot_options(robot, optin)
             error(['Unknown options: ', args{:}]);
         end
     end
- 
 end
 
 % [opt, others] = parse_options(default, options) parses the cell array inside
