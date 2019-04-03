@@ -377,7 +377,7 @@ classdef DQ_kinematics < handle
             warning(['The function jacobian() is deprecated and will be '...
                 'removed in the future. Please use pose_jacobian() '...
                 'instead']);
-            if nargin == 4
+            if nargin == 3
                 J = pose_jacobian(obj,theta, ith);
             else
                 J = pose_jacobian(obj,theta);
