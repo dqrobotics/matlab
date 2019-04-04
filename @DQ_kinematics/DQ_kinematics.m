@@ -15,20 +15,18 @@
 % Type DQ_kinematics.(method,property) for specific help.
 % Ex.: help DQ_kinematics.fkm
 %
-% METHODS:
+% For specific methods, see also
 %       raw_fkm
 %       fkm
 %       raw_pose_jacobian
 %       pose_jacobian
 %       pose_jacobian_derivative
 %       distance_jacobian
-%       position_jacobian
+%       translation_jacobian
 %       rotation_jacobian
-%
-%       set_base
+%       set_reference_frame
+%       set_base_frame
 %       set_effector
-%
-% See also DQ, DQ_KinematicController
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -67,7 +65,8 @@ classdef DQ_kinematics < handle
         dummy;
         n_dummy;
         convention;
-        base;
+        reference_frame;
+        base_frame;
         effector;
         
         % Properties for the plot function
@@ -108,7 +107,8 @@ classdef DQ_kinematics < handle
             obj.a = A(3,:);
             obj.alpha = A(4,:);
             
-            obj.base = DQ(1); %Default base's pose
+            obj.reference_frame = DQ(1); %Default base's pose
+            obj.base_frame = DQ(1);
             obj.effector = DQ(1); %Default effector's pose
             
             % Define a unique robot name
@@ -126,11 +126,28 @@ classdef DQ_kinematics < handle
             
         end
         
-        function set_base(obj,base)
-            % dq.set_base(base) sets the pose of the robot's base
-            
-            obj.base = DQ(base);
+        function set_reference_frame(obj,reference_frame)
+            % dq.set_reference_frame(base) sets the reference frame used
+            % for the fkm() and pose_jacobian() functions            
+            obj.reference_frame = DQ(reference_frame);
         end
+        
+        function set_base_frame(obj, base_frame)
+            % set_base_frame(base_frame) sets the base frame with respect
+            % to the global reference frame (i.e., the identity). The rigid 
+            % motion from the global reference frame to the robot base is given
+            % by the unit dual quaternion 'base_frame'. This function is used to
+            % define the 'physical' place of the robot base
+            % and it does not necessarily coincides with the reference
+            % frame.
+            if is_unit(base_frame)
+                obj.base_frame = DQ(base_frame);
+            else
+                error('The base frame must be a unit dual quaternion.');
+            end
+        end
+        
+        
         
         function set_effector(obj,effector)
             % dq.set_effector(effector) sets the pose of the effector
@@ -186,9 +203,9 @@ classdef DQ_kinematics < handle
             %   instead.
             
             if nargin == 3
-                q = obj.base*obj.raw_fkm(theta, ith); %Takes into account the base displacement
+                q = obj.reference_frame*obj.raw_fkm(theta, ith); %Takes into account the base displacement
             else
-                q = obj.base*obj.raw_fkm(theta)*obj.effector;
+                q = obj.reference_frame*obj.raw_fkm(theta)*obj.effector;
             end
         end
         
@@ -309,12 +326,12 @@ classdef DQ_kinematics < handle
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
-                J = hamiplus8(obj.base)*obj.raw_pose_jacobian(theta, ith);
+                J = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian(theta, ith);
             else
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.base)*haminus8(obj.effector)*obj.raw_pose_jacobian(theta);
+                J = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*obj.raw_pose_jacobian(theta);
             end
         end
         

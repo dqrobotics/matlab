@@ -213,14 +213,14 @@ function h = create_new_robot(robot, opt)
 
     % Draw a small plane representing the robot base
     if opt.base
-        plane = robot.base.'*DQ.k*robot.base';
+        plane = robot.base_frame.'*DQ.k*robot.base_frame';
         % Since the plane is infinite, the DQ.plot function draws the part
         % closest to the origin of the reference frame. We first
         % consider the plane that passes through the origin and is aligned with 
         % the one that supports the base
         base_handle = plot(plane.P,'plane',opt.mag,'color','k');
         % We then translate the 'visible' plane to the base frame
-        base_translation = vec3(translation(robot.base));
+        base_translation = vec3(translation(robot.base_frame));
         plane_vertices = get(base_handle, 'Vertices');
         for i = 1:3
             plane_vertices(:,i) = plane_vertices(:,i) + base_translation(i);
@@ -231,7 +231,7 @@ function h = create_new_robot(robot, opt)
      
     % Write the robot name.
     if opt.name        
-        b = vec3(translation(robot.base));
+        b = vec3(translation(robot.base_frame));
         h.name_handle = text(b(1), b(2) - opt.mag, b(3), [' ' robot.name],...
             'FontAngle', 'italic','FontWeight', 'bold');
     end
@@ -254,9 +254,12 @@ function h = create_new_robot(robot, opt)
             'ydata', [0;0], ...
             'zdata', [0;0], ...
             'color', 'blue');
-        h.xt = text(0, 0, opt.wristlabel(1), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-        h.yt = text(0, 0, opt.wristlabel(2), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-        h.zt = text(0, 0, opt.wristlabel(3), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+        h.xt = text(0, 0, opt.wristlabel(1), 'FontWeight', 'bold',...
+            'HorizontalAlignment', 'Center');
+        h.yt = text(0, 0, opt.wristlabel(2), 'FontWeight', 'bold',...
+            'HorizontalAlignment', 'Center');
+        h.zt = text(0, 0, opt.wristlabel(3), 'FontWeight', 'bold',...
+            'HorizontalAlignment', 'Center');
 
     end
 
@@ -322,7 +325,7 @@ function update_robot(robot, q)
     % the last view only.
     h = robot.handle;
     mag = h.mag;
-    base = vec3(translation(robot.base));
+    base = vec3(translation(robot.base_frame));
     
     % Initialize the vector containing the origin of each frame along the
     % kinematic chain
@@ -337,7 +340,7 @@ function update_robot(robot, q)
     % compute the link transforms, and record the origin of each frame
     % for the graphics update.    
     for j=1:n    
-        t = vec3(translation(robot.fkm(q,j)));
+        t = vec3(translation(robot.base_frame*robot.fkm(q,j)));
         x(j+1) = t(1);    
         y(j+1) = t(2);
         z(j+1) = t(3);
@@ -362,7 +365,7 @@ function update_robot(robot, q)
             for k = 1:size(xyz,2)
                 % 1 + DQ.E*(1/2)*p, where p = xyz(1:3,k);
                 cylinder_vertex = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);
-                xyz(1:3,k) = vec3(translation(fkm_j*cylinder_vertex));
+                xyz(1:3,k) = vec3(translation(robot.base_frame*fkm_j*cylinder_vertex));
             end
             
             % Now that all cylinder vertices are transformed, update the
@@ -385,7 +388,7 @@ function update_robot(robot, q)
     if isfield(h, 'x')
         % get the end-effector pose (considering the final transformation given
         % by set_end_effector()
-        t = robot.fkm(q);
+        t = robot.base_frame*robot.fkm(q);
         t1 = vec3(translation(t));        
         
         % The following transformations use the Hamilton operators to
