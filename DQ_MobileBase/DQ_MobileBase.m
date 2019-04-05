@@ -6,11 +6,19 @@
 %                   pose_jacobian
 %                   create_new_robot (Protected)
 %                   update_robot     (Protected)
+%                   set_dim_configuration_space
 %
 % CONCRETE METHODS: plot
+%                   get_dim_configuration_space
 %
 %
-% See also DQ_kinematics
+% See also 
+%           fkm
+%           pose_jacobian
+%           create_new_robot
+%           update_robot
+%           plot
+%           get_dim_configuration_space
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -42,16 +50,26 @@ classdef (Abstract) DQ_MobileBase < handle
         name;
         q;
         plotopt;
+        base_pose;
     end
     
     properties (Access = protected)
         handle;
+        dim_configuration_space;
     end
     
     methods
         function obj = DQ_MobileBase()
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
+        end
+        
+        function ret = get_dim_configuration_space(obj)
+            ret = obj.dim_configuration_space;
+        end
+        
+        function ret = base_frame(obj)
+            ret = obj.base_pose;
         end
                 
         function plot(robot,q,varargin)

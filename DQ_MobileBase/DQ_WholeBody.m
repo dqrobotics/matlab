@@ -1,12 +1,18 @@
 classdef DQ_WholeBody < handle
     properties %(Access = protected)
         chain;
+        dim_configuration_space;
     end
     
     methods
         function obj = DQ_WholeBody(robot)
             % TODO: test if robot is an instance of DQ_Kinematics
             obj.chain{1} = robot;
+            obj.dim_configuration_space = robot.get_dim_configuration_space();
+        end
+        
+        function ret = get_dim_configuration_space(obj)
+            ret = obj.dim_configuration_space;
         end
         
         function add(obj, robot)
@@ -14,6 +20,8 @@ classdef DQ_WholeBody < handle
             % TODO: test if robot is an instance of DQ_Kinematics
             len = length(obj.chain);
             obj.chain{len + 1} = robot;
+            obj.dim_configuration_space = obj.dim_configuration_space + ...
+                robot.get_dim_configuration_space();
         end        
        
         function x = fkm(obj,q,ith)
@@ -37,7 +45,7 @@ classdef DQ_WholeBody < handle
                 % implementation can be improved. For instance, we can
                 % store the size of each configuration vector whenever we
                 % add a new robot into the serial kinematic chain.
-                dim = obj.chain{i}.n_links;
+                dim = obj.chain{i}.get_dim_configuration_space();
                 qi = q(j : j + dim - 1);
                 j = j + dim;
                 x = x*obj.chain{i}.fkm(qi);
@@ -45,23 +53,35 @@ classdef DQ_WholeBody < handle
         end
         
         function plot(obj,q)
+            dim_conf_space = obj.chain{1}.get_dim_configuration_space();
+            plot(obj.chain{1},q(1:dim_conf_space));            
             
-            current_base_frame = obj.chain{1}.base_frame;
-            n_links = obj.chain{1}.n_links;
-            plot(obj.chain{1},q(1:n_links),'cylinder',[0, 0, 0]);            
-            
-            j = n_links + 1;
+            j = dim_conf_space + 1;
             
             % Iterate over the chain
             for i = 2:length(obj.chain)
                 % Replace n_links by dimension_configuration_space
-                dim = obj.chain{i}.n_links;
+                dim = obj.chain{i}.get_dim_configuration_space();
                 qi = q(j : j + dim - 1);
-                j = j + dim;               
+                j = j + dim;        
                 
-                current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
-                obj.chain{i}.set_base_frame(current_base_frame);                    
-                plot(obj.chain{i},qi,'cylinder',[0,i*0.2,0], 'nobase');         
+                if isa(obj.chain{1}, 'DQ_MobileBase')
+                    current_base_frame = obj.fkm(q,i-1);
+                else
+                    current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
+                end
+                
+                % current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
+                obj.chain{i}.set_base_frame(current_base_frame); 
+                
+                if i < length(obj.chain)
+                plot(obj.chain{i},qi,'cylinder',[0,i*0.2,0], 'nobase',...
+                    'nojoints', 'nowrist','noname');         
+                else
+                    plot(obj.chain{i},qi,'cylinder',[0,i*0.2,0], 'nobase',...
+                    'nojoints','noname'); 
+                end
+                    
             end            
         end
         

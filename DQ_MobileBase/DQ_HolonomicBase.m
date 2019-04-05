@@ -6,6 +6,8 @@
 % METHODS:
 %       fkm
 %       pose_jacobian
+%       get_dim_configuration_space
+%       base_frame
 %
 % See also DQ_kinematics, DQ_MobileBase
 
@@ -32,14 +34,18 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 classdef DQ_HolonomicBase < DQ_MobileBase
+    
     methods
         function obj = DQ_HolonomicBase()
-            obj = obj@DQ_MobileBase;            
-        end
+            obj.dim_configuration_space = 3;            
+        end 
         
         % pose = fkm(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. 
-        function pose = fkm(~, q)
+        % TODO: Since this function uses as reference the global frame, and
+        % thus it acts as the raw_fkm_function, implement the fkm with respect a
+        % reference frame.
+        function pose = fkm(obj, q)
             x = q(1);
             y = q(2);
             phi = q(3);
@@ -50,6 +56,8 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             dual_part = (1/2)*i_*(x*cos(phi/2) + y*sin(phi/2)) + ...
                         (1/2)*j_*(-x*sin(phi/2) + y*cos(phi/2));            
             pose = real_part + E_*dual_part;
+            
+            obj.base_pose = pose;
         end
         
         % J = robot.pose_jacobian(q) returns, given the configuration 
@@ -83,6 +91,10 @@ classdef DQ_HolonomicBase < DQ_MobileBase
                  j61, j62, j63;
                  j71, j72, j73;
                  0, 0, 0];
+        end
+        
+        function ret = get_dim_configuration_space(obj)
+            ret = obj.dim_configuration_space;
         end
     end
     
