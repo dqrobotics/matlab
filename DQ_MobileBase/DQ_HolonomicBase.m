@@ -3,13 +3,13 @@
 % 
 % Usage: robot = DQ_MobileBase()
 %
-% METHODS:
-%       fkm
-%       pose_jacobian
-%       get_dim_configuration_space
-%       base_frame
-%
-% See also DQ_kinematics, DQ_MobileBase
+% See also
+%           fkm
+%           pose_jacobian
+%           get_dim_configuration_space
+%           base_frame
+% Other classes
+%           DQ_kinematics, DQ_MobileBase
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -38,14 +38,15 @@ classdef DQ_HolonomicBase < DQ_MobileBase
     methods
         function obj = DQ_HolonomicBase()
             obj.dim_configuration_space = 3;            
-        end 
-        
-        % pose = fkm(q) returns the pose of a mobile base given the 
+        end
+       
+        function pose = fkm(obj, q)
+        % fkm(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. 
+        %
         % TODO: Since this function uses as reference the global frame, and
         % thus it acts as the raw_fkm_function, implement the fkm with respect a
         % reference frame.
-        function pose = fkm(obj, q)
             x = q(1);
             y = q(2);
             phi = q(3);
@@ -59,12 +60,12 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             
             obj.base_pose = pose;
         end
-        
-        % J = robot.pose_jacobian(q) returns, given the configuration 
+            
+        function J = pose_jacobian(~,q)
+        % pose_jacobian(q) returns, given the configuration 
         % q = [x,y,phi]', the mobile-base pose Jacobian J that satisfies 
         % x_dot = J*q, where x_dot is the time derivative of the unit dual 
-        % quaternion that represents the mobile-base pose.        
-        function J = pose_jacobian(~,q)
+        % quaternion that represents the mobile-base pose. 
             x = q(1);
             y = q(2);
             phi = q(3);
@@ -94,6 +95,7 @@ classdef DQ_HolonomicBase < DQ_MobileBase
         end
         
         function ret = get_dim_configuration_space(obj)
+            % Returns the dimension of the configuration space
             ret = obj.dim_configuration_space;
         end
     end
