@@ -1,42 +1,80 @@
+% Simple example on how to define a serially coupled heterogeneous
+% kinematic chain.
+
+% (C) Copyright 2019 DQ Robotics Developers
+%
+% This file is part of DQ Robotics.
+%
+%     DQ Robotics is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU Lesser General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+%
+%     DQ Robotics is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU Lesser General Public License for more details.
+%
+%     You should have received a copy of the GNU Lesser General Public License
+%     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
+%
+% DQ Robotics website: dqrobotics.github.io
+%
+% Contributors to this file:
+%     Bruno Vihena Adorno - adorno@ufmg.br
+
+%% Start a fresh simulation
 clear all;
 close all;
 clc;
 
-include_namespace_dq;
-
 base = DQ_HolonomicBase;
-arm1 = DQ_KUKA;
-arm1.name = 'base';
-arm2 = DQ_KUKA;
-arm3 = DQ_KUKA;
-arm4 = DQ_KUKA;
+arm = {DQ_KUKA, DQ_KUKA, DQ_AX18, DQ_KUKA, DQ_AX18};
 
-% Initializes the robot with arm1
-robot = DQ_WholeBody(arm1);
-%robot.add(arm1)
+%% Initializes the robot with base
+robot = DQ_WholeBody(base);
+% Serially add all the arms
+for i = 1:length(arm)
+    robot.add(arm{i});
+end
 
-% Add another independent arm serially coupled to
-robot.add(arm2);
-robot.add(arm3);
-robot.add(arm4)
+%% Initialize the configuration vector. All variables are zero except three.
+% This is completely arbitrary.
+q = zeros(robot.get_dim_configuration_space(),1);
+q(1) = 3;
+q(5) = pi/2; % second joint of the first arm
+q(12) = -pi/2; % second joint of the second arm
 
-q = zeros(28,1);
-% robot.fkm(q), where q = [q1; q2], is equivalent to arm1.fkm(q1)*arm2.fkm(q2)
-x = robot.fkm(q);
-% Get the whole-body Jacobian
-%J = robot.pose_jacobian(q);
-
-% Plot the whole kinematic chain
+%% Initalize the plot
+% Plot the global reference frame
 plot(DQ(1));
 hold on;
-plot(arm1.base_frame);
+% Plot the robot in the initial configuraion
 plot(robot,q);
-axis([-10,1,0,2,0,5]);
+axis square;
+axis([-10,10,-10,10,0,5]);
 hold on;
+title('Starting the robot motion in 3 seconds.')
+pause(3);
+title('Press ''q'' to quit');
 
-for i=0:0.1:pi/2
-    q(2) = i;
-    plot(robot,q);
-  %  pause(0.01);
-    drawnow;
+%% Initializing the keyboard 'stroke capturing system' with a value
+% different from  'q'
+key = '@';
+set(gcf,'CurrentCharacter',key);
+
+%% The robot will move until the user presses 'q'
+i = 0;
+while key ~= 'q'
+  %  figure(gcf);
+    key = get(gcf,'CurrentCharacter');
+        i = mod(i + 0.1, 2*pi); % After 2*pi, i goes again to zero
+        q(1) = 3*cos(i); % x-coordinate of the mobile base
+        q(2) = 3*sin(i); % y-coordinate of the mobile base
+        q(3) = i; % phi angle of the mobile base
+        q(4) = i; % first joint of the first arm
+      
+        plot(robot,q); 
+        drawnow;
 end
+close all;
