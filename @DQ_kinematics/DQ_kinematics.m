@@ -27,6 +27,7 @@
 %       set_reference_frame
 %       set_base_frame
 %       set_effector
+%       get_dim_configuration_space
 
 % (C) Copyright 2015 DQ Robotics Developers
 %
@@ -124,6 +125,10 @@ classdef DQ_kinematics < handle
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
             obj.plotopt = {};
             
+        end
+        
+        function ret = get_dim_configuration_space(obj)
+            ret = obj.n_links;
         end
         
         function set_reference_frame(obj,reference_frame)
