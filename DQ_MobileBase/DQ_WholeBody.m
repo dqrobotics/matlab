@@ -17,7 +17,10 @@ classdef DQ_WholeBody < handle
         
         function add(obj, robot)
             % add(robot) adds a robot to the end of the serial kinematic chain
-            % TODO: test if robot is an instance of DQ_Kinematics
+            % TODO: 1) test if robot is an instance of DQ_Kinematics
+            %       2) make it possible to add the kinematic chain in any
+            %       position of the chain. 
+            %       3) make it possible to create branch structures
             len = length(obj.chain);
             obj.chain{len + 1} = robot;
             obj.dim_configuration_space = obj.dim_configuration_space + ...
@@ -50,6 +53,33 @@ classdef DQ_WholeBody < handle
                 j = j + dim;
                 x = x*obj.chain{i}.fkm(qi);
             end
+        end
+        
+        function J = pose_jacobian(obj,q,ith)
+            
+            if nargin > 2
+                % find the jacobian up to the ith intermediate kinematic
+                % chain
+                n = ith;                
+            else
+                % find the jacobian of the whole chain
+                n = length(obj.chain);
+            end
+            
+            x_0_to_n = obj.fkm(q);
+            j = 1;
+            
+            for i = 0:n-1
+                x_0_to_iplus1 = obj.fkm(q,i+1);
+                x_iplus1_to_n = x_0_to_iplus1'*x_0_to_n;
+                
+                dim = obj.chain{i+1}.get_dim_configuration_space();
+                q_iplus1 = q(j : j + dim - 1);
+                j = j + dim;
+                L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
+                    obj.chain{i+1}.pose_jacobian(q_iplus1);
+            end
+            J = cell2mat(L);
         end
         
         function plot(obj,q)
