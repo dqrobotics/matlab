@@ -43,7 +43,7 @@ x = robot.fkm(q); % Initial end-effector pose
 % Define a rotation of pi/2 around the z-axis
 r = cos(pi/4) + k_*sin(pi/4);
 % Define a random translation
-p = 15*rand(1)*i_ + (15*rand(1)-7.5)*j_;
+p = 5*rand(1)*i_ + (15*rand(1)-7.5)*j_;
 
 % In order to define a decoupled transformation we use a CMI(3)
 % multiplication, also known as decompositional multiplication
@@ -87,9 +87,10 @@ while key ~= 'q' && norm(x_error) > 0.01
     J = robot.pose_jacobian(q);
     N = haminus8(xd)*DQ.C8*J;
     x_error = vec8(x'*xd - 1);    
-    % Use the damped least-square inverse. This is not the most appropriate
-    % controller, but we just want to perform a simple simulation of Little
-    % John.
+    % Use the damped least-square inverse in simple pseudoinverse-like kinematic
+    % control. This is not the most appropriate controller for this robot, as 
+    % the nonholonomy is not taken into account explicitly, but we just want to 
+    % perform a simple simulation of Little John.
     u = -N'/(N*N' + 0.01*eye(size(N,1)))*gain*x_error;
     % Which ends here!
     
