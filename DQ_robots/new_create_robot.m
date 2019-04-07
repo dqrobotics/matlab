@@ -25,8 +25,8 @@ function robot = new_create_robot()
     % Create a new iRoomba Create Robot
     
     % The parameters below are given in meters
-    parameter.wheel_radius = 65e-3; 
-    parameter.distance_between_wheels = 260e-3;
+    wheel_radius = 65e-3; 
+    distance_between_wheels = 260e-3;
     
-    robot = DQ_DifferentialDriveRobot(parameter);
+    robot = DQ_DifferentialDriveRobot(wheel_radius,distance_between_wheels);
 end
