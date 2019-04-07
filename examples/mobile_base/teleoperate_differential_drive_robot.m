@@ -65,8 +65,8 @@ function teleoperate_differential_drive_robot(varargin)
     %Key-press events are handled by the function keypress.
     fig_handle = figure('KeyPressFcn',@keypress);
     hold on;
-    axis([0,20,-15,15,0,1]);
-    axis square;
+    axis equal;
+    axis(distance_between_wheels*[-10,10,-10,10,0,1/distance_between_wheels]);    
     view(3);
     xlabel('X');
     ylabel('Y');
