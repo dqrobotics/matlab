@@ -14,7 +14,9 @@
 %
 % See also 
 %           fkm
+%           raw_fkm
 %           pose_jacobian
+%           raw_pose_jacobian
 %           create_new_robot
 %           update_robot
 %           plot
@@ -56,12 +58,18 @@ classdef (Abstract) DQ_MobileBase < handle
     properties (Access = protected)
         handle;
         dim_configuration_space;
+        frame_displacement;
     end
     
     methods
         function obj = DQ_MobileBase()
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
+            obj.frame_displacement = DQ(1);
+        end
+        
+        function set_frame_displacement(obj,x)
+            obj.frame_displacement = x;
         end
         
         function ret = get_dim_configuration_space(obj)
@@ -160,12 +168,26 @@ classdef (Abstract) DQ_MobileBase < handle
          % Given the configuration q, pose_jacobian(obj,q) returns the
          % Jacobian matrix that satisfies x_dot = J*q, where x_dot is the
          % time derivative of the unit dual quaternion that represents the
-         % mobile-base pose.
+         % mobile-base pose. It takes into account the base frame
+         % displacement
          J = pose_jacobian(obj, q);
          
+         % Given the configuration q, pose_jacobian(obj,q) returns the
+         % Jacobian matrix that satisfies x_dot = J*q, where x_dot is the
+         % time derivative of the unit dual quaternion that represents the
+         % mobile-base pose. It does not take into account the base frame
+         % displacement
+         J = raw_pose_jacobian(obj, q);
+         
          % pose = fkm(obj,q) returns the pose of a mobile base given the 
-         % configuration q = [x,y,phi]'. 
-         pose = fkm(obj,q)
+         % configuration q = [x,y,phi]'. It considers the base frame 
+         % displacement 
+         pose = fkm(obj,q);
+         
+         % pose = raw_fkm(obj,q) returns the pose of a mobile base given the 
+         % configuration q = [x,y,phi]'. It does not consider the base frame 
+         % displacement         
+         pose = raw_fkm(obj,q);
     end
     
     methods (Abstract, Access = protected)
