@@ -1,3 +1,40 @@
+% CLASS DQ_WholeBody
+% 
+% Usage: robot = DQ_WholeBody(first_chain_element), where
+% first_chain_element is an object of DQ_MobileBase or DQ_kinematics
+%
+% See also  
+%           fkm
+%           pose_jacobian
+%           add
+%           get_dim_configuration_space
+%           plot
+%           
+% Other classes
+%           DQ_kinematics, DQ_MobileBase
+
+% (C) Copyright 2015 DQ Robotics Developers
+%
+% This file is part of DQ Robotics.
+%
+%     DQ Robotics is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU Lesser General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+%
+%     DQ Robotics is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU Lesser General Public License for more details.
+%
+%     You should have received a copy of the GNU Lesser General Public License
+%     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
+%
+% DQ Robotics website: dqrobotics.github.io
+%
+% Contributors to this file:
+%     Bruno Vihena Adorno - adorno@ufmg.br
+
 classdef DQ_WholeBody < handle
     properties %(Access = protected)
         chain;
@@ -12,6 +49,8 @@ classdef DQ_WholeBody < handle
         end
         
         function ret = get_dim_configuration_space(obj)
+            % dim = get_dim_configuration_space() returns the dimension of
+            % the whole configuration space
             ret = obj.dim_configuration_space;
         end
         
@@ -28,10 +67,10 @@ classdef DQ_WholeBody < handle
         end        
        
         function x = fkm(obj,q,ith)
-        % x = fkm(q) receives the configuration vector q of the whole
-        % kinematic chain and returns the pose of the last frame.
-        % x = fkm(q, ith) calculates the forward kinematics up to the ith
-        % kinematic chain.
+            % x = fkm(q) receives the configuration vector q of the whole
+            % kinematic chain and returns the pose of the last frame.
+            % x = fkm(q, ith) calculates the forward kinematics up to the ith
+            % kinematic chain.
             
             if nargin > 2
                 n = ith;
@@ -56,7 +95,13 @@ classdef DQ_WholeBody < handle
         end
         
         function J = pose_jacobian(obj,q,ith)
-            
+        % J = pose_jacobian(q) receives the configuration vector q of the whole
+        % kinematic chain and returns the jacobian matrix J that satisfies
+        % vec8(xdot) = J * q_dot, where q_dot is the configuration velocity
+        % and xdot is the time derivative of the unit dual quaternion that
+        % represents the end-effector pose.
+        % J = pose_jacobian(q, ith) calculates the Jacobian up to the ith
+        % kinematic chain.
             if nargin > 2
                 % find the jacobian up to the ith intermediate kinematic
                 % chain
@@ -83,6 +128,7 @@ classdef DQ_WholeBody < handle
         end
         
         function plot(obj,q)
+            % Given the configuration 'a', plot the whole kinematic chain.
             dim_conf_space = obj.chain{1}.get_dim_configuration_space();
             plot(obj.chain{1},q(1:dim_conf_space));            
             
@@ -90,7 +136,6 @@ classdef DQ_WholeBody < handle
             
             % Iterate over the chain
             for i = 2:length(obj.chain)
-                % Replace n_links by dimension_configuration_space
                 dim = obj.chain{i}.get_dim_configuration_space();
                 qi = q(j : j + dim - 1);
                 j = j + dim;        
@@ -101,7 +146,6 @@ classdef DQ_WholeBody < handle
                     current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
                 end
                 
-                % current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
                 obj.chain{i}.set_base_frame(current_base_frame); 
                 
                 if i < length(obj.chain)
@@ -114,13 +158,5 @@ classdef DQ_WholeBody < handle
                     
             end            
         end
-        
-        % Get configuration vector of the i-th element in the kinematic
-        % chain
-        % function ret = get_configuration(obj,q,i)
-            
-            
-            
-      %  end
     end    
 end
