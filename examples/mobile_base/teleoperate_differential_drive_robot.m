@@ -4,9 +4,9 @@
 % robot with default parameters; that is, wheel radius equal to 0.1 m and
 % distance between wheels equal to 0.4 m.
 %
-% teleoperate_differential_drive_robot(param) start the teleoperation of the
-% simulated robot with parameters given by param.wheel_radius and
-% param.distance_between_wheels
+% teleoperate_differential_drive_robot(wheel_radius, distance_between_wheels)
+% start the teleoperation of the simulated robot with parameters given by 
+% wheel_radius and distance_between_wheels, both in meters.
 
 % (C) Copyright 2019 DQ Robotics Developers
 %
@@ -30,19 +30,33 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function teleoperate_differential_drive_robot(param)
+function teleoperate_differential_drive_robot(varargin)
 
     %% Configuring the nonholonomic mobile base
     if nargin == 0
-        param.wheel_radius = 0.1; % Wheel radius (meters)
-        param.distance_between_wheels = 0.4; % Distance between wheels (meters)
+        wheel_radius = 0.1; % Wheel radius (meters)
+        distance_between_wheels = 0.4; % Distance between wheels (meters)
+    elseif nargin == 2
+        wheel_radius = varargin{1};
+        distance_between_wheels = varargin{2};
+    else
+        error_msg = sprintf(...
+        ['\nUsage: \n'...        
+        'teleoperate_differential_drive_robot() starts the teleoperation of'... 
+        ' the simulated robot with default parameters; that is, wheel radius'...
+        ' equal to 0.1 m and distance between wheels equal to 0.4 m.\n\n'...
+        'teleoperate_differential_drive_robot(wheel_radius,'...
+        ' distance_between_wheels) start the teleoperation of the simulated'...
+        ' robot with parameters given by wheel_radius and '...
+        'distance_between_wheels, both in meters.']); 
+        error(error_msg);
     end
 
-    base = DQ_DifferentialDriveRobot(param);
+    base = DQ_DifferentialDriveRobot(wheel_radius, distance_between_wheels);
     
     fprintf(['\nStarting simulation of a differential drive robot with wheel'...
         'radius equal to %f m and distance between wheels equal to %f m'], ...
-        param.wheel_radius, param.distance_between_wheels);
+        wheel_radius, distance_between_wheels);
 
     q = [1,1,0]'; % Initial configuration
     T = 0.001; % Integration step for the animation

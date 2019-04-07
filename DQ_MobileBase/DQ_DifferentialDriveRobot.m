@@ -2,11 +2,8 @@
 %
 % This class inherits from DQ_HolonomicBase
 % 
-% Usage: robot = DQ_DifferentialDriveRobot(param), where 'param' is a struct
-% containing all parameters needed to obtain the mobile base kinematic model. 
-% More specifically:
-%   param.wheel_radius: radius of the wheels, in meters.
-%   param.distance_between_wheels: distance between the wheels, in meters. 
+% Usage: robot = DQ_DifferentialDriveRobot(wheel_radius,distance_between_wheels), 
+% where both wheel_radius and distance_between_wheels are given in meters. 
 %
 % METHODS:
 %       fkm
@@ -39,9 +36,11 @@
 
 classdef DQ_DifferentialDriveRobot < DQ_HolonomicBase
     methods
-        function obj = DQ_DifferentialDriveRobot(param)
-            obj.wheel_radius = param.wheel_radius;
-            obj.distance_between_wheels = param.distance_between_wheels;
+        function obj = DQ_DifferentialDriveRobot(wheel_radius,...
+                distance_between_wheels)
+            obj.wheel_radius = wheel_radius;
+            obj.distance_between_wheels = distance_between_wheels;
+            obj.base_diameter = obj.distance_between_wheels;
         end
         
         function J = constraint_jacobian(obj,phi)

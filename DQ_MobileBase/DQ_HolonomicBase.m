@@ -8,6 +8,7 @@
 %           pose_jacobian
 %           get_dim_configuration_space
 %           base_frame
+%           set_base_diameter
 % Other classes
 %           DQ_kinematics, DQ_MobileBase
 
@@ -34,6 +35,10 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 classdef DQ_HolonomicBase < DQ_MobileBase
+    
+    properties (Access = protected)
+        base_diameter = 0.5; %The default base diameter is 0.5 m
+    end
     
     methods
         function obj = DQ_HolonomicBase()
@@ -115,10 +120,17 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             % Returns the dimension of the configuration space
             ret = obj.dim_configuration_space;
         end
+        
+        function set_base_diameter(obj,diameter)
+            % Set the base diameter, in meters. This function must be
+            % called before the first plot to take effect in the
+            % visualization.
+            obj.base_diameter = diameter;
+        end
     end
     
     methods (Access = protected)
-        function h = create_new_robot(~, opt)
+        function h = create_new_robot(obj, opt)
             % h = CREATE_NEW_ROBOT(robot, opt) uses data from robot object and
             % options to create a graphical robot. It returns a structure of handles
             % to graphical objects.            
@@ -144,8 +156,11 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             set(gca, 'SortMethod', 'depth');
             grid on
             
+            diameter = opt.scale*obj.base_diameter;
+            
             % Draw a small circle representing the robot base
-            h.robot = rectangle('Curvature', [opt.scale,opt.scale], 'FaceColor', 'y');
+            h.robot = rectangle('Position',[0,0,diameter,diameter],...
+                'Curvature', [1,1], 'FaceColor', 'y');
            
             % create base frame
             if opt.frame,
@@ -177,16 +192,16 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             % the last view only.
             h = robot.handle;
             mag = h.scale;
-            side = h.scale;
+            diameter = h.scale*robot.base_diameter;
             % base = vec3(translation(robot.base));
            
             % Get the origin of the base frame
-            x = q(1) -  h.scale/2;
-            y = q(2) -  h.scale/2;
+            x = q(1) -  diameter/2;
+            y = q(2) -  diameter/2;
 
             % Update the coordinates of each frame along the kinematic chain. This 
             % updates the line drawing that represents the robot kinematic chain.
-            set(h.robot,'Position', [x,y,side,side]);
+            set(h.robot,'Position', [x,y,diameter,diameter]);
 
             % display the wrist axes and labels   
             % compute the wrist axes, based on final link transformation plus the

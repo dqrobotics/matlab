@@ -41,6 +41,7 @@ end
 
 % Declare a new holonomic base
 holonomic_base = DQ_HolonomicBase();
+holonomic_base.set_base_diameter(2); % The base diameter is set to 2m 
 
 % Prepare the plot
 figure;
@@ -59,7 +60,7 @@ for i = 1:2
 end
 
 axis([neg{1}, pos{1}, neg{2}, pos{2}, 0, 1]);
-axis square;
+axis vis3d;
 xlabel('X');
 ylabel('Y');
 hold on;
