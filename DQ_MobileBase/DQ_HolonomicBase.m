@@ -191,7 +191,7 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             % different windows/views, the kinematic robot will store the handle of
             % the last view only.
             h = robot.handle;
-            mag = h.scale;
+            mag = h.scale*robot.base_diameter/2;
             diameter = h.scale*robot.base_diameter;
             % base = vec3(translation(robot.base));
            
