@@ -135,6 +135,8 @@ while key ~= 'q'
         pause(0.005);
         drawnow;
     end
+    title('Press any letter to visualize again or press ''q'' to quit.')
+    pause;
     j = j + 1;
 end
 
