@@ -226,11 +226,10 @@ switch primitive_type
        
         % Now we obtain a vector orthogonal to n.
         if n ~= DQ.i
-            v = cross(DQ.i,n);
-            sqr_norm_v = norm(v)*norm(v);
-            v = (v/sqr_norm_v)*(plane_length/2);
+            v = cross(DQ.i,n);            
+            v = (v/norm(v))*(plane_length/2);            
         else
-            v = DQ.j; %DQ.k would be another obvious option
+            v = DQ.j*(plane_length/2); %DQ.k would be another obvious option
         end
         
         % u,v,n are perpedicular
