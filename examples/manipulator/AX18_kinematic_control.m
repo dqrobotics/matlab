@@ -5,7 +5,7 @@ clc;
 
 % Create a new DQ_kinematics object with the AX18 arm standard 
 % Denavit-Hartenberg parameters           
-ax18 = DQ_AX18;
+ax18 = Ax18ManipulatorRobot.kinematics();
 
 % Initial configuration
 theta=[0 0 0 0 0]';

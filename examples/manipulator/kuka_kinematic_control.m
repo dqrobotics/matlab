@@ -4,7 +4,7 @@ clear classes;
 clc;
 
 %Create a new DQ_kinematics object with KUKA LWR parameters
-kuka = DQ_KUKA;
+kuka = KukaLwr4Robot.kinematics();
 kuka.name = 'KUKA';
 
 %Initial configuration

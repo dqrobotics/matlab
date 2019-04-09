@@ -4,7 +4,7 @@ clear classes;
 clc;
 
 %Create a new DQ_kinematics object with the COMAU SmartSiX modified Denavit-Hartenberg parameters           
-comau_kine = DQ_COMAU;
+comau_kine = ComauSmartSixRobot.kinematics();
 
 
 %% Basic definitions for the simulation
@@ -34,7 +34,7 @@ view(27,34);
 pause(1);
 while norm(error) > epsilon  
     x = comau_kine.fkm(theta);
-    J = comau_kine.jacobian(theta);
+    J = comau_kine.pose_jacobian(theta);
     error = vec8(xd-x);
     theta = theta + pinv(J)*K*error;
     plot(comau_kine,theta);
