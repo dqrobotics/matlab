@@ -5,12 +5,28 @@
 % Usage: robot = DQ_DifferentialDriveRobot(wheel_radius,distance_between_wheels), 
 % where both wheel_radius and distance_between_wheels are given in meters. 
 %
-% METHODS:
+% For more information about the available methods, see also
+% Concrete:
+%       constraint_jacobian
+% Concrete (Inherited from DQ_HolonomicBase):
+%       base_frame
+%       get_dim_configuration_space
 %       fkm
-%       pose_jacobian
+%       create_new_robot (Protected)
+%       pose_jacobian (overloaded)
 %       plot
-%
-% See also DQ_kinematics, DQ_HolonomicBase, DQ_DifferentialDrive
+%       raw_fkm
+%       raw_pose_jacobian
+%       set_base_diameter
+%       update_robot     (Protected)
+% Concrete (Inherited from DQ_Kinematics):
+%       set_base_frame
+%       set_reference_frame
+% Static (Inherited from DQ_Kinematics):
+%       distance_jacobian
+%       rotation_jacobian
+%       translation_jacobian
+
 
 % (C) Copyright 2015 DQ Robotics Developers
 %

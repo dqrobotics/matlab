@@ -2,27 +2,27 @@
 % This is an abstract class that provides the basic functionalities that
 % all concrete classes must implement. 
 % 
-% ABSTRACT METHODS: fkm
-%                   pose_jacobian
-%                   create_new_robot (Protected)
-%                   update_robot     (Protected)
-%                   set_dim_configuration_space
-%
-% CONCRETE METHODS: plot
-%                   get_dim_configuration_space
-%
-%
-% See also 
-%           fkm
-%           raw_fkm
-%           pose_jacobian
-%           raw_pose_jacobian
-%           create_new_robot
-%           update_robot
-%           plot
-%           get_dim_configuration_space
+% For more information about the available methods, see also
+% Abstract:
+%       create_new_robot (Protected)
+%       raw_fkm
+%       raw_pose_jacobian
+%       update_robot     (Protected)
+% Abstract (Inherited from DQ_Kinematics):
+%       fkm
+%       pose_jacobian
+% Concrete:
+%       get_dim_configuration_space
+%       plot
+% Concrete (Inherited from DQ_Kinematics):
+%       set_base_frame
+%       set_reference_frame
+% Static (Inherited from DQ_Kinematics):
+%       distance_jacobian
+%       rotation_jacobian
+%       translation_jacobian
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -44,13 +44,8 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef (Abstract) DQ_MobileBase < handle
-    % DQ_MobileBase inherits the HANDLE superclass to avoid unnecessary copies
-    % when passing DQ_MobileBase objects as arguments to methods.
-    
-    properties
-        name;
-        q;
+classdef (Abstract) DQ_MobileBase < DQ_Kinematics
+    properties      
         plotopt;
         base_pose;
     end
@@ -63,8 +58,8 @@ classdef (Abstract) DQ_MobileBase < handle
     
     methods
         function obj = DQ_MobileBase()
-            % Define a unique robot name
-            obj.name = sprintf('%f',rand(1));
+            % At the begining, there is no frame displacement (e.g., a 
+            % displacement related to the mobile base height).
             obj.frame_displacement = DQ(1);
         end
         
@@ -81,7 +76,7 @@ classdef (Abstract) DQ_MobileBase < handle
         end
                 
         function plot(robot,q,varargin)
-        % plot(robot,q,options) plots the robot of type DQ_MobileBase. 
+        % PLOT(robot,q,options) plots the robot of type DQ_MobileBase. 
         % q is the vector of joint configurations
         % options is an optional argument that has variable size and accept any
         % number of the following parameters:
@@ -164,27 +159,13 @@ classdef (Abstract) DQ_MobileBase < handle
 
     
     methods (Abstract)
-         % ABSTRACT METHOD.
-         % Given the configuration q, pose_jacobian(obj,q) returns the
-         % Jacobian matrix that satisfies x_dot = J*q, where x_dot is the
-         % time derivative of the unit dual quaternion that represents the
-         % mobile-base pose. It takes into account the base frame
-         % displacement
-         J = pose_jacobian(obj, q);
-         
-         % Given the configuration q, pose_jacobian(obj,q) returns the
-         % Jacobian matrix that satisfies x_dot = J*q, where x_dot is the
-         % time derivative of the unit dual quaternion that represents the
-         % mobile-base pose. It does not take into account the base frame
-         % displacement
+         % RAW_POSE_JACOBIAN(obj,q) returns the Jacobian matrix that satisfies 
+         % x_dot = J * q, where x_dot is the time derivative of x = FKM(q). It
+         % does not take into account the base frame displacement
          J = raw_pose_jacobian(obj, q);
          
-         % pose = fkm(obj,q) returns the pose of a mobile base given the 
-         % configuration q = [x,y,phi]'. It considers the base frame 
-         % displacement 
-         pose = fkm(obj,q);
-         
-         % pose = raw_fkm(obj,q) returns the pose of a mobile base given the 
+       
+         % RAW_FKM(q) returns the pose of a mobile base given the 
          % configuration q = [x,y,phi]'. It does not consider the base frame 
          % displacement         
          pose = raw_fkm(obj,q);
@@ -216,15 +197,15 @@ classdef (Abstract) DQ_MobileBase < handle
         % UPDATE_ROBOT(robot, q) moves an existing graphical robot to the 
         % configuration specified by q. The parameter 'robot' is a DQ_MobileBase
         % object, and graphics are defined by the handle structure robot.handle, 
-       % which stores the 'graphical robot' as robot.handle.robot.
+        % which stores the 'graphical robot' as robot.handle.robot.
         update_robot(rr, q);
     end
 end
 
-% mobile_base_plot(robot, q, varargin) creates a new robot, if it does
+% MOBILE_BASE_PLOT(robot, q, varargin) creates a new robot, if it does
 % not exist, otherwise it updates all robots with the same name.
 % 
-% In case a robot is created, the function create_new_robot() provides a
+% In case a robot is created, the function CREATE_NEW_ROBOT() provides a
 % handle 'h' to the graphical robot. Then, for the h.robot object we 
 % additionally: 
 %   - save this new kinematic robot object as its UserData
@@ -232,8 +213,9 @@ end
 %
 %  This enables us to find all robots with a given name, in all figures,
 %  and update them.
-
 function mobile_base_plot(robot, q, varargin)
+
+
     % process options
     if (nargin > 2) && isstruct(varargin{1})
         % options is a struct. 
@@ -304,7 +286,7 @@ function o = plot_options(robot, optin)
     end
 end
 
-% [opt, others] = parse_options(default, options) parses the cell array inside
+% [opt, others] = PARSE_OPTIONS(default, options) parses the cell array inside
 % 'options' and returns the corresponding structure 'opt'. The default
 % parameters are given by 'default'.
 %
@@ -333,7 +315,6 @@ function [opt,others] = parse_options(default, options)
 % TODO: Since this function is exactly the same for all classes, maybe we
 % should declare it in another place and just use it without having to copy
 % it.
-
     arglist = {};
 
     argc = 1;

@@ -1,18 +1,31 @@
 % CLASS DQ_HolonomicBase 
-% This class inherits from DQ_MobileBase
+%
+% Basic implementation of a holonomic base.
 % 
 % Usage: robot = DQ_MobileBase()
-%
-% See also
-%           fkm
-%           pose_jacobian
-%           get_dim_configuration_space
-%           base_frame
-%           set_base_diameter
-% Other classes
-%           DQ_kinematics, DQ_MobileBase
+%      
+% For more information about the available methods, see also
+% Concrete:
+%       base_frame
+%       fkm
+%       create_new_robot (Protected)
+%       pose_jacobian
+%       raw_fkm
+%       raw_pose_jacobian
+%       set_base_diameter
+%       update_robot     (Protected)
+% Concrete (Inherited from DQ_MobileBase):
+%       get_dim_configuration_space
+%       plot
+% Concrete (Inherited from DQ_Kinematics):
+%       set_base_frame
+%       set_reference_frame
+% Static (Inherited from DQ_Kinematics):
+%       distance_jacobian
+%       rotation_jacobian
+%       translation_jacobian
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -46,7 +59,7 @@ classdef DQ_HolonomicBase < DQ_MobileBase
         end
        
         function pose = raw_fkm(obj, q)
-        % raw_fkm(q) returns the pose of a mobile base given the 
+        % RAW_FKM(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. It does not take into consideration
         % the base frame displacement (e.g., base height).
         %
@@ -67,14 +80,14 @@ classdef DQ_HolonomicBase < DQ_MobileBase
         end
         
         function pose = fkm(obj, q)
-        % fkm(q) returns the pose of a mobile base given the 
+        % FKM(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. It takes into consideration
         % the base frame displacement (e.g., base height).
             pose = obj.raw_fkm(q)*obj.frame_displacement;
         end
             
         function J = raw_pose_jacobian(~,q)
-        % pose_jacobian(q) returns, given the configuration 
+        % RAW_POSE_JACOBIAN(q) returns, given the configuration 
         % q = [x,y,phi]', the mobile-base pose Jacobian J that satisfies 
         % x_dot = J*q, where x_dot is the time derivative of the unit dual 
         % quaternion that represents the mobile-base pose. It does not take into
@@ -108,17 +121,12 @@ classdef DQ_HolonomicBase < DQ_MobileBase
         end
         
         function J = pose_jacobian(obj,q)
-        % pose_jacobian(q) returns, given the configuration 
+        % POSE_JACOBIAN(q) returns, given the configuration 
         % q = [x,y,phi]', the mobile-base pose Jacobian J that satisfies 
         % x_dot = J*q, where x_dot is the time derivative of the unit dual 
         % quaternion that represents the mobile-base pose. It takes into
         % consideration the base frame displacement (e.g., base height).
             J = haminus8(obj.frame_displacement)*obj.raw_pose_jacobian(q);
-        end
-        
-        function ret = get_dim_configuration_space(obj)
-            % Returns the dimension of the configuration space
-            ret = obj.dim_configuration_space;
         end
         
         function set_base_diameter(obj,diameter)
