@@ -340,7 +340,7 @@ function update_robot(robot, q)
     % compute the link transforms, and record the origin of each frame
     % for the graphics update.    
     for j=1:n    
-        t = vec3(translation(robot.base_frame*robot.fkm(q,j)));
+        t = vec3(translation(robot.base_frame*robot.raw_fkm(q,j)));
         x(j+1) = t(1);    
         y(j+1) = t(2);
         z(j+1) = t(3);
@@ -360,7 +360,7 @@ function update_robot(robot, q)
             xyz = get(h.joint(j), 'UserData');
             
             %The joints are located at the beginning of each link
-            fkm_j = robot.fkm(q,j-1);
+            fkm_j = robot.raw_fkm(q,j-1);
             
             for k = 1:size(xyz,2)
                 % 1 + DQ.E*(1/2)*p, where p = xyz(1:3,k);
@@ -388,7 +388,7 @@ function update_robot(robot, q)
     if isfield(h, 'x')
         % get the end-effector pose (considering the final transformation given
         % by set_end_effector()
-        t = robot.base_frame*robot.fkm(q);
+        t = robot.base_frame*robot.raw_fkm(q)*robot.effector;
         t1 = vec3(translation(t));        
         
         % The following transformations use the Hamilton operators to

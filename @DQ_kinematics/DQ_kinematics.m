@@ -382,6 +382,7 @@ classdef DQ_kinematics < DQ_Kinematics
             warning(['The function set_base() is deprecated and will be '...
                 'removed in the future. Please use set_reference_frame() '...
                 'instead']);
+            obj.set_base_frame(frame);
             obj.set_reference_frame(frame);
         end
             
