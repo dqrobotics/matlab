@@ -15,27 +15,30 @@
 % Type DQ_kinematics.(method,property) for specific help.
 % Ex.: help DQ_kinematics.fkm
 %
-% For specific methods, see also
-%       raw_fkm
+% For more information about the available methods, see also
+% Concrete:
+%       get_dim_configuration_space
 %       fkm
-%       raw_pose_jacobian
 %       pose_jacobian
 %       pose_jacobian_derivative
-%       distance_jacobian
-%       translation_jacobian
-%       rotation_jacobian
-%       set_reference_frame
-%       set_base_frame
+%       raw_fkm
+%       raw_pose_jacobian
 %       set_effector
-%       get_dim_configuration_space
+% Concrete (Inherited from DQ_Kinematics):
+%       set_base_frame
+%       set_reference_frame
+% Static (Inherited from DQ_Kinematics):
+%       distance_jacobian
+%       rotation_jacobian
+%       translation_jacobian
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
 %     DQ Robotics is free software: you can redistribute it and/or modify
-%     it under the terms of the GNU Lesser General Public License as published by
-%     the Free Software Foundation, either version 3 of the License, or
+%     it under the terms of the GNU Lesser General Public License as published 
+%     by the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
 %
 %     DQ Robotics is distributed in the hope that it will be useful,
@@ -55,9 +58,7 @@
 % confusion, specially among those trying to learn the library. The
 % affected methods are: FKM and Jacobian.
 
-classdef DQ_kinematics < handle
-    % DQ_kinematics inherits the HANDLE superclass to avoid unnecessary copies
-    % when passing DQ_kinematics objects as arguments to methods.
+classdef DQ_kinematics < DQ_Kinematics
     properties
         n_links;
         theta,d,a,alpha;
@@ -65,13 +66,10 @@ classdef DQ_kinematics < handle
         % future
         dummy;
         n_dummy;
-        convention;
-        reference_frame;
-        base_frame;
+        convention;        
         effector;
         
-        % Properties for the plot function
-        name;
+        % Properties for the plot function        
         plotopt
         lineopt
     end
@@ -80,10 +78,6 @@ classdef DQ_kinematics < handle
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
-        % Robot configuration (i.e., joint angles, in case of revolute
-        % joints, and joint displacements, in case of prismatic joints)
-        q
-        
     end
     
     methods
@@ -131,41 +125,20 @@ classdef DQ_kinematics < handle
             ret = obj.n_links;
         end
         
-        function set_reference_frame(obj,reference_frame)
-            % dq.set_reference_frame(base) sets the reference frame used
-            % for the fkm() and pose_jacobian() functions            
-            obj.reference_frame = DQ(reference_frame);
-        end
-        
-        function set_base_frame(obj, base_frame)
-            % set_base_frame(base_frame) sets the base frame with respect
-            % to the global reference frame (i.e., the identity). The rigid 
-            % motion from the global reference frame to the robot base is given
-            % by the unit dual quaternion 'base_frame'. This function is used to
-            % define the 'physical' place of the robot base
-            % and it does not necessarily coincides with the reference
-            % frame.
-            if is_unit(base_frame)
-                obj.base_frame = DQ(base_frame);
-            else
-                error('The base frame must be a unit dual quaternion.');
-            end
-        end
-        
-        
-        
         function set_effector(obj,effector)
-            % dq.set_effector(effector) sets the pose of the effector
+            % SET_EFFECTOR(effector) sets the pose of the effector
             
             obj.effector = DQ(effector);
         end
         
-        function q = raw_fkm(obj,theta, ith)
-            %   dq = raw_fkm(theta) calculates the forward kinematic model and
+        function x = raw_fkm(obj,q, ith)
+            %   RAW_FKM(q) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
             %   last joint (the displacements due to the base and the effector 
             %   are not taken into account).
-            %   theta is the vector of joint variables
+            %
+            %   'q' is the vector of joint variables
+            %
             %   This is an auxiliary function to be used mainly with the
             %   Jacobian function.
             
@@ -175,42 +148,42 @@ classdef DQ_kinematics < handle
                 n = obj.n_links;
             end
             
-            if length(theta) ~= (obj.n_links - obj.n_dummy)
+            if length(q) ~= (obj.n_links - obj.n_dummy)
                 error('Incorrect number of joint variables');
             end
             
-            q=DQ(1);
+            x = DQ(1);
             
             j = 0;
             for i=1:n
                 if obj.dummy(i) == 1
-                    %The offset is taken into account inside the method dh2dq
-                    q = q*dh2dq(obj,0,i);
+                    % The offset is taken into account inside the method dh2dq
+                    x = x*dh2dq(obj,0,i);
                     j = j + 1;
                 else
-                    q = q*dh2dq(obj,theta(i-j),i);
+                    x = x*dh2dq(obj,q(i-j),i);
                 end
             end
         end
         
-        function q = fkm(obj,theta, ith)
-            %   dq = fkm(theta) calculates the forward kinematic model and
+        function x = fkm(obj,q, ith)
+            %   FKM(q) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
             %   end-effector pose. This function takes into account the
             %   displacement due to the base's and effector's poses.
             %
-            %   theta is the vector of joint variables
+            %   'q' is the vector of joint variables
             %
-            %   dq = fkm(theta, ith) calculates the FKM up to the ith link.
+            %   FKM(q, ith) calculates the FKM up to the ith link.
             %   If ith is the last link, it DOES NOT take into account the
             %   trasformation given by set_effector. If you want to take
-            %   into account that transformation, use dq = fkm(theta)
+            %   into account that transformation, use FKM(q)
             %   instead.
             
             if nargin == 3
-                q = obj.reference_frame*obj.raw_fkm(theta, ith); %Takes into account the base displacement
+                x = obj.reference_frame*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
-                q = obj.reference_frame*obj.raw_fkm(theta)*obj.effector;
+                x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
             end
         end
         
@@ -229,59 +202,58 @@ classdef DQ_kinematics < handle
             alpha = obj.alpha(i);
             
             if strcmp(obj.convention,'standard')
-                q(1)=cos((theta+obj.theta(i))/2)*cos(alpha/2);
-                q(2)=cos((theta+obj.theta(i))/2)*sin(alpha/2);
-                q(3)=sin((theta+obj.theta(i))/2)*sin(alpha/2);
-                q(4)=sin((theta+obj.theta(i))/2)*cos(alpha/2);
-                d2=d/2;
-                a2=a/2;
+                h(1) = cos((theta+obj.theta(i))/2)*cos(alpha/2);
+                h(2) = cos((theta+obj.theta(i))/2)*sin(alpha/2);
+                h(3) = sin((theta+obj.theta(i))/2)*sin(alpha/2);
+                h(4) = sin((theta+obj.theta(i))/2)*cos(alpha/2);
+                d2 = d/2;
+                a2 = a/2;
                 
                 
-                q(5)=-d2*q(4)-a2*q(2);
-                q(6)=-d2*q(3)+a2*q(1);
-                q(7)=d2*q(2)+a2*q(4);
-                q(8)=d2*q(1)-a2*q(3);
+                h(5) = -d2*h(4)-a2*h(2);
+                h(6) = -d2*h(3)+a2*h(1);
+                h(7) = d2*h(2)+a2*h(4);
+                h(8) = d2*h(1)-a2*h(3);
             else
                 h1 = cos((theta+obj.theta(i))/2)*cos(alpha/2);
                 h2 = cos((theta+obj.theta(i))/2)*sin(alpha/2);
                 h3 = sin((theta+obj.theta(i))/2)*sin(alpha/2);
                 h4 = sin((theta+obj.theta(i))/2)*cos(alpha/2);
-                q(1)= h1;
-                q(2)= h2;
-                q(3)= -h3;
-                q(4)= h4;
-                d2=d/2;
-                a2=a/2;
+                h(1) = h1;
+                h(2) = h2;
+                h(3) = -h3;
+                h(4) = h4;
+                d2 = d/2;
+                a2 = a/2;
                 
-                
-                q(5)=-d2*h4-a2*h2;
-                q(6)=-d2*h3+a2*h1;
-                q(7)=-(d2*h2+a2*h4);
-                q(8)=d2*h1-a2*h3;
+                h(5) = -d2*h4-a2*h2;
+                h(6) = -d2*h3+a2*h1;
+                h(7) = -(d2*h2+a2*h4);
+                h(8) = d2*h1-a2*h3;
             end
             
-            dq=DQ(q);
+            dq = DQ(h);
         end
         
-        function p = get_z(obj,q)
+        function p = get_z(~,h)
             p(1) = 0;
-            p(2)=q(2)*q(4) + q(1)*q(3);
-            p(3)=q(3)*q(4) - q(1)* q(2);
-            p(4)=(q(4)^2-q(3)^2-q(2)^2+q(1)^2)/2;
-            p(5)=0;
-            p(6)=q(2)*q(8)+q(6)*q(4)+q(1)*q(7)+q(5)*q(3);
-            p(7)=q(3)*q(8)+q(7)*q(4)-q(1)*q(6)-q(5)*q(2);
-            p(8)=q(4)*q(8)-q(3)*q(7)-q(2)*q(6)+q(1)*q(5);
+            p(2) = h(2)*h(4) + h(1)*h(3);
+            p(3) = h(3)*h(4) - h(1)* h(2);
+            p(4) = (h(4)^2-h(3)^2-h(2)^2+h(1)^2)/2;
+            p(5) = 0;
+            p(6) = h(2)*h(8)+h(6)*h(4)+h(1)*h(7)+h(5)*h(3);
+            p(7) = h(3)*h(8)+h(7)*h(4)-h(1)*h(6)-h(5)*h(2);
+            p(8) = h(4)*h(8)-h(3)*h(7)-h(2)*h(6)+h(1)*h(5);
         end
         
-        function J = raw_pose_jacobian(obj,theta,ith)
-            % J = raw_pose_jacobian(theta) returns the Jacobian that satisfies 
-            % vec(x_dot) = J * theta_dot, where x = fkm(theta) and theta is the 
+        function J = raw_pose_jacobian(obj,q,ith)
+            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
+            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
             % vector of joint variables.
             %
-            % J = raw_pose_jacobian(theta,ith) returns the Jacobian that
-            % satisfies vec(x_ith_dot) = J * theta_dot(1:ith), where 
-            % x_ith = fkm(theta, ith), that is, the fkm up to the i-th link.
+            % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
+            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
+            % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
             %
             % This function does not take into account any base or
             % end-effector displacements and should be used mostly
@@ -289,14 +261,14 @@ classdef DQ_kinematics < handle
             
             if nargin == 3
                 n = ith;
-                x_effector = obj.raw_fkm(theta,ith);
+                x_effector = obj.raw_fkm(q,ith);
             else
                 n = obj.n_links;
-                x_effector = obj.raw_fkm(theta);
+                x_effector = obj.raw_fkm(q);
             end
             
             x = DQ(1);
-            J= zeros(8,n-obj.n_dummy);
+            J = zeros(8,n-obj.n_dummy);
             jth=0;
             
             for i = 0:n-1
@@ -304,12 +276,14 @@ classdef DQ_kinematics < handle
                 if strcmp(obj.convention,'standard')
                     z = DQ(obj.get_z(x.q));
                 else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
+                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
+                        0,-obj.a(i+1)*cos(obj.alpha(i+1)), ...
+                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
                     z = 0.5*x*w*x';
                 end
                 
                 if ~obj.dummy(i+1)
-                    x = x*obj.dh2dq(theta(jth+1),i+1);
+                    x = x*obj.dh2dq(q(jth+1),i+1);
                     j = z * x_effector;
                     J(:,jth+1) = j.q;
                     jth = jth+1;
@@ -320,10 +294,10 @@ classdef DQ_kinematics < handle
             end
         end
         
-        function J = pose_jacobian(obj, theta, ith)
-            % J = pose_jacobian(theta) returns the Jacobian that satisfies
-            % vec(x_dot) = J * theta_dot, where x = fkm(theta) and
-            % theta is the vector of joint variables. It takes into account
+        function J = pose_jacobian(obj, q, ith)
+            % POSE_JACOBIAN(q) returns the Jacobian that satisfies
+            % vec(x_dot) = J * q_dot, where x = fkm(q) and
+            % q is the vector of joint variables. It takes into account
             % both base and end-effector displacements (their default
             % values are 1).
             
@@ -331,38 +305,41 @@ classdef DQ_kinematics < handle
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
-                J = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian(theta, ith);
+                J = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian(...
+                    q, ith);
             else
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*obj.raw_pose_jacobian(theta);
+                J = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*...
+                    obj.raw_pose_jacobian(q);
             end
         end
         
-        function J_dot = pose_jacobian_derivative(obj,theta,theta_dot, ith)
-            % J_dot = jacobian_dot(theta,theta_dot) returns the Jacobian 
+        function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
+            % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
             % time derivative.
-            % J_dot = jacobian_dot(theta,theta_dot,ith) returns the first
+            % 
+            % POSE_JACOBIAN_DERIVATIVE(q,q_dot,ith) returns the first
             % ith columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
             
             if nargin == 4
                 n = ith;
-                x_effector = obj.raw_fkm(theta,ith);
-                J = obj.raw_pose_jacobian(theta,ith);
-                vec_x_effector_dot = J*theta_dot(1:ith);
+                x_effector = obj.raw_fkm(q,ith);
+                J = obj.raw_pose_jacobian(q,ith);
+                vec_x_effector_dot = J*q_dot(1:ith);
             else
                 n = obj.n_links;
-                x_effector = obj.raw_fkm(theta);
-                J = obj.raw_pose_jacobian(theta);
-                vec_x_effector_dot = J*theta_dot;
+                x_effector = obj.raw_fkm(q);
+                J = obj.raw_pose_jacobian(q);
+                vec_x_effector_dot = J*q_dot;
             end
                                  
             x = DQ(1);            
             J_dot = zeros(8,n-obj.n_dummy);
-            jth=0;
+            jth = 0;
             
             for i = 0:n-1
                 % Use the standard DH convention
@@ -370,7 +347,9 @@ classdef DQ_kinematics < handle
                     w = DQ.k;
                     z = DQ(obj.get_z(x.q));
                 else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0,0,-obj.a(i+1)*cos(obj.alpha(i+1)),-obj.a(i+1)*sin(obj.alpha(i+1)) ] );
+                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
+                        0,-obj.a(i+1)*cos(obj.alpha(i+1)),...
+                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
                     z = 0.5*x*w*x';
                 end
                 
@@ -381,12 +360,15 @@ classdef DQ_kinematics < handle
                     % Therefore, we have to deal with the case i = 0
                     % explictly.
                     if i ~= 0
-                        vec_zdot = 0.5*(haminus8(w*x') + hamiplus8(x*w)*DQ.C8)*obj.raw_pose_jacobian(theta,i)*theta_dot(1:i);
+                        vec_zdot = 0.5*(haminus8(w*x') + ...
+                            hamiplus8(x*w)*DQ.C8) * ...
+                            obj.raw_pose_jacobian(q,i)*q_dot(1:i);
                     else
                         vec_zdot = zeros(8,1);
                     end
-                    J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot + hamiplus8(z)*vec_x_effector_dot;
-                    x = x*obj.dh2dq(theta(jth+1),i+1);
+                    J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot +...
+                        hamiplus8(z)*vec_x_effector_dot;
+                    x = x*obj.dh2dq(q(jth+1),i+1);
                     jth = jth+1;
                 else
                     % Dummy joints don't contribute to the Jacobian
@@ -395,6 +377,7 @@ classdef DQ_kinematics < handle
             end
         end
         
+        %% Deprecated methods. They will be removed in the near future.
         function J = jacobian(obj,theta, ith)
             warning(['The function jacobian() is deprecated and will be '...
                 'removed in the future. Please use pose_jacobian() '...
@@ -427,8 +410,9 @@ classdef DQ_kinematics < handle
         
     end
     
+%% Deprecated static methods. They will be removed in the near future.    
+    
     methods(Static)
-        
         function ret = C4()
              warning(['DQ_kinematics.C4 is deprecated and will be removed'... 
                 'in the future. Please use DQ.C4 instead']);
@@ -451,47 +435,6 @@ classdef DQ_kinematics < handle
             warning(['The function jacobd is deprecated and will be removed'... 
                 'in the future. Please use distance_jacobian() instead']);
             Jd = DQ_kinematics.distance_jacobian(J,x);
-        end
-        
-        function Jd = distance_jacobian(J,x)
-            %Given the dual quaternion Jacobian J and the corresponding
-            %dual quaternion, Jd = jacobd(J,x) returns the distance Jacobian; that it,
-            %the Jacobian that satisfies the relation dot_(d^2) = Jd * dot_theta,
-            %where dot_(d^2) is the time derivative of the
-            %square of the distance between the end-effector and the base and dot_theta is the time derivative of
-            %the joint vector.
-            if ~isa(x,'DQ')
-                warning(['The second argument of distance_jacobian should be'...
-                    ' a unit dual quaternion']);
-                x = DQ(x);
-            end
-            p = translation(x);
-            Jp = DQ_kinematics.translation_jacobian(J,x);
-            Jd = 2*vec4(p)'*Jp;
-        end
-        
-        function Jp = translation_jacobian(J,x)
-        % Given the Jacobian J and the corresponding dual quaternion x, such
-        % that vec8(x_dot) = J*q_dot, Jp = position_jacobian(J,x) returns the 
-        % translation Jacobian; that it, the Jacobian that satisfies the 
-        % relation p_dot = Jp * q_dot, where p_dot is the time derivative of the
-        % translation quaternion and q_dot is the time derivative of the joint
-        % vector.
-            if ~isa(x,'DQ')
-                warning(['The second argument of position_jacobian should be'...
-                    ' a unit dual quaternion']);
-                x = DQ(x);
-            end
-            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ.C4*J(1:4,:);
-        end
-        
-        function Jr = rotation_jacobian(J)
-        % Given the Jacobian J that satisfies vec8(x_dot) = J*q_dot, 
-        % rotation_jacobian returns the Jacobian Jr that satisfies 
-        % vec4(r_dot) = Jr * q_dot, where r_dot is the time derivative of
-        % the rotation quaternion r in x = r + DQ.E*(1/2)*p*r and q_dot is
-        % the time derivative of the joint vector.
-            Jr = J(1:4,:);
         end
     end
 end
