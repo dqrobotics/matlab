@@ -378,6 +378,14 @@ classdef DQ_kinematics < DQ_Kinematics
         end
         
         %% Deprecated methods. They will be removed in the near future.
+        function set_base(obj,frame)
+            warning(['The function set_base() is deprecated and will be '...
+                'removed in the future. Please use set_reference_frame() '...
+                'instead']);
+            obj.set_reference_frame(frame);
+        end
+            
+        
         function J = jacobian(obj,theta, ith)
             warning(['The function jacobian() is deprecated and will be '...
                 'removed in the future. Please use pose_jacobian() '...
