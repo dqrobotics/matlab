@@ -51,7 +51,7 @@ classdef DQ_Kinematics < handle
         name;
     end
     
-    properties (SetAccess = private)
+    properties (SetAccess = protected)
         % Robot configuration vector
         q        
     end
@@ -124,7 +124,7 @@ classdef DQ_Kinematics < handle
          % relation dot(d^2) = Jd * q_dot, where dot(d^2) is the time 
          % derivative of the square of the distance between the origin of the 
          % frame represented by 'x' and the origin of the reference frame.
-             if ~isunit(x)
+             if ~is_unit(x)
                 error(['The second argument of distance_jacobian should be'...
                         ' a unit dual quaternion']);
              end
@@ -141,7 +141,7 @@ classdef DQ_Kinematics < handle
         % vec4(p_dot) = Jp * q_dot, where p_dot is the time derivative of the
         % translation quaternion p and q_dot is the time derivative of the 
         % configuration vector
-            if ~isunit(x)
+            if ~is_unit(x)
                 error(['The second argument of translation_jacobian should be'...
                     ' a unit dual quaternion']);              
             end
