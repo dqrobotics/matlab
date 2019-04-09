@@ -1,6 +1,10 @@
-% Simple example to test the DQ_MobileBase class. Given an initial pose,
-% control the robot motion towards a desired pose by using a switched
-% controller in order to prevent the unwinding problem.
+% HOLONOMIC_BASE_CONTROL() runs a simple example to test the DQ_MobileBase 
+% class. Given an initial pose, control the robot motion towards a desired pose
+% by using a switched controller in order to prevent the unwinding problem.
+%
+% HOLONOMIC_BASE_CONTROL(x,y,phi) enables to define the desired (x,y,phi)
+% configuration.
+
 
 % (C) Copyright 2019 DQ Robotics Developers
 %
