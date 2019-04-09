@@ -378,6 +378,93 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             end
         end
         
+        % plot(robot,q,options) plots the robot of type DQ_kinematics.
+        % q is the vector of joint configurations
+        % options is an optional argument that has variable size and accept any
+        % number of the following pairs:
+        %
+        %  'workspace', W          size of robot 3D workspace, where
+        %                          W = [xmn, xmx ymn ymx zmn zmx]
+        %  'cylinder', C           color for joint cylinders, C=[r g b]
+        %  'scale', scale          annotation scale factor
+        %  'base'|'nobase'         controls display of base plane
+        %  'wrist'|'nowrist'       controls display of wrist
+        %  'name'|'noname'         display the robot's name
+        %  'xyz'|'noa'             wrist axis label
+        %  'joints'|'nojoints'     controls display of joints
+        %
+        % The graphical robot object holds a copy of the robot object and
+        % the graphical element is tagged with the robot's name (.name property).
+        %
+        % 1) Figure behavior:
+        %
+        % If no robot of this name is currently displayed then a robot will
+        % be drawn in the current figure.  If hold is enabled (hold on) then the
+        % robot will be added to the current figure.
+        %
+        % If the robot already exists then that graphical model will be found
+        % and moved.
+        %
+        % 2) Multiple views of the same robot:
+        %
+        % If one or more plots of this robot already exist then these will all
+        % be moved according to the argument 'q'.  All robots in all windows with
+        % the same name will be moved.
+        %
+        % NOTE: Since each kinematic robot stores just one graphical handle,
+        % if we want to plot the same robot in different views, we must declare
+        % different robots with the same name. Otherwise, if just one robot is declared,
+        % but plotted in different windows/views, the kinematic robot will store
+        % the handle of the last view only. Therefore, only the last view will be
+        % updated
+        %
+        % 3) Multiple robots in the same figure:
+        %
+        % Multiple robots (i.e., with different names) can be displayed in the same
+        % plot, by using "hold on" before calls to plot(robot).
+        %
+        % 4) Graphical robot state:
+        %
+        % The configuration of the robot as displayed is stored in the DQ_kinematics
+        % object and can be accessed by the read only object property 'q'.
+        %
+        % 5) Graphical annotations and options:
+        %
+        % The robot is displayed as a basic stick figure robot with annotations
+        % such as:
+        % - XYZ wrist axes and labels,
+        % - joint cylinders,
+        % which are controlled by options.
+        %
+        % The size of the annotations is determined using a simple heuristic from
+        % the workspace dimensions.  This dimension can be changed by setting the
+        % multiplicative scale factor using the 'scale' option.
+        function plot(robot,q,varargin)
+            has_options = 0;
+            if nargin < 2
+                fprintf(['\nUsage: plot(robot, q,[options])'...
+                    '\ntype ''help DQ_kinematics/plot'' for more information\n']);
+                return;
+            elseif nargin >= 3
+                has_options = 1;
+            end
+            
+            if ~isvector(q)
+                error('The first argument must be the vector of joint configurations.');
+            end
+            
+            % The joint configuration vector must be a row vector
+            if ~isrow(q)
+                q = q';
+            end
+            
+            if has_options
+                dq_kinematics_plot(robot,q, varargin{:});
+            else
+                dq_kinematics_plot(robot,q);
+            end
+        end
+        
         %% Deprecated methods. They will be removed in the near future.
         function set_base(obj,frame)
             warning(['The function set_base() is deprecated and will be '...
@@ -448,94 +535,6 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         end
     end
 end
-
-% plot(robot,q,options) plots the robot of type DQ_kinematics. 
-% q is the vector of joint configurations
-% options is an optional argument that has variable size and accept any
-% number of the following pairs:
-%
-%  'workspace', W          size of robot 3D workspace, where
-%                          W = [xmn, xmx ymn ymx zmn zmx]
-%  'cylinder', C           color for joint cylinders, C=[r g b]
-%  'scale', scale          annotation scale factor
-%  'base'|'nobase'         controls display of base plane
-%  'wrist'|'nowrist'       controls display of wrist
-%  'name'|'noname'         display the robot's name 
-%  'xyz'|'noa'             wrist axis label
-%  'joints'|'nojoints'     controls display of joints
-%
-% The graphical robot object holds a copy of the robot object and
-% the graphical element is tagged with the robot's name (.name property).
-%
-% 1) Figure behavior:
-%
-% If no robot of this name is currently displayed then a robot will
-% be drawn in the current figure.  If hold is enabled (hold on) then the
-% robot will be added to the current figure.
-%
-% If the robot already exists then that graphical model will be found 
-% and moved.
-%
-% 2) Multiple views of the same robot:
-%
-% If one or more plots of this robot already exist then these will all
-% be moved according to the argument 'q'.  All robots in all windows with 
-% the same name will be moved.
-%
-% NOTE: Since each kinematic robot stores just one graphical handle, 
-% if we want to plot the same robot in different views, we must declare 
-% different robots with the same name. Otherwise, if just one robot is declared,
-% but plotted in different windows/views, the kinematic robot will store 
-% the handle of the last view only. Therefore, only the last view will be 
-% updated
-%
-% 3) Multiple robots in the same figure:
-%
-% Multiple robots (i.e., with different names) can be displayed in the same 
-% plot, by using "hold on" before calls to plot(robot).  
-%
-% 4) Graphical robot state:
-%
-% The configuration of the robot as displayed is stored in the DQ_kinematics
-% object and can be accessed by the read only object property 'q'.
-%
-% 5) Graphical annotations and options:
-%
-% The robot is displayed as a basic stick figure robot with annotations 
-% such as:
-% - XYZ wrist axes and labels,
-% - joint cylinders,
-% which are controlled by options.
-%
-% The size of the annotations is determined using a simple heuristic from 
-% the workspace dimensions.  This dimension can be changed by setting the 
-% multiplicative scale factor using the 'scale' option.
-function plot(robot,q,varargin)    
-    has_options = 0;
-    if nargin < 2
-        fprintf(['\nUsage: plot(robot, q,[options])'...
-                 '\ntype ''help DQ_kinematics/plot'' for more information\n']);
-        return;
-    elseif nargin >= 3
-        has_options = 1;
-    end
-    
-    if ~isvector(q)
-        error('The first argument must be the vector of joint configurations.');
-    end
-    
-    % The joint configuration vector must be a row vector
-    if ~isrow(q)
-        q = q';
-    end
-    
-    if has_options
-        dq_kinematics_plot(robot,q, varargin{:});
-    else
-        dq_kinematics_plot(robot,q);
-    end
-end
-
 
 % dq_kinematics_plot(robot, q, varargin) creates a new robot, if it does
 % not exist, otherwise it updates all robots with the same name.
