@@ -20,20 +20,16 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
+classdef RoombaCreateRobot
+    methods (Static)
+        function robot = kinematics()
+            % Create a new iRoomba Create Robot
 
-function robot = new_little_john_robot()
-    % Mobile manipulator composed of a nonholonomic mobile base (Create)
-    % serially coupled to a 5-DOF arm (made of AX18 servos)
-    arm = DQ_AX18();
-    base = new_create_robot();
-    
-    include_namespace_dq
-    
-    % Changing the reference due to the mobile base height
-    x = 1 + E_*(1/2)*170e-3*k_;
-    
-    base.set_frame_displacement(x);
-    
-    robot = DQ_WholeBody(base);
-    robot.add(arm);
+            % The parameters below are given in meters
+            wheel_radius = 65e-3; 
+            distance_between_wheels = 260e-3;
+
+            robot = DQ_DifferentialDriveRobot(wheel_radius,distance_between_wheels);
+        end
+    end
 end

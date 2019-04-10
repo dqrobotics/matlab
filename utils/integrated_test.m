@@ -10,7 +10,10 @@ function [fail_count, fail_log] = integrated_test()
             'draw_lines_planes_using_dual_quaternions',...
             'example_dq_kinematic_control',...
             'matlab_general_operations',...
-            'pose_jacobian_time_derivative'
+            'pose_jacobian_time_derivative',...
+            'example_little_john(''novisual'')',...
+            'robot_serialization(''novisual'')',...
+            'whole_body_control_example(''novisual'')'
             };
 
     fail_log = sprintf('This is the list of failed tests: ');
@@ -18,17 +21,17 @@ function [fail_count, fail_log] = integrated_test()
     for i = 1:length(file)        
         try
             close all;
-            clc;
             fprintf('\n%d of %d: Executing %s', i, length(file), file{i});
             eval(file{i});
         catch
-            strcat(fail_log, file{i}, ', ');
+            clc;
+            fail_log = [fail_log, file{i}, ', '];
             fprintf('\n');
             warning('Could not execute file %s', file{i});
             fail_count = fail_count + 1; 
         end
     end
     clc;
-    fprintf('\n Number of fails: %s', fail_count);
+    fprintf('\nNumber of fails: %d', fail_count);
     fprintf('\n%s', fail_log);
 end

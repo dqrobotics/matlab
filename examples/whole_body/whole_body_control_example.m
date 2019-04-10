@@ -1,5 +1,8 @@
-% Simple example on how to perform whole body control using the Little John
-% robot (http://macro.ppgee.ufmg.br/site-map/articles/14-front-end-articles/121-little-john)
+% Simple example on how to perform whole body control. We use a holonomic
+% mobile base serially coupled to five manipulators, all in series. Since
+% the overall robot has 34 DOF, first we simulate and then we show the
+% robot motion to improve the visualization. The desired end-effector pose
+% is randomly generated.
 
 % (C) Copyright 2019 DQ Robotics Developers
 %
@@ -23,29 +26,46 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function example_little_john(varargin)
+function whole_body_control_example(varargin)
     %default behavior is to visualize the trajectory
     visualize = 1; 
     if nargin == 1 && strcmp(varargin{1}, 'novisual')
         visualize = 0;
     end
-
+    
     % Include the DQ name space to use i_ instead of DQ.i, etc.
     include_namespace_dq
 
-    robot = LittleJohnRobot.kinematics();
+    % The components of our mobile manipulator
+    base = DQ_HolonomicBase;
+    arm = {KukaLwr4Robot.kinematics(),...
+           KukaLwr4Robot.kinematics(),...
+           Ax18ManipulatorRobot.kinematics(),...
+           KukaLwr4Robot.kinematics(),...
+           Ax18ManipulatorRobot.kinematics()};
+
+    %% Initializes the robot serially coupled kinematic chain from the mobile base
+    robot = DQ_WholeBody(base);
+    % Serially add all the arms
+    for i = 1:length(arm)
+        robot.add(arm{i});
+    end
 
     %% Initialize the configuration vector. 
     % All variables are zero except four. This is completely arbitrary.
     q = zeros(robot.get_dim_configuration_space(),1);
+    q(1) = 3;
+    q(5) = pi/2; % second joint of the first arm
+    q(6) = -pi/2;
+    q(12) = -pi/2; % second joint of the second arm
 
     %% Initialize controller parameters and control objective
     x = robot.fkm(q); % Initial end-effector pose
 
-    % Define a rotation of pi/2 around the z-axis
-    r = cos(pi/4) + k_*sin(pi/4);
+    % Define a rotation of pi/2 around a random rotation axis
+    r = cos(pi/2) + normalize(DQ(rand(3,1)))*sin(pi/2);
     % Define a random translation
-    p = 5*rand(1)*i_ + (15*rand(1)-7.5)*j_;
+    p = 15*rand(1)*i_ + (15*rand(1)-7.5)*j_ + (0.5*rand(1) + 1)*k_;
 
     % In order to define a decoupled transformation we use a CMI(3)
     % multiplication, also known as decompositional multiplication
@@ -54,16 +74,19 @@ function example_little_john(varargin)
 
     %% Initalize the plot
     % Plot the global reference frame
-    plot(DQ(1), 'scale', 0.2);
+    plot(DQ(1));
     hold on;
     plot(xd,'scale',0.2);
 
-    % Plot the robot in the initial configuration
+    % Plot the robot in the initial configuraion
     plot(robot,q);
     %axis square;
-    axis([-2,15,-15,15,0,0.7]);
-    axis equal;
+    axis([-2,15,-15,15,0,3.1]);
     hold on;
+    title('Start the simulation in 3s. Press ''q'' anytime to abort and quit');
+    pause(1);
+    title('Start the simulation in 2s. Press ''q'' anytime to abort and quit');
+    pause(1);
     title('Start the simulation in 1s. Press ''q'' anytime to abort and quit');
     pause(1);
 
@@ -77,7 +100,7 @@ function example_little_john(varargin)
     T = 0.001; % Integration step used in the robot configuration update
     gain = 100; % The gain determines the convergence rate
     i = 1;
-    while (key ~= 'q') & (norm(x_error) > 0.01)
+    while key ~= 'q' && norm(x_error) > 0.01
 
         my_text = sprintf(['After the error becomes less than 0.01,'...
             ' the visualization will begin. Current error is %f'],norm(x_error));
@@ -89,22 +112,15 @@ function example_little_john(varargin)
         J = robot.pose_jacobian(q);
         N = haminus8(xd)*DQ.C8*J;
         x_error = vec8(x'*xd - 1);    
-        % Use the damped least-square inverse in simple pseudoinverse-like kinematic
-        % control. This is not the most appropriate controller for this robot, as 
-        % the nonholonomy is not taken into account explicitly, but we just want to 
-        % perform a simple simulation of Little John.
-        u = -N'/(N*N' + 0.01*eye(size(N,1)))*gain*x_error;
+        u = -pinv(N)*gain*x_error;
         % Which ends here!
 
         % Store the current configuration to visualize it later
         q_vec(:,i) = q;
         i = i + 1;
         % Numerically integrate the robot configuration, since there is no
-        % actual robot. Since the base inputs are the wheel velocities, we have
-        % to map them back to the base configuration in order to perform the
-        % integration
-        C = blkdiag(robot.chain{1}.constraint_jacobian(q(3)),eye(5));
-        q = q + T*C*u;
+        % actual robot.
+        q = q + T*u;
 
         % Update the title in order to provide a hint about when the simulation
         % will finish
@@ -136,4 +152,3 @@ function example_little_john(varargin)
         close all;
     end
 end
-

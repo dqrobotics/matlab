@@ -23,58 +23,70 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-%% Start a fresh simulation
-clear all;
-close all;
-clc;
+function robot_serialization(varargin)
+    %default behavior is to visualize the trajectory
+    visualize = 1; 
+    if nargin == 1 && strcmp(varargin{1}, 'novisual')
+        visualize = 0;
+    end
 
-base = DQ_HolonomicBase;
-arm = {DQ_KUKA, DQ_KUKA, DQ_AX18, DQ_KUKA, DQ_AX18};
+    base = DQ_HolonomicBase;
+    arm = {KukaLwr4Robot.kinematics(),...
+           KukaLwr4Robot.kinematics(),...
+           Ax18ManipulatorRobot.kinematics(),...
+           KukaLwr4Robot.kinematics(),...
+           Ax18ManipulatorRobot.kinematics()};
 
-%% Initializes the robot with base
-robot = DQ_WholeBody(base);
-% Serially add all the arms
-for i = 1:length(arm)
-    robot.add(arm{i});
-end
+    %% Initializes the robot with base
+    robot = DQ_WholeBody(base);
+    % Serially add all the arms
+    for i = 1:length(arm)
+        robot.add(arm{i});
+    end
 
-%% Initialize the configuration vector. All variables are zero except three.
-% This is completely arbitrary.
-q = zeros(robot.get_dim_configuration_space(),1);
-q(1) = 3;
-q(5) = pi/2; % second joint of the first arm
-q(12) = -pi/2; % second joint of the second arm
+    %% Initialize the configuration vector. All variables are zero except three.
+    % This is completely arbitrary.
+    q = zeros(robot.get_dim_configuration_space(),1);
+    q(1) = 3;
+    q(5) = pi/2; % second joint of the first arm
+    q(12) = -pi/2; % second joint of the second arm
 
-%% Initalize the plot
-% Plot the global reference frame
-plot(DQ(1));
-hold on;
-% Plot the robot in the initial configuraion
-plot(robot,q);
-axis square;
-axis([-10,10,-10,10,0,5]);
-hold on;
-title('Starting the robot motion in 3 seconds.')
-pause(3);
-title('Press ''q'' to quit');
+    %% Initalize the plot
+    % Plot the global reference frame
+    h = figure;
+    plot(DQ(1));
+    hold on;
+    % Plot the robot in the initial configuraion
+    plot(robot,q);
+    axis square;
+    axis([-10,10,-10,10,0,5]);
+    hold on;
+    title('Starting the robot motion in 3 seconds.')
+    pause(3);
+    title('Press ''q'' to quit');
 
-%% Initializing the keyboard 'stroke capturing system' with a value
-% different from  'q'
-key = '@';
-set(gcf,'CurrentCharacter',key);
+    %% Initializing the keyboard 'stroke capturing system' with a value
+    % different from  'q'
+    key = '@';
+    set(gcf,'CurrentCharacter',key);
 
-%% The robot will move until the user presses 'q'
-i = 0;
-while key ~= 'q'
-  %  figure(gcf);
-    key = get(gcf,'CurrentCharacter');
+    %% The robot will move until the user presses 'q'
+    i = 0;
+    
+    while key ~= 'q'     
+        key = get(gcf,'CurrentCharacter');
         i = mod(i + 0.1, 2*pi); % After 2*pi, i goes again to zero
         q(1) = 3*cos(i); % x-coordinate of the mobile base
         q(2) = 3*sin(i); % y-coordinate of the mobile base
         q(3) = i; % phi angle of the mobile base
         q(4) = i; % first joint of the first arm
-      
+
         plot(robot,q); 
         drawnow;
+        if (~visualize) & (i > pi)
+            key = 'q';
+        end     
+    end
+    
+    close(h);
 end
-close all;
