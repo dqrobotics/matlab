@@ -46,79 +46,80 @@ classdef DQ_CooperativeDualTaskSpace
     
     methods
         function obj = DQ_CooperativeDualTaskSpace(robot1, robot2)
-            if ~isa(robot1,'DQ_kinematics') || ~isa(robot2,'DQ_kinematics')
-                error(['The DQ_cdts class must be initialized with the '...
-                       'kinematics information of each robot']);
+            if ~isa(robot1,'DQ_Kinematics') || ~isa(robot2,'DQ_Kinematics')
+                error(['The DQ_CooperativeDualTaskSpace class must be '
+                       'initialized with the kinematics information of each '...
+                       'robot']);
             else
                 obj.robot1 = robot1;
                 obj.robot2 = robot2;
             end
         end
         
-        function x = pose1(obj,theta)
-            % x = pose1(theta) returns the pose of the first end-effector,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
-            theta1=theta(1:obj.robot1.n_links);
-            x = obj.robot1.fkm(theta1);
+        function x = pose1(obj,q)
+            % x = pose1(q) returns the pose of the first end-effector,
+            % where 'q' is the joint position of the resultant system;
+            % that is, q = [q1;q2]
+            q1 = q(1:obj.robot1.get_dim_configuration_space);
+            x = obj.robot1.fkm(q1);
         end
         
-        function x = pose2(obj,theta)
-            % x = pose2(theta) returns the pose of the second end-effector,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]           
-            theta2=theta(obj.robot1.n_links+1:end);
-            x = obj.robot2.fkm(theta2);
+        function x = pose2(obj,q)
+            % x = pose2(q) returns the pose of the second end-effector,
+            % where 'q' is the joint position of the resultant system;
+            % that is, q = [q1;q2]           
+            q2 = q(obj.robot1.get_dim_configuration_space+1:end);
+            x = obj.robot2.fkm(q2);
         end
         
-        function J = jacobian1(obj,theta)
-            % J = jacobian1(theta) returns the jacobian of the first arm,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
-            theta1=theta(1:obj.robot1.n_links);
-            J = obj.robot1.pose_jacobian(theta1);
+        function J = jacobian1(obj,q)
+            % J = jacobian1(q) returns the jacobian of the first arm,
+            % where q is the joint position of the resultant system;
+            % that is, q = [q1;q2]
+            q1 = q(1:obj.robot1.get_dim_configuration_space);
+            J = obj.robot1.pose_jacobian(q1);
         end
         
-        function J = jacobian2(obj,theta)
-            % J = jacobian2(theta) returns the jacobian of the second arm,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
-            theta2=theta(obj.robot1.n_links+1:end);
-            J = obj.robot2.pose_jacobian(theta2);
+        function J = jacobian2(obj,q)
+            % J = jacobian2(q) returns the jacobian of the second arm,
+            % where q is the joint position of the resultant system;
+            % that is, q = [q1;q2]
+            q2 = q(obj.robot1.get_dim_configuration_space+1:end);
+            J = obj.robot2.pose_jacobian(q2);
         end
         
-        function x = relative_pose(obj,theta)
-            % x = relative_pose(theta) returns the relative dual position,
+        function x = relative_pose(obj,q)
+            % x = relative_pose(q) returns the relative dual position,
             % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
+            % that is, q = [q1;q2]
                        
-            x = obj.pose2(theta)'*obj.pose1(theta);
+            x = obj.pose2(q)'*obj.pose1(q);
         end
         
-        function x = absolute_pose(obj,theta)
-            % x = absolute_pose(theta) returns the absolute dual position,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]            
-            x = obj.pose2(theta)*(obj.relative_pose(theta)^0.5);
+        function x = absolute_pose(obj,q)
+            % x = absolute_pose(q) returns the absolute dual position,
+            % where 'q' is the joint position of the resultant system;
+            % that is, q = [q1;q2]            
+            x = obj.pose2(q)*(obj.relative_pose(q)^0.5);
         end
         
-        function jac = relative_pose_jacobian(obj,theta)
-            % jac = relative_pose_jacobian(theta) returns the relative Jacobian,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
-            jac = [hamiplus8(obj.pose2(theta)')*obj.jacobian1(theta), ...
-                   haminus8(obj.pose1(theta))*DQ.C8*obj.jacobian2(theta)];
+        function Jr = relative_pose_jacobian(obj,q)
+            % jac = relative_pose_jacobian(q) returns the relative Jacobian,
+            % where 'q' is the joint position of the resultant system;
+            % that is, q = [q1;q2]
+            Jr = [hamiplus8(obj.pose2(q)')*obj.jacobian1(q), ...
+                   haminus8(obj.pose1(q))*DQ.C8*obj.jacobian2(q)];
         end
         
-        function jac = absolute_pose_jacobian(obj, theta)
-            % jac = absolute_pose_jacobian(theta) returns the absolute Jacobian,
-            % where theta is the joint position of the resultant system;
-            % that is, theta = [theta1;theta2]
-            x2 = obj.pose2(theta);
+        function Ja = absolute_pose_jacobian(obj, q)
+            % jac = absolute_pose_jacobian(q) returns the absolute Jacobian,
+            % where 'q' is the joint position of the resultant system;
+            % that is, q = [q1;q2]
+            x2 = obj.pose2(q);
             
-            jacob2 = obj.jacobian2(theta);            
-            jacobr = obj.relative_pose_jacobian(theta);
-            xr=obj.relative_pose(theta);
+            jacob2 = obj.jacobian2(q);            
+            jacobr = obj.relative_pose_jacobian(q);
+            xr=obj.relative_pose(q);
             
             jacob_r2 = 0.5*haminus4(xr.P'*(xr.P)^0.5)*jacobr(1:4,:);
             jacobp_r = DQ_kinematics.translation_jacobian(jacobr,xr);
@@ -126,7 +127,8 @@ classdef DQ_CooperativeDualTaskSpace
             jacob_xr_2 = [jacob_r2;  0.25*(haminus4(xr.P^0.5)*jacobp_r + ...
                                      hamiplus4(translation(xr))*jacob_r2)];
             
-            jac = haminus8(xr^0.5)*[zeros(8,obj.robot1.n_links),jacob2] + ...
+            Ja = haminus8(xr^0.5) * ...
+                [zeros(8,obj.robot1.get_dim_configuration_space),jacob2] + ...
                   hamiplus8(x2)*jacob_xr_2;
         end
     end

@@ -4,27 +4,32 @@
 function cdts_broom_kuka()
 
     %% Basic definitions for the two-arm system
-    kuka1 = DQ_KUKA;
-    kuka2 = DQ_KUKA;
-    kuka1.base = 1+DQ.E*0.5*DQ([0,-0.4,0,0]);
-    kuka2.base =  1+DQ.E*0.5*DQ([0, 0.4,0,0]);
+    kuka1 = KukaLwr4Robot.kinematics();    
+    frame1 = 1 + DQ.E*0.5*DQ([0,-0.4,0,0]);
+    kuka1.set_base_frame(frame1);
+    kuka1.set_reference_frame(frame1);
+    
+    kuka2 = KukaLwr4Robot.kinematics();
+    frame2 = 1+DQ.E*0.5*DQ([0, 0.4,0,0]);
+    kuka2.set_base_frame(frame2);
+    kuka2.set_reference_frame(frame2);
     two_arms = DQ_CooperativeDualTaskSpace(kuka1, kuka2);
 
 
     %% Initial conditions
-    initial_theta1 = [-1.6965, 2.2620, 1.5708, 1.4451, -0.4398, 0.0628, 0]';
-    initial_theta2 = [1.6336, -0.8168, 1.5708, 1.5080, -0.2513, 0, 0]';
-    theta=[ initial_theta1; initial_theta2];
+    q1_start = [-1.6965, 2.2620, 1.5708, 1.4451, -0.4398, 0.0628, 0]';
+    q2_start = [1.6336, -0.8168, 1.5708, 1.5080, -0.2513, 0, 0]';
+    q = [q1_start; q2_start];
 
     %% Task definitions for grabbing the broom.
 
     % The relative configuration between the hands must remain constant in order 
     % to minimize internal forces
-    dqrd = two_arms.relative_pose(theta);
+    dqrd = two_arms.relative_pose(q);
 
     % The sweep motion consists of turning the broom around the torso's y axis.
     % So let's use the decompositional multiplication! (see )
-    dqad_ant =  two_arms.absolute_pose(theta);
+    dqad_ant =  two_arms.absolute_pose(q);
     dqad = DQ([cos(pi/16);0;sin(pi/16);0]) .* dqad_ant;
 
     taskd=[dqad.q;dqrd.q];
@@ -32,10 +37,10 @@ function cdts_broom_kuka()
     %% Definition for DRAWING the broom (with respect to the right hand)
     d_broom = 0.9;
 
-    aux = translation(two_arms.pose1(theta))-translation(two_arms.pose2(theta));
+    aux = translation(two_arms.pose1(q))-translation(two_arms.pose2(q));
     t_broom = aux*(1/norm(aux.q))*d_broom;
 
-    broom_base=translation(two_arms.pose2(theta));
+    broom_base=translation(two_arms.pose2(q));
     broom_tip = broom_base+t_broom;
 
     %Broom's color
@@ -56,8 +61,8 @@ function cdts_broom_kuka()
 
     % Drawing the arms
     opt={'noname'};
-    plot(kuka1,initial_theta1',opt{:});
-    plot(kuka2,initial_theta2',opt{:});
+    plot(kuka1,q1_start',opt{:});
+    plot(kuka2,q2_start',opt{:});
     % Drawing the broom;
     line_handle1=line([broom_base.q(2), broom_tip.q(2)], [broom_base.q(3), ...
                        broom_tip.q(3)],[broom_base.q(4),broom_tip.q(4)],'color',...
@@ -70,33 +75,33 @@ function cdts_broom_kuka()
     %% Two-arm control
     epsilon = 0.01; %for the stop condition
     error = epsilon+1;
-    i=0;
-    iter=1;
+    i = 0;
+    iter = 1;
     j=1;
 
     %The sweep motion (back and forth) will be performed twice
     while j <= 4    
         %standard control law
         nerror_ant = error;
-        jacob = [two_arms.absolute_pose_jacobian(theta);...
-                 two_arms.relative_pose_jacobian(theta)];
-        taskm =  [vec8(two_arms.absolute_pose(theta));...
-                  vec8(two_arms.relative_pose(theta))];
+        jacob = [two_arms.absolute_pose_jacobian(q);...
+                 two_arms.relative_pose_jacobian(q)];
+        taskm =  [vec8(two_arms.absolute_pose(q));...
+                  vec8(two_arms.relative_pose(q))];
 
         error = taskd-taskm;
-        theta = theta+pinv(jacob)*0.5*error;
+        q = q+pinv(jacob)*0.5*error;
 
         % Visualisation
 
         % Plot the arms
-        plot(kuka1,theta(1:7)');
-        plot(kuka2,theta(8:14)');
+        plot(kuka1,q(1:7)');
+        plot(kuka2,q(8:14)');
 
         % Plot the broom
-        aux = translation(two_arms.pose1(theta))-translation(two_arms.pose2(theta));
+        aux = translation(two_arms.pose1(q))-translation(two_arms.pose2(q));
         t_broom = aux*(1/norm(aux.q))*d_broom;
 
-        broom_base=translation(two_arms.pose2(theta));
+        broom_base=translation(two_arms.pose2(q));
         broom_tip = broom_base+t_broom;
 
         set(line_handle1, 'Xdata', [broom_base.q(2), broom_tip.q(2)], 'Ydata', ...
