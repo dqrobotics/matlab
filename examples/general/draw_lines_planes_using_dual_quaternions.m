@@ -28,63 +28,57 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-clear all;
-close all;
-clc;
+function draw_lines_planes_using_dual_quaternions()
 
-% Declaring 'shortcuts' for the imaginary and dual units. In the near
-% future those shortcuts will be placed inside a namespace file.
-i_ = DQ.i;
-j_ = DQ.j;
-k_ = DQ.k;
-E_ = DQ.E;
+    include_namespace_dq
 
-% Rotation of pi around the y-axis;
-r = j_;
-% Translation (1,1,1)
-p = i_ + j_ + k_;
+    % Rotation of pi around the y-axis;
+    r = j_;
+    % Translation (1,1,1)
+    p = i_ + j_ + k_;
 
-% Initial location of the moving frame
-x = r + E_*0.5*p*r;
+    % Initial location of the moving frame
+    x = r + E_*0.5*p*r;
 
-% Plot the reference frame
-plot(DQ(1), 'name', '$\mathcal{F}_0$');
-hold on;
-axis([-4, 4, -4, 4, -4, 4])
-handle_x = plot(x, 'name', '$\mathcal{F}_1$');
+    % Plot the reference frame
+    plot(DQ(1), 'name', '$\mathcal{F}_0$');
+    hold on;
+    axis([-4, 4, -4, 4, -4, 4])
+    handle_x = plot(x, 'name', '$\mathcal{F}_1$');
 
-% Define a plane, with respect to the local frame, perpendicular to the z-axis 
-% with 2 units of distance from the xy-plane.
-plane = k_ + E_* 2;
-% Plot the plane and get its handle. The handle will be used to move the
-% plane in subsequent plots.
-handle_plane = plot(x.'*plane*x','plane',5, 'color', 'g');
+    % Define a plane, with respect to the local frame, perpendicular to the z-axis 
+    % with 2 units of distance from the xy-plane.
+    plane = k_ + E_* 2;
+    % Plot the plane and get its handle. The handle will be used to move the
+    % plane in subsequent plots.
+    handle_plane = plot(x.'*plane*x','plane',5, 'color', 'g');
 
-% Draw four lines, with respect to the local frame, perpendicular to and 2 units 
-% of distance from the z-axis and with 1 unit of distance from the xy-plane. 
-l1 = j_ + E_*cross(-2*i_ + k_, j_); 
-l2 = j_ + E_*cross( 2*i_ + k_, j_);
-l3 = i_ + E_*cross( 2*j_ + k_, i_);
-l4 = i_ + E_*cross(-2*j_ + k_, i_);
+    % Draw four lines, with respect to the local frame, perpendicular to and 2 units 
+    % of distance from the z-axis and with 1 unit of distance from the xy-plane. 
+    l1 = j_ + E_*cross(-2*i_ + k_, j_); 
+    l2 = j_ + E_*cross( 2*i_ + k_, j_);
+    l3 = i_ + E_*cross( 2*j_ + k_, i_);
+    l4 = i_ + E_*cross(-2*j_ + k_, i_);
 
-% Plot the four lines and get their handles. The handles will be used to
-% move the lines in subsequent plots.
-handle_l1 = plot(x*l1*x','line', 8);
-handle_l2 = plot(x*l2*x','line', 8);
-handle_l3 = plot(x*l3*x','line', 8);
-handle_l4 = plot(x*l4*x','line', 8);
+    % Plot the four lines and get their handles. The handles will be used to
+    % move the lines in subsequent plots.
+    handle_l1 = plot(x*l1*x','line', 8);
+    handle_l2 = plot(x*l2*x','line', 8);
+    handle_l3 = plot(x*l3*x','line', 8);
+    handle_l4 = plot(x*l4*x','line', 8);
 
-% Move the coordinate frame x towards the reference frame using screw
-% linear interpolation. All geometrical objects will be moved accordingly
-for ii = 1:-0.01:0
-      y = x^ii;
-      handle_x = plot(y, 'erase', handle_x, 'name', '$\mathcal{F}_1$');
-      handle_l1 = plot(y*l1*y', 'erase', handle_l1, 'line',8);
-      handle_l2 = plot(y*l2*y', 'erase', handle_l2, 'line',8);
-      handle_l3 = plot(y*l3*y', 'erase', handle_l3, 'line',8);
-      handle_l4 = plot(y*l4*y', 'erase', handle_l4, 'line',8);
-      handle_plane = plot(y.'*plane*y', 'erase', handle_plane, 'plane', 5);
-      pause(0.001);
+    % Move the coordinate frame x towards the reference frame using screw
+    % linear interpolation. All geometrical objects will be moved accordingly
+    for ii = 1:-0.01:0
+          y = x^ii;
+          handle_x = plot(y, 'erase', handle_x, 'name', '$\mathcal{F}_1$');
+          handle_l1 = plot(y*l1*y', 'erase', handle_l1, 'line',8);
+          handle_l2 = plot(y*l2*y', 'erase', handle_l2, 'line',8);
+          handle_l3 = plot(y*l3*y', 'erase', handle_l3, 'line',8);
+          handle_l4 = plot(y*l4*y', 'erase', handle_l4, 'line',8);
+          handle_plane = plot(y.'*plane*y', 'erase', handle_plane, 'plane', 5);
+          pause(0.001);
+    end
 end
 
 
