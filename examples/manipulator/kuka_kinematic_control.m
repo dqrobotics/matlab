@@ -1,99 +1,96 @@
-close all;
-clear all;
-clear classes;
-clc;
+function kuka_kinematic_control()
 
-%Create a new DQ_kinematics object with KUKA LWR parameters
-kuka = KukaLwr4Robot.kinematics();
-kuka.name = 'KUKA';
+    %Create a new DQ_kinematics object with KUKA LWR parameters
+    kuka = KukaLwr4Robot.kinematics();
+    kuka.name = 'KUKA';
 
-%Initial configuration
-thetastart =[0    0.3770    0.1257   -0.5655         0         0         0]';
-%Final configuration
-thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
-theta = thetastart;
+    %Initial configuration
+    thetastart =[0    0.3770    0.1257   -0.5655         0         0         0]';
+    %Final configuration
+    thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
+    theta = thetastart;
 
-epsilon = 0.001; %The error must be bellow this value in order to stop the robot
-gain = 0.1; %Gain of the controllers
+    epsilon = 0.001; %The error must be bellow this value in order to stop the robot
+    gain = 0.1; %Gain of the controllers
 
-xd = kuka.fkm(thetad); %Desired end-effector's pose
+    xd = kuka.fkm(thetad); %Desired end-effector's pose
 
-figure;
-axis equal;
-plot(kuka, theta);
+    figure;
+    axis equal;
+    plot(kuka, theta);
 
-grid off;
-view(-0,0)
-hold on;
+    grid off;
+    view(-0,0)
+    hold on;
 
-plot(kuka, theta);
-    
+    plot(kuka, theta);
 
-fprintf('Performing standard kinematic control using dual quaternion coordinates');
-xm = kuka.fkm(theta);
-error = epsilon+1;
-while norm(error) > epsilon
-    jacob = kuka.pose_jacobian(theta);
+
+    fprintf('Performing standard kinematic control using dual quaternion coordinates');
     xm = kuka.fkm(theta);
-    error = vec8(xd-xm);
-    theta = theta+pinv(jacob)*gain*error;
-    plot(kuka, theta');    
-    drawnow;
+    error = epsilon+1;
+    while norm(error) > epsilon
+        jacob = kuka.pose_jacobian(theta);
+        xm = kuka.fkm(theta);
+        error = vec8(xd-xm);
+        theta = theta+pinv(jacob)*gain*error;
+        plot(kuka, theta');    
+        drawnow;
+    end
+
+    fprintf('\nNow let us control only the translation part\n');
+    %The end-effector will touch the base
+    pd = [0,0,0,0];
+
+    error = epsilon+1;
+    while norm(error) > epsilon
+        jacob = kuka.pose_jacobian(theta);
+        xm = kuka.fkm(theta);
+        jacobp = kuka.translation_jacobian(jacob,xm);
+        pm = translation(xm);
+        error = vec4(pd-pm);    
+        theta = theta+pinv(jacobp)*gain*error;
+        plot(kuka, theta'); 
+        drawnow;
+    end
+
+    fprintf('\nNow let us control only the orientation\n')
+
+    %The end-effector will be aligned with the world frame
+    rd = DQ(1);
+
+    error = epsilon+1;
+    while norm(error) > epsilon
+        jacob = kuka.pose_jacobian(theta);
+        xm = kuka.fkm(theta);
+        jacobr = kuka.rotation_jacobian(jacob);
+        rm = xm.P;
+        error = vec4(rd-rm);    
+        theta = theta+pinv(jacobr)*gain*error;
+        plot(kuka, theta');  
+        drawnow;
+    end
+
+
+    fprintf('\nNow let us place the end-effector at a distance of 0.2 m from the base (we are going to perform distance control)\n')
+
+    %Technically speaking, we're controlling the square of the distance,
+    %otherwise the distance Jacobian can have singularities. See discussion on page 76 of 
+    %ADORNO, B. V., Two-arm manipulation: from manipulators to enhanced human-robot
+    % collaboration, Universit? Montpellier 2, Montpellier, France, 2011.
+    dd=0.2^2;
+    error = epsilon+1;
+    while norm(error) > epsilon
+        jacob = kuka.pose_jacobian(theta);
+        xm = kuka.fkm(theta);
+        jacobd = kuka.distance_jacobian(jacob,xm);
+        dm = norm(vec4(translation(xm)))^2;
+        error = dd-dm;    
+        theta = theta+pinv(jacobd)*gain*error;
+        plot(kuka, theta');
+        drawnow;
+    end
 end
-
-fprintf('\nNow let us control only the translation part\n');
-%The end-effector will touch the base
-pd = [0,0,0,0];
-
-error = epsilon+1;
-while norm(error) > epsilon
-    jacob = kuka.pose_jacobian(theta);
-    xm = kuka.fkm(theta);
-    jacobp = kuka.translation_jacobian(jacob,xm);
-    pm = translation(xm);
-    error = vec4(pd-pm);    
-    theta = theta+pinv(jacobp)*gain*error;
-    plot(kuka, theta'); 
-    drawnow;
-end
-
-fprintf('\nNow let us control only the orientation\n')
-
-%The end-effector will be aligned with the world frame
-rd = DQ(1);
-
-error = epsilon+1;
-while norm(error) > epsilon
-    jacob = kuka.pose_jacobian(theta);
-    xm = kuka.fkm(theta);
-    jacobr = kuka.rotation_jacobian(jacob);
-    rm = xm.P;
-    error = vec4(rd-rm);    
-    theta = theta+pinv(jacobr)*gain*error;
-    plot(kuka, theta');  
-    drawnow;
-end
-
-
-fprintf('\nNow let us place the end-effector at a distance of 0.2 m from the base (we are going to perform distance control)\n')
-
-%Technically speaking, we're controlling the square of the distance,
-%otherwise the distance Jacobian can have singularities. See discussion on page 76 of 
-%ADORNO, B. V., Two-arm manipulation: from manipulators to enhanced human-robot
-% collaboration, Universit? Montpellier 2, Montpellier, France, 2011.
-dd=0.2^2;
-error = epsilon+1;
-while norm(error) > epsilon
-    jacob = kuka.pose_jacobian(theta);
-    xm = kuka.fkm(theta);
-    jacobd = kuka.distance_jacobian(jacob,xm);
-    dm = norm(vec4(translation(xm)))^2;
-    error = dd-dm;    
-    theta = theta+pinv(jacobd)*gain*error;
-    plot(kuka, theta');
-    drawnow;
-end
-
 
 
 
