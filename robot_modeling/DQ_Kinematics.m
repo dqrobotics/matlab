@@ -102,60 +102,60 @@ classdef DQ_Kinematics < handle
         % FKM(q) takes the configuration vector 'q' and calculates the forward
         % kinematic model and returns the unit dual quaternion corresponding to 
         % the relevant pose. 
-        % Optionally, in case of coupled kinematic chains, FKM(theta, ith) 
+        % Optionally, in case of coupled kinematic chains, FKM(q, to_ith_link) 
         % calculates the forward kinematic model up to the ith element in
         % the chain.
-        x = fkm(obj,theta, ith);
+        x = fkm(obj,q, to_ith_link);
         
         % POSE_JACOBIAN(q) returns the Jacobian that satisfies
-        % vec8(x_dot) = J * q_dot, where x = fkm(q), 'x_dot' is the time
-        % derivative of 'x' and 'q' is the configuration vector.
+        % vec8(x_pose_dot) = J * q_dot, where x_pose = fkm(q), 'x_pose_dot' is the time
+        % derivative of 'x_pose' and 'q' is the configuration vector.
         % Optionally, in case of coupled kinematic chains, 
-        % POSE_JACOBIAN(theta, ith) calculates the forward kinematic model up to
+        % POSE_JACOBIAN(q, to_ith_link) calculates the forward kinematic model up to
         % the ith element in the chain.
-        J = pose_jacobian(obj, theta, ith);
+        J = pose_jacobian(obj, q, to_ith_link);
     end
     
     methods(Static)
-        function Jd = distance_jacobian(J,x)
-         % Given the Jacobian 'J' and the corresponding unit dual quaternion 'x' 
-         % that satisfy vec8(x_dot) = J * q_dot, DISTANCE_JACOBIAN(J,x) returns 
+        function Jd = distance_jacobian(J_pose, x_pose)
+         % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
+         % that satisfy vec8(x_pose_dot) = J_pose * q_dot, DISTANCE_JACOBIAN(J_pose,x_pose) returns 
          % the distance Jacobian; that it, the Jacobian that satisfies the 
          % relation dot(d^2) = Jd * q_dot, where dot(d^2) is the time 
          % derivative of the square of the distance between the origin of the 
-         % frame represented by 'x' and the origin of the reference frame.
-             if ~is_unit(x)
+         % frame represented by 'x_pose' and the origin of the reference frame.
+             if ~is_unit(x_pose)
                 error(['The second argument of distance_jacobian should be'...
                         ' a unit dual quaternion']);
              end
-             p = translation(x);
-             Jp = DQ_Kinematics.translation_jacobian(J,x);
+             p = translation(x_pose);
+             Jp = DQ_Kinematics.translation_jacobian(J_pose,x_pose);
              Jd = 2*vec4(p)'*Jp;
         end
     
         
-        function Jp = translation_jacobian(J,x)
-        % Given the Jacobian 'J' and the corresponding unit dual quaternion 'x' 
-        % that satisfy vec8(x_dot) = J * q_dot, TRANSLATION_JACOBIAN(J,x) 
+        function Jp = translation_jacobian(J_pose,x_pose)
+        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
+        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, TRANSLATION_JACOBIAN(J_pose,x_pose) 
         % returns the Jacobian that satisfies the relation 
         % vec4(p_dot) = Jp * q_dot, where p_dot is the time derivative of the
         % translation quaternion p and q_dot is the time derivative of the 
         % configuration vector
-            if ~is_unit(x)
+            if ~is_unit(x_pose)
                 error(['The second argument of translation_jacobian should be'...
                     ' a unit dual quaternion']);              
             end
-            Jp = 2*haminus4(x.P')*J(5:8,:)+2*hamiplus4(x.D)*DQ.C4*J(1:4,:);
+            Jp = 2*haminus4(x_pose.P')*J_pose(5:8,:)+2*hamiplus4(x_pose.D)*DQ.C4*J_pose(1:4,:);
         end
         
-        function Jr = rotation_jacobian(J)
-        % Given the Jacobian 'J' and the corresponding unit dual quaternion 'x' 
-        % that satisfy vec8(x_dot) = J * q_dot, ROTATION_JACOBIAN(J) returns 
+        function Jr = rotation_jacobian(J_pose)
+        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
+        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, ROTATION_JACOBIAN(J_pose) returns 
         % the Jacobian Jr that satisfies vec4(r_dot) = Jr * q_dot, where r_dot 
         % is the time derivative of the rotation quaternion r in 
-        % x = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
+        % x_pose = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
         % configuration vector.
-            Jr = J(1:4,:);
+            Jr = J_pose(1:4,:);
         end
     end
 end
