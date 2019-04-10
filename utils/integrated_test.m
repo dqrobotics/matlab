@@ -23,7 +23,7 @@ function [fail_count, fail_log] = integrated_test()
             eval(file{i});
         catch
             strcat(fail_log, file{i}, ', ');
-            printf('\n');
+            fprintf('\n');
             warning('Could not execute file %s', file{i});
             fail_count = fail_count + 1; 
         end
