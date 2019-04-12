@@ -42,16 +42,16 @@ classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
     % when passing DQ_Kinematics objects as arguments to methods.
     properties
-        % Reference frame used in fkm() and pose_jacobian methods
-        reference_frame; 
-        % Frame used to determine the robot physical location
-        base_frame;
         % Every robot receives a unique name, but users can choose any name
         % they want
         name;
     end
     
     properties (SetAccess = protected)
+        % Reference frame used in fkm() and pose_jacobian methods
+        reference_frame;
+        % Frame used to determine the robot physical location
+        base_frame;
         % Robot configuration vector
         q        
     end

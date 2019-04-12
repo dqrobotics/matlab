@@ -60,8 +60,7 @@
 % affected methods are: FKM and Jacobian.
 
 classdef DQ_SerialManipulator < DQ_Kinematics
-    properties
-        n_links;
+    properties        
         theta,d,a,alpha;
         % Dummy and n_dummy are deprecated and will be removed in the near
         % future
@@ -79,6 +78,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
+        n_links;
     end
     
     methods
