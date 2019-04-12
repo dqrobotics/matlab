@@ -47,7 +47,6 @@
 classdef (Abstract) DQ_MobileBase < DQ_Kinematics
     properties      
         plotopt;
-        base_pose;
     end
     
     properties (Access = protected)
@@ -69,10 +68,6 @@ classdef (Abstract) DQ_MobileBase < DQ_Kinematics
         
         function ret = get_dim_configuration_space(obj)
             ret = obj.dim_configuration_space;
-        end
-        
-        function ret = base_frame(obj)
-            ret = obj.base_pose;
         end
                 
         function plot(robot,q,varargin)

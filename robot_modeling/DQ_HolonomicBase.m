@@ -58,7 +58,7 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             obj.dim_configuration_space = 3;            
         end
        
-        function pose = raw_fkm(obj, q)
+        function pose = raw_fkm(~, q)
         % RAW_FKM(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. It does not take into consideration
         % the base frame displacement (e.g., base height).
@@ -75,8 +75,6 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             dual_part = (1/2)*i_*(x*cos(phi/2) + y*sin(phi/2)) + ...
                         (1/2)*j_*(-x*sin(phi/2) + y*cos(phi/2));            
             pose = real_part + E_*dual_part;
-            
-            obj.base_pose = pose;
         end
         
         function pose = fkm(obj, q)
