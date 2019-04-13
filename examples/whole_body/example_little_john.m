@@ -102,8 +102,8 @@ function example_little_john(varargin)
         % Numerically integrate the robot configuration, since there is no
         % actual robot. Since the base inputs are the wheel velocities, we have
         % to map them back to the base configuration in order to perform the
-        % integration
-        C = blkdiag(robot.chain{1}.constraint_jacobian(q(3)),eye(5));
+        % integration        
+        C = blkdiag(robot.get_chain{1}.constraint_jacobian(q(3)),eye(5));
         q = q + T*C*u;
 
         % Update the title in order to provide a hint about when the simulation
