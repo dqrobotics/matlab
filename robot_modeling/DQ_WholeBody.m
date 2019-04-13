@@ -1,7 +1,12 @@
 % CLASS DQ_WholeBody
 % 
 % Usage: robot = DQ_WholeBody(first_chain_element), where
-% first_chain_element is an object of DQ_MobileBase or DQ_kinematics
+% first_chain_element is an object of DQ_Kinematics or one of its
+% subclasses.
+%
+% Alternatively, robot = DQ_WholeBody(first_chain_element,'reversed'),
+% where the optional argument 'reversed' indicates that the kinematic chain
+% is reversed.
 %
 % See also  
 %           fkm
@@ -13,7 +18,7 @@
 % Other classes
 %           DQ_kinematics, DQ_MobileBase
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -35,42 +40,117 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef DQ_WholeBody < handle
-    properties %(Access = protected)
-        chain;
+classdef DQ_WholeBody < DQ_Kinematics
+    properties (Access = protected)        
+        
+        % Contains all elements in the serial kinematic chain. Usually they
+        % are objects from DQ_Kinematics or one of its subclasses. They can also 
+        % be DQ elements that represent constant rigid transformations.
+        chain; 
+        % Logical vector with the same dimension of the 'chain' vector. Given
+        % chain{ith}, if reversed(ith) == 'true', then the corresponding
+        % fkm of chain{ith} is its conjugate and the corresponding pose_jacobian is
+        % DQ.C8*J.
+        reversed; 
         dim_configuration_space;
     end
     
     methods
-        function obj = DQ_WholeBody(robot)
-            % TODO: test if robot is an instance of DQ_Kinematics
+        function obj = DQ_WholeBody(varargin)
+            robot = varargin{1};
+            if ~isa(robot,'DQ_Kinematics')
+                    error(['The first argument must be a DQ_Kinematics '...
+                           'object or one of its subclasses.']);
+            end
             obj.chain{1} = robot;
             obj.dim_configuration_space = robot.get_dim_configuration_space();
+            % The default behavior is to have direct chains (i.e., not reversed)
+            if nargin == 1
+                obj.reversed(1) = false;
+            elseif nargin == 2 && strcmp(varargin{2},'reversed')
+                obj.reversed(1) = true;
+            else 
+                error_mesg = sprintf(['Invalid number of parameters. Usage:\n'...
+                       'robot = DQ_WholeBody(first_chain_element)\n'...
+                       'robot = DQ_WholeBody(first_chain_element,''reversed'')']);
+                error(error_mesg);
+            end
+                   
         end
         
         function ret = get_dim_configuration_space(obj)
-            % dim = get_dim_configuration_space() returns the dimension of
+            % dim = GET_DIM_CONFIGURATION_SPACE() returns the dimension of
             % the whole configuration space
             ret = obj.dim_configuration_space;
         end
         
-        function add(obj, robot)
-            % add(robot) adds a robot to the end of the serial kinematic chain
-            % TODO: 1) test if robot is an instance of DQ_Kinematics
-            %       2) make it possible to add the kinematic chain in any
+        function ret = get_chain(obj)
+            ret = obj.chain;
+        end
+        
+        function add(obj, new_chain)
+            % ADD(new_chain) adds a new DQ_Kinematics or DQ object to the end 
+            % of the serial kinematic chain. More specifically, if new_chain is
+            % a DQ_Kinematics object, the end-effector of the previous chain is 
+            % connected to the base of the new chain. If it is a DQ object,
+            % then the constant transformation, which represents a constant 
+            % rigid motion, is just added to the chain in an analogous manner.
+            % TODO: make it possible to add the kinematic chain in any
             %       position of the chain. 
             %       3) make it possible to create branch structures
             len = length(obj.chain);
-            obj.chain{len + 1} = robot;
-            obj.dim_configuration_space = obj.dim_configuration_space + ...
-                robot.get_dim_configuration_space();
-        end        
+            obj.chain{len + 1} = new_chain;
+            % The dimension of the configuration space increases only if
+            % the the new element in the chain is not a constant rigid
+            % transformation
+            if isa(new_chain,'DQ_Kinematics')
+                obj.dim_configuration_space = obj.dim_configuration_space + ...
+                    new_chain.get_dim_configuration_space();
+            elseif ~isa(new_chain,'DQ')
+                error(['Only DQ_Kinematics and DQ objects can be added to the'...
+                    ' chain']);
+            end
+            obj.reversed(len + 1) = false;
+        end  
+        
+        function add_reversed(obj, robot)
+            % ADD_REVERSED(robot) adds a new robot to the end of the serial 
+            % kinematic chain, but its kinematic chain is reversed. 
+            % More specifically, the end-effector of the previous chain is 
+            % connected to the end-effector of the new chain.
+            % TODO: 1) make it possible to add the kinematic chain in any
+            %       position of the chain. 
+            %       2) make it possible to create branch structures
+            if isa(new_chain,'DQ_Kinematics')
+                len = length(obj.chain);
+                obj.chain{len + 1} = robot;
+                obj.dim_configuration_space = obj.dim_configuration_space + ...
+                    robot.get_dim_configuration_space();
+                obj.reversed(len + 1) = true;
+            else
+                error('Only DQ_Kinematics objects can be added in reverse mode');
+            end
+        end
        
         function x = fkm(obj,q,ith)
-            % x = fkm(q) receives the configuration vector q of the whole
+            % x = FKM(q) receives the configuration vector q of the whole
             % kinematic chain and returns the pose of the last frame.
-            % x = fkm(q, ith) calculates the forward kinematics up to the ith
+            % x = FKM(q, ith) calculates the forward kinematics up to the ith
             % kinematic chain.
+            % FKM takes into account the reference frame.
+            if nargin > 2
+                x = obj.reference_frame * raw_fkm(obj,q,ith);
+            else
+                x = obj.reference_frame * raw_fkm(obj,q);
+            end
+        end
+        
+        function x = raw_fkm(obj,q,ith)
+            % x = RAW_FKM(q) receives the configuration vector q of the whole
+            % kinematic chain and returns the pose of the last frame.
+            % x = RAW_FKM(q, ith) calculates the forward kinematics up to the ith
+            % kinematic chain.
+            % RAW_FKM does not take into account the reference frame.
             
             if nargin > 2
                 n = ith;
@@ -87,20 +167,36 @@ classdef DQ_WholeBody < handle
                 % implementation can be improved. For instance, we can
                 % store the size of each configuration vector whenever we
                 % add a new robot into the serial kinematic chain.
-                dim = obj.chain{i}.get_dim_configuration_space();
-                qi = q(j : j + dim - 1);
-                j = j + dim;
-                x = x*obj.chain{i}.fkm(qi);
+                if isa(obj.chain{i}, 'DQ_Kinematics')
+                    dim = obj.chain{i}.get_dim_configuration_space();
+                    qi = q(j : j + dim - 1);
+                    j = j + dim;
+                end
+               
+                if obj.reversed(i) == true
+                    % The chain is reversed
+                    x = x*obj.chain{i}.fkm(qi)';
+                elseif isa(obj.chain{i}, 'DQ')
+                    % Is it a rigid transformation? (Rigid transformations are 
+                    % never reversed in the chain because a reverse rigid
+                    % transformation is accomplished by using its
+                    % conjugate when adding it to the chain.)
+                    x = x*obj.chain{i};
+                else
+                    % It's neither a rigid transformation nor a reversed
+                    % chain; that is, it's just a regular one.
+                    x = x*obj.chain{i}.fkm(qi);
+                end
             end
         end
         
         function J = pose_jacobian(obj,q,ith)
-        % J = pose_jacobian(q) receives the configuration vector q of the whole
+        % J = POSE_JACOBIAN(q) receives the configuration vector q of the whole
         % kinematic chain and returns the jacobian matrix J that satisfies
         % vec8(xdot) = J * q_dot, where q_dot is the configuration velocity
         % and xdot is the time derivative of the unit dual quaternion that
         % represents the end-effector pose.
-        % J = pose_jacobian(q, ith) calculates the Jacobian up to the ith
+        % J = POSE_JACOBIAN(q, ith) calculates the Jacobian up to the ith
         % kinematic chain.
             if nargin > 2
                 % find the jacobian up to the ith intermediate kinematic
@@ -111,52 +207,91 @@ classdef DQ_WholeBody < handle
                 n = length(obj.chain);
             end
             
-            x_0_to_n = obj.fkm(q);
+            x_0_to_n = obj.fkm(q,n);
             j = 1;
             
             for i = 0:n-1
                 x_0_to_iplus1 = obj.fkm(q,i+1);
                 x_iplus1_to_n = x_0_to_iplus1'*x_0_to_n;
                 
-                dim = obj.chain{i+1}.get_dim_configuration_space();
-                q_iplus1 = q(j : j + dim - 1);
-                j = j + dim;
-                L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
+                % Constant rigid transformations in the chain do not change the
+                % dimension of the configuration space.
+                if isa(obj.chain{i+1}, 'DQ_Kinematics')
+                    dim = obj.chain{i+1}.get_dim_configuration_space();
+                    q_iplus1 = q(j : j + dim - 1);
+                    j = j + dim;
+                end
+                if obj.reversed(i+1) == true
+                    L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
+                     DQ.C8*obj.chain{i+1}.pose_jacobian(q_iplus1);
+                else                    
+                    L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
                     obj.chain{i+1}.pose_jacobian(q_iplus1);
+                end
             end
             J = cell2mat(L);
         end
         
         function plot(obj,q)
-            % Given the configuration 'a', plot the whole kinematic chain.
-            dim_conf_space = obj.chain{1}.get_dim_configuration_space();
-            plot(obj.chain{1},q(1:dim_conf_space));            
+            % Given the robot configuration 'q', plot the whole kinematic chain.
             
-            j = dim_conf_space + 1;
+            if isa(obj.chain{1}, 'DQ_Kinematics')
+                dim_conf_space = obj.chain{1}.get_dim_configuration_space();
+                %DQ_MobileBase does not have 'nojoints' property
+                if isa(obj.chain{1}, 'DQ_MobileBase')
+                    plot(obj.chain{1},q(1:dim_conf_space));
+                elseif isa(obj.chain{1}, 'DQ_SerialManipulator')
+                    % To improve plot performance, specially for very large
+                    % configuration space dimensions, we never plot the
+                    % joints of serial manipulators.
+                    plot(obj.chain{1},q(1:dim_conf_space),'nojoints');
+                end
+                j = dim_conf_space + 1;
+            else 
+                j = 1;
+            end
             
             % Iterate over the chain
-            for i = 2:length(obj.chain)
-                dim = obj.chain{i}.get_dim_configuration_space();
-                qi = q(j : j + dim - 1);
-                j = j + dim;        
-                
+            for i = 2:length(obj.chain)               
+                % If the first element in the kinematic chain is a mobile
+                % base, its fkm coincides with the base location, already
+                % considering a frame displacement, if aplicable (e.g., in case
+                % the mobile base frame is not in its center). 
                 if isa(obj.chain{1}, 'DQ_MobileBase')
                     current_base_frame = obj.fkm(q,i-1);
-                else
-                    current_base_frame = obj.chain{1}.base_frame*obj.fkm(q,i-1);
+                else 
+                    % The first element in the chain has a fixed-base robot, 
+                    % which may be located arbitrarily in the workspace with a
+                    % rigid transformation given by base_frame (which is not 
+                    % necessarily the same as the reference frame).                 
+                    current_base_frame = obj.get_base_frame() * ...
+                        obj.raw_fkm(q,i-1);
                 end
-                
-                obj.chain{i}.set_base_frame(current_base_frame); 
-                
-                if i < length(obj.chain)
-                plot(obj.chain{i},qi,'cylinder',[0,i*0.2,0], 'nobase',...
-                    'nojoints', 'nowrist','noname');         
-                else
-                    plot(obj.chain{i},qi,'cylinder',[0,i*0.2,0], 'nobase',...
-                    'nojoints','noname'); 
-                end
+
+                % Constant rigid transformations do not change the
+                % dimension of the configuration space. Furthermore, we do
+                % not plot them (this behavior may be changed in the future, 
+                % though).
+                if isa(obj.chain{i}, 'DQ_Kinematics')
+                    obj.chain{i}.set_base_frame(current_base_frame);
                     
-            end            
+                    dim = obj.chain{i}.get_dim_configuration_space();
+                    qi = q(j : j + dim - 1);
+                    j = j + dim;
+
+                    % We do not plot names, bases, and coordinate systems of
+                    % the intermediate kinematic chains.
+                    if i < length(obj.chain)
+                        plot(obj.chain{i},qi, 'nobase', ...
+                            'nowrist', 'noname', 'nojoints');
+                    else
+                       % But we plot the coordinate system of the whole-body
+                       % end-effector.
+                       plot(obj.chain{i},qi, 'nobase', 'noname', 'nojoints');
+                    end
+                end
+            end 
+                       
         end
     end    
 end
