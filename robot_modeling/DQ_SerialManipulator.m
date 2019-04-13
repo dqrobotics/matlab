@@ -378,6 +378,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             end
         end
         
+        function plot(robot,q,varargin)
         % plot(robot,q,options) plots the robot of type DQ_kinematics.
         % q is the vector of joint configurations
         % options is an optional argument that has variable size and accept any
@@ -439,7 +440,6 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         % The size of the annotations is determined using a simple heuristic from
         % the workspace dimensions.  This dimension can be changed by setting the
         % multiplicative scale factor using the 'scale' option.
-        function plot(robot,q,varargin)
             has_options = 0;
             if nargin < 2
                 fprintf(['\nUsage: plot(robot, q,[options])'...
