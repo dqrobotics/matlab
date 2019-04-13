@@ -77,6 +77,10 @@ classdef DQ_Kinematics < handle
             end
         end
         
+        function ret = get_reference_frame(obj)
+            ret = obj.reference_frame;
+        end
+        
         function set_base_frame(obj, base_frame)
             % set_base_frame(base_frame) sets the base frame with respect
             % to the global reference frame (i.e., the identity). The rigid 
@@ -90,6 +94,10 @@ classdef DQ_Kinematics < handle
             else
                 error('The base frame must be a unit dual quaternion.');
             end
+        end
+        
+        function ret = get_base_frame(obj)
+            ret = obj.base_frame;
         end
     end
     
