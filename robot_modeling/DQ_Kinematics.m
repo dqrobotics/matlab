@@ -13,6 +13,7 @@
 %       set_reference_frame
 % Static:
 %       distance_jacobian
+%       line_jacobian
 %       rotation_jacobian
 %       translation_jacobian
 
@@ -164,6 +165,41 @@ classdef DQ_Kinematics < handle
         % x_pose = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
         % configuration vector.
             Jr = J_pose(1:4,:);
+        end
+        
+       
+ 
+ 
+        function Jlx = line_jacobian(pose_jacobian, x, line_direction)
+        % LINE_JACOBIAN(pose_jacobian, x, line_direction) returns the line
+        % Jacobian related to a line, whose direction with respect to the 
+        % end-effector frame, given by the unit dual quaternion 'x', is given by
+        % 'line_direction' and passes through the origin of 'x'. 
+        %
+        % For example, using i_, j_, and k_ will return the line Jacobian related
+        % to the line collinear with, respectively, the x-axis, y-axis, and 
+        % z-axis of 'x'.
+        %
+        % For more details see Eq. 20 of?Marinho, M. M., Adorno, B. V., 
+        % Harada, K., & Mitsuishi, M. "Active Constraints Using Vector
+        % Field Inequalities for Surgical Robots." ICRA 2018.
+        % https://doi.org/10.1109/ICRA.2018.8461105
+
+            Jt = DQ_Kinematics.translation_jacobian(pose_jacobian,x);
+            Jr = DQ_Kinematics.rotation_jacobian(pose_jacobian);
+
+            t = translation(x);
+            r = rotation(x);
+
+            l = r*(line_direction)*r';
+
+            % Line direction and moment Jacobians
+            Jrx = (haminus4(line_direction*r') + ...
+                               hamiplus4(r*line_direction)*DQ.C4)*Jr;
+            Jmx = crossmatrix4(l)'*Jt + crossmatrix4(t)*Jrx;
+
+            % Assemble the 8-by-n line Jacobian, where n = dim_configuration_space          
+            Jlx = [Jrx; Jmx];
         end
     end
 end
