@@ -1,8 +1,8 @@
-%p = translation(dq) returns the translation of the unit dual quaternion dq,
-%assuming  dq=r + DQ.E * p * r * (0.5), that is, the translation followed
-%by rotation movement.
+% TRANSLATION(dq) returns the translation of the unit dual quaternion dq,
+% assuming  dq = r + DQ.E * 1/2 * p * r , that is, the translation followed
+% by rotation motion.
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -19,7 +19,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
