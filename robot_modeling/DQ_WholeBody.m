@@ -243,13 +243,14 @@ classdef DQ_WholeBody < DQ_Kinematics
                     dim = obj.chain{i+1}.get_dim_configuration_space();
                     q_iplus1 = q(j : j + dim - 1);
                     j = j + dim;
-                end
-                if obj.reversed(i+1) == true
-                    L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
-                     DQ.C8*obj.chain{i+1}.pose_jacobian(q_iplus1);
-                else                    
-                    L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
-                    obj.chain{i+1}.pose_jacobian(q_iplus1);
+                
+                    if obj.reversed(i+1) == true
+                        L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
+                         DQ.C8*obj.chain{i+1}.pose_jacobian(q_iplus1);
+                    else                    
+                        L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
+                        obj.chain{i+1}.pose_jacobian(q_iplus1);
+                    end
                 end
             end
             J = cell2mat(L);
