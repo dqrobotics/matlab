@@ -57,13 +57,14 @@
 %       norm
 %       normalize
 %       ______________VECTOR OPERATIONS ON DUAL QUATERNIONS________________
+%       crossmatrix4
 %       hamiplus4, haminus4, hamiplus8, haminus8
 %       vec3, vec4, vec6, vec8
 %       __________FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS__________
 %       exp
 %       log
 %       plot 
-%       translation
+%       rotation
 %       rotation_axis
 %       rotation_angle
 %       translation
