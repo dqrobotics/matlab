@@ -1,27 +1,38 @@
-% CLASS DQ
-% Define the operations that can be done with dual quaternions
-% Ways of defining a dual quaternion:
-%       dq = DQ %Create a dual quaternion 0+0*i+0*j+0*k+E*(0+0*i+0*j+0*k)
-%       dq = DQ(v) %Where v is a 8-, 4-, or 1-dimension vector with
-%               the dual quaternions coefficients. The 4- and 1-dimension vectors are special cases,
-%               where the 4-dimension vector means quaternion definition,
-%               whilst the 1-dimension vector means a scalar, both in dual quaternion space.
-%       dq = 1+ 2*DQ.i + 5*DQ.E*DQ.k %Create the dual quaternion
-%               (1+2i)+E*(5k) in terms of its imaginary components and the
-%               dual unit. This way is closer to the mathematical
-%               definition used on paper.
-% 
-% Type help DQ.(method/constant/operation) for specific help.
+% CLASS DQ - Units, operations and operators related to dual quaternions.
 %
-% CONSTANTS:
+% Ways of defining a dual quaternion:
+%
+% FIRST (closer to mathematical notation):     
+%       >> dq = 1 + 2 * DQ.i + 5 * DQ.E * DQ.k creates the dual quaternion
+%          (1+2i)+E*(5k) in terms of its imaginary components and the dual unit. 
+%       
+% ALTERNATIVELY, 'include_namespace_dq' can be used, therefore one can write
+%       >> dq = 1 + 2 * i_ + 5 * E_ * k_
+% 
+% SECOND (Matlab style):
+%       >> dq = DQ(v), where v is a vector of 8, 6, 4, 3 or 1 dimensions with
+%               the dual quaternions coefficients. 
+%       More specifically:
+%               1) An eight-dimensional v contains the coefficients of general
+%               dual quaternions.
+%               2) A six-dimensional v contains the coefficientes of a pure dual
+%               quaternion
+%               3) A four-dimensional v contains the coefficients of a general
+%               quaternion
+%               4) A three-dimensional v contains the coefficients of a pure
+%               quaternion
+%               5) An one-dimensional v contains the coefficient of a real
+%               number.
+% 
+% See also
+%       ___________________________CONSTANTS_______________________________
 %       DQ.E (dual unit)
 %       DQ.i (imaginary i)
 %       DQ.j (imaginary j)
 %       DQ.k (imaginary k)
 %       C8 (conjugator matrix associated to vec8)
 %       C4 (conjugator matrix associated to vec4)
-%
-% BINARY OPERATIONS: 
+%       ________________________BINARY OPERATIONS__________________________
 %       +  (plus)
 %       -  (minus)
 %       *  (mtimes)
@@ -32,27 +43,23 @@
 %       .\ (ldivide)
 %       == (eq)
 %       ~= (ne)
-%       ^  (mpower), for the moment it is defined only for
-%                                 unit dual quaternions
-% UNARY OPERATIONS:
+%       ^  (mpower)
+%       _________________________UNARY OPERATIONS__________________________
 %       '   (ctranspose)
 %       .'  (transpose)
 %       inv
 %       dinv
 %       P, D, Re, Im
-%
-% GENERAL FUNCTIONS: 
+%       _________________________GENERAL FUNCTIONS_________________________
 %       cross
 %       dot       
 %       is_unit
 %       norm
 %       normalize
-%
-% VECTOR OPERATIONS ON DUAL QUATERNIONS
-%       hamiplus4(h), haminus4(h), hamiplus8(h), haminus8(h)
-%       vec3(h), vec4(h), vec6(h), vec8(h)
-%                   
-% FUNCTIONS AND METHODS APPLIED ONLY TO UNIT DUAL QUATERNIONS:
+%       ______________VECTOR OPERATIONS ON DUAL QUATERNIONS________________
+%       hamiplus4, haminus4, hamiplus8, haminus8
+%       vec3, vec4, vec6, vec8
+%       __________FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS__________
 %       exp
 %       log
 %       plot 
@@ -61,10 +68,11 @@
 %       rotation_angle
 %       translation
 %       T
-%
-% See also DQ_kinematics, DQ_KinematicController
+%       _________________________RELATED CLASSES___________________________
+%       DQ_Kinematics
+%       DQ_KinematicController
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -81,7 +89,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
