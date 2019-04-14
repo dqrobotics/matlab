@@ -190,6 +190,29 @@ classdef DQ_WholeBody < DQ_Kinematics
             end
         end
         
+        function q = sequential(obj,q)
+        % SEQUENTIAL(q) takes the configuration vector q in a sequential ordering
+        % and automatically reorganize it in the order determined by each kinematic
+        % chain. For instance, given a reverse chain composed of six
+        % joints, joint 6 is the first one and joint 1 is the sixth one,
+        % opposed to the commonly used forward chain, where joint 1 is the first
+        % joint and joint 6 is sixth one.
+            j = 1;            
+            for i = 1:length(obj.chain)
+                if isa(obj.chain{i}, 'DQ_Kinematics')
+                    dim = obj.chain{i}.get_dim_configuration_space();
+                    qi = q(j : j + dim - 1);
+                    if ~obj.reversed(i)
+                        q(j : j + dim - 1) = qi;
+                        
+                    else
+                        q(j : j + dim - 1) = flip(qi);
+                    end
+                    j = j + dim;
+                end
+            end
+        end
+        
         function J = pose_jacobian(obj,q,ith)
         % J = POSE_JACOBIAN(q) receives the configuration vector q of the whole
         % kinematic chain and returns the jacobian matrix J that satisfies
@@ -233,7 +256,9 @@ classdef DQ_WholeBody < DQ_Kinematics
         end
         
         function plot(obj,q)
-            % Given the robot configuration 'q', plot the whole kinematic chain.
+            % PLOT(q) draws the whole kinematic chain, given 'q'. It does
+            % all necessary transformations to take into account reverse
+            % chains and direct kinematic chains.
             
             if isa(obj.chain{1}, 'DQ_Kinematics')
                 dim_conf_space = obj.chain{1}.get_dim_configuration_space();
@@ -244,6 +269,24 @@ classdef DQ_WholeBody < DQ_Kinematics
                     % To improve plot performance, specially for very large
                     % configuration space dimensions, we never plot the
                     % joints of serial manipulators.
+                    
+                    % If the first kinematic chain is a fixed-base serial
+                    % chain *and* reversed, we must adapt its base frame so
+                    % that the DQ_Kinematics/plot function, which always
+                    % start ploting from its base frame, plots the serial
+                    % chain with the end-effector coinciding with the
+                    % whole-body base frame. (Note that each individual chain
+                    % has its own base frame used to determine its spatial
+                    % location).
+                    if obj.reversed(1)
+                        current_base_frame = obj.get_base_frame() * ...
+                        obj.raw_fkm(q,1);
+                    else
+                        % if the chain is not reversed, then its base frame
+                        % must coincide with the whole-body base frame.
+                        current_base_frame = obj.get_base_frame();
+                    end
+                    obj.chain{1}.set_base_frame(current_base_frame);
                     plot(obj.chain{1},q(1:dim_conf_space),'nojoints');
                 end
                 j = dim_conf_space + 1;
