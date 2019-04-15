@@ -1,6 +1,23 @@
 % Example on how to build two legs from two KUKA LWR4 Robots, step by step. In
 % order use the whole chain, the serialization process takes into account
 % reverse chains. 
+%
+% Usage: TWO_LEGS_EXAMPLE(zoom_value) runs the example with zoom given by
+% 'zoom_value'. If no parameter is passed to the function, 'zoom_value'
+% equals 1.
+%
+% General instructions:
+% 1) After the program starts, press the up-arrow and down-arrow keys to
+% increase or decrease the joint angle, respectively. 
+% 2) The joint can be changed by pressing the number keys (1 for the first joint, 2
+% for the second and so on). 
+% 3) Press 's' to change between the original and sequential modes. The
+% former uses the ordering of the original kinematic chains. For instance,
+% if the first chain has 7 DOF and is reversed, in original mode joint 1 
+% corresponds to the seventh joint. In the sequential mode, a more
+% intuititve approach is used and joint 1 corresponds to the first joint of
+% the whole-body kinematic chain.
+  
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -31,7 +48,15 @@
 %         visualize = 0;
 %     end
 
-function two_legs_example
+function two_legs_example(varargin)
+    if nargin == 0
+        zoom_value = 1;
+    elseif nargin == 1
+        zoom_value = varargin{1};
+    else
+        error('Usage two_legs_example(zoom_value)')
+    end
+
     % Include the DQ name space to use i_ instead of DQ.i, etc.
     include_namespace_dq
     
@@ -46,7 +71,7 @@ function two_legs_example
     % They will be used to change the joint angles of both robots
     fig_handle = figure('KeyPressFcn', @keypress);
     view(18,51);
-    zoom(4);
+    zoom(zoom_value);
     hold on;
     xlabel('X');
     ylabel('Y');

@@ -1,7 +1,11 @@
-% KUKA_LINE_CONTROL() runs a simple example with the KukaLwr4Robot. The
+% KUKA_LINE_CONTROL(zoom_value) runs a simple example with the KukaLwr4Robot. The
 % goal is to make the robot end-effector's x-axis to be aligned with a
 % random line generated in the space.
 %
+% The input 'zoom_value' determines the zoom used in the visualization. If no 
+% parameter is passed to the function, 'zoom_value' equals 1.
+
+
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -25,7 +29,14 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function kuka_line_control()
+function kuka_line_control(varargin)
+    if nargin == 0
+        zoom_value = 1;
+    elseif nargin == 1
+        zoom_value = varargin{1};
+    else
+        error('Usage kuka_line_control(zoom_value)')
+    end
     % include the namespace in order to use i_ instead of DQ_i, etc.
     include_namespace_dq
 
@@ -53,7 +64,7 @@ function kuka_line_control()
     axis equal;
     grid off;
     view(-69,32);
-    zoom(2);
+    zoom(zoom_value);
     hold on;
     
     plot(kuka, q);

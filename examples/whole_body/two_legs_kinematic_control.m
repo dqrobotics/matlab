@@ -1,6 +1,9 @@
-% Example on how to build two legs from two KUKA LWR4 Robots, step by step. In
-% order use the whole chain, the serialization process takes into account
-% reverse chains. 
+% TWO_LEGS_KINEMATIC_CONTROL(zoom_value) runs an example on how to build two
+% legs from two KUKA LWR4 Robots, step by step. In order use the whole chain, 
+% the serialization process takes into account reverse chains. 
+%
+% The input 'zoom_value' determines the zoom used in the visualization. If no 
+% parameter is passed to the function, 'zoom_value' equals 1.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -31,7 +34,15 @@
 %         visualize = 0;
 %     end
 
-function two_legs_kinematic_control()
+function two_legs_kinematic_control(varargin)
+    if nargin == 0
+        zoom_value = 1;
+    elseif nargin == 1
+        zoom_value = varargin{1};
+    else
+        error('Usage two_legs_kinematic_control(zoom_value)')
+    end
+    
     % Include the DQ name space to use i_ instead of DQ.i, etc.
     include_namespace_dq
     
@@ -44,7 +55,7 @@ function two_legs_kinematic_control()
     % Let's first assemble the scene    
     figure;
     view(0,20);
-    zoom(2);
+    zoom(zoom_value);
     hold on;
     xlabel('X');
     ylabel('Y');
@@ -125,11 +136,11 @@ function two_legs_kinematic_control()
         if right_step
             robot = left_to_right;
             xd = right_foot .* step_size;
-            disp('Step with the right foot');
+            title('Step with the right foot');
         else %left foot
             robot = right_to_left;
             xd = left_foot .* step_size;
-            disp('Step with the left foot');
+            title('Step with the left foot');
         end
         
         robot.set_base_frame(step_base_frame);
@@ -138,10 +149,7 @@ function two_legs_kinematic_control()
         h_plot = plot(xd, 'erase', h_plot, 'scale', 0.1);
   
         x_error = 1;      
-        while key ~= 'q' && norm(x_error) > 0.01
-            my_text = sprintf(['After the error becomes less than 0.01,'...
-                ' the visualization will begin. Current error is %f'],norm(x_error));
-            title(my_text)
+        while key ~= 'q' && norm(x_error) > 0.01           
             key = get(gcf,'CurrentCharacter');
             
             % Retrieve the FKM and pose Jacobian
