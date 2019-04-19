@@ -54,9 +54,15 @@
 %       dinv
 %       P, D, Re, Im
 %       sharp (_same_ as .')
+%       ________________________CASTING OPERATORS__________________________
+%       double
 %       _________________________GENERAL FUNCTIONS_________________________
 %       cross
-%       dot       
+%       dot
+%       is_pure
+%       is_quaternion
+%       is_real
+%       is_real_number
 %       is_unit
 %       norm
 %       normalize

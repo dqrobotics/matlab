@@ -1,7 +1,10 @@
-% IS_UNIT(x) returns 1 if x is a unit norm dual quaternion, 0 otherwise
-% See also is_pure, is_quaternion, is_real, is_real_number
+% IS_REAL(x) receives a dual quaternion x and returns 1 if its imaginary
+% part is zero. Note that a real dual quaternion is not necessarily a
+% strict real number because it can also be a dual number.
+% See also is_pure, is_quaternion, is_real_number, is_unit
 
-% (C) Copyright 2015 DQ Robotics Developers
+
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -24,8 +27,8 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 
-function ret = is_unit(x)
-    if norm(x) == 1
+function ret = is_real(x)
+    if Im(x) == 0
         ret = 1;
     else
         ret = 0;

@@ -1,7 +1,7 @@
-% IS_UNIT(x) returns 1 if x is a unit norm dual quaternion, 0 otherwise
-% See also is_pure, is_quaternion, is_real, is_real_number
+% DOUBLE(dq) receives a dual-quaternion real number (i.e.,
+% Im(dq) = D(dq) = 0) and casts it to a standard double type.
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -24,10 +24,10 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 
-function ret = is_unit(x)
-    if norm(x) == 1
-        ret = 1;
+function res = double(x)
+    if is_real_number(x)
+        res = x.q(1);
     else
-        ret = 0;
+        error('Only strict real numbers can be cast to double');
     end
 end
