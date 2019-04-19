@@ -44,12 +44,16 @@
 %       == (eq)
 %       ~= (ne)
 %       ^  (mpower)
+%       Ad
+%       Adsharp
 %       _________________________UNARY OPERATIONS__________________________
-%       '   (ctranspose)
-%       .'  (transpose)
+%       '  (ctranspose)
+%       .' (transpose)
+%       conj (_same_ as ')
 %       inv
 %       dinv
 %       P, D, Re, Im
+%       sharp (_same_ as .')
 %       _________________________GENERAL FUNCTIONS_________________________
 %       cross
 %       dot       
