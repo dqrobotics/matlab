@@ -188,10 +188,9 @@ classdef DQ_Kinematics < handle
         
         function Jplane = plane_jacobian(pose_jacobian, x_pose, plane_normal)
         % PLANE_JACOBIAN(pose_jacobian, x_pose, plane_normal) returns the plane
-        % jacobian, where x_pose
-        % is the end-effector pose, pose_jacobian is the matrix that
-        % satisfies x_pose_dot = pose_jacobian * q_dot, with q_dot being
-        % the joint velocities, and plane_normal is the plane normal with
+        % jacobian, where x_pose is the end-effector pose, pose_jacobian is the 
+        % matrix that satisfies x_pose_dot = pose_jacobian * q_dot, with q_dot 
+        % being the joint velocities, and plane_normal is the plane normal with
         % respect to the reference frame. For example using i_, j_, and k_
         % will return the plane Jacobian whose normal is collinear with, 
         % respectively, the x-axis, y-axis, and z-axis of the end-effector
