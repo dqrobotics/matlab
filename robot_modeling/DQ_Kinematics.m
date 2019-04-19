@@ -14,7 +14,15 @@
 % Static:
 %       distance_jacobian
 %       line_jacobian
+%       line_to_point_distance_jacobian
+%       line_to_point_residual
 %       plane_jacobian
+%       point_to_line_distance_jacobian
+%       point_to_line_residual
+%       point_to_plane_distance_jacobian
+%       point_to_plane_residual
+%       point_to_point_distance_jacobian
+%       point_to_point_residual
 %       rotation_jacobian
 %       translation_jacobian
 
@@ -143,6 +151,62 @@ classdef DQ_Kinematics < handle
              Jp = DQ_Kinematics.translation_jacobian(J_pose,x_pose);
              Jd = 2*vec4(p)'*Jp;
         end
+        
+        function J = line_to_point_distance_jacobian(line_jacobian, ...
+            robot_line, workspace_point)
+        % LINE_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the square distance between a line in the robot and a point in 
+        % in the workspace.
+        %
+        % For more details, see Eq. (34) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also line_to_point_residual
+        
+            n_columns = size(line_jacobian,2);
+
+            Jl = line_jacobian(1:4, n_columns);
+            Jm = line_jacobian(5:8, n_columns);
+
+            % Extract line direction
+            l = P(robot_line);
+            % Extract line moment
+            m = D(robot_line);
+            
+            h = cross(workspace_point,l) - m;
+
+            J = 2*vec4(h)' * (crossmatrix4(workspace_point) * Jl - Jm);
+        end
+
+        function residual = line_to_point_residual(robot_line, ...
+                workspace_point, workspace_point_derivative)
+        % LINE_TO_POINT_RESIDUAL returns the residual related to the time
+        % derivative of the square distance between a line rigidly attached
+        % to the robot and a moving point in the workspace that is
+        % independent of the robot motion (i.e., which does not depend on
+        % the robot joint velocities)
+        %
+        % For more details, see Eq. (34) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also line_to_point_distance_jacobian
+        
+            % Extract line quaternions
+            l = P(robot_line);
+            m = D(robot_line);
+
+            % Notational simplicity
+            hc1 = cross(workspace_point,l) - m;
+            hc2 = cross(workspace_point_derivative,l);
+
+            residual = double(2.0*dot(hc2,hc1));
+        end
+   
         
         function Jlx = line_jacobian(pose_jacobian, x, line_direction)
         % LINE_JACOBIAN(pose_jacobian, x, line_direction) returns the line
