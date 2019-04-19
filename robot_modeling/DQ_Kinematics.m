@@ -14,6 +14,7 @@
 % Static:
 %       distance_jacobian
 %       line_jacobian
+%       plane_jacobian
 %       rotation_jacobian
 %       translation_jacobian
 
@@ -126,6 +127,7 @@ classdef DQ_Kinematics < handle
     end
     
     methods(Static)
+        
         function Jd = distance_jacobian(J_pose, x_pose)
          % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
          % that satisfy vec8(x_pose_dot) = J_pose * q_dot, DISTANCE_JACOBIAN(J_pose,x_pose) returns 
@@ -141,35 +143,7 @@ classdef DQ_Kinematics < handle
              Jp = DQ_Kinematics.translation_jacobian(J_pose,x_pose);
              Jd = 2*vec4(p)'*Jp;
         end
-    
         
-        function Jp = translation_jacobian(J_pose,x_pose)
-        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
-        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, TRANSLATION_JACOBIAN(J_pose,x_pose) 
-        % returns the Jacobian that satisfies the relation 
-        % vec4(p_dot) = Jp * q_dot, where p_dot is the time derivative of the
-        % translation quaternion p and q_dot is the time derivative of the 
-        % configuration vector
-            if ~is_unit(x_pose)
-                error(['The second argument of translation_jacobian should be'...
-                    ' a unit dual quaternion']);              
-            end
-            Jp = 2*haminus4(x_pose.P')*J_pose(5:8,:)+2*hamiplus4(x_pose.D)*DQ.C4*J_pose(1:4,:);
-        end
-        
-        function Jr = rotation_jacobian(J_pose)
-        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
-        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, ROTATION_JACOBIAN(J_pose) returns 
-        % the Jacobian Jr that satisfies vec4(r_dot) = Jr * q_dot, where r_dot 
-        % is the time derivative of the rotation quaternion r in 
-        % x_pose = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
-        % configuration vector.
-            Jr = J_pose(1:4,:);
-        end
-        
-       
- 
- 
         function Jlx = line_jacobian(pose_jacobian, x, line_direction)
         % LINE_JACOBIAN(pose_jacobian, x, line_direction) returns the line
         % Jacobian related to a line, whose direction with respect to the 
@@ -201,5 +175,78 @@ classdef DQ_Kinematics < handle
             % Assemble the 8-by-n line Jacobian, where n = dim_configuration_space          
             Jlx = [Jrx; Jmx];
         end
+        
+        function Jr = rotation_jacobian(J_pose)
+        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
+        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, ROTATION_JACOBIAN(J_pose) returns 
+        % the Jacobian Jr that satisfies vec4(r_dot) = Jr * q_dot, where r_dot 
+        % is the time derivative of the rotation quaternion r in 
+        % x_pose = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
+        % configuration vector.
+            Jr = J_pose(1:4,:);
+        end
+        
+        function Jplane = plane_jacobian(pose_jacobian, x_pose, plane_normal)
+        % PLANE_JACOBIAN(pose_jacobian, x_pose, plane_normal) returns the plane
+        % jacobian, where x_pose
+        % is the end-effector pose, pose_jacobian is the matrix that
+        % satisfies x_pose_dot = pose_jacobian * q_dot, with q_dot being
+        % the joint velocities, and plane_normal is the plane normal with
+        % respect to the reference frame. For example using i_, j_, and k_
+        % will return the plane Jacobian whose normal is collinear with, 
+        % respectively, the x-axis, y-axis, and z-axis of the end-effector
+        % frame given by x_pose
+        %
+        % For more details, see Section IV.F?of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270
+       
+            % Requirements
+            xt = translation(x_pose);
+            xr = rotation(x_pose);
+            Jr = DQ_Kinematics.rotation_jacobian(pose_jacobian);
+            Jt = DQ_Kinematics.translation_jacobian(pose_jacobian, x_pose);
+
+            % Plane normal w.r.t the reference frame
+            nz = xr*(plane_normal)*xr';
+
+            % Plane normal Jacobian, that is, the time derivative of the plane
+            % normal w.r.t the reference frame
+            Jnz = (haminus4(plane_normal*xr') + ...
+                hamiplus4(xr*plane_normal)*DQ.C4)*Jr;
+
+            % Plane distance Jacobian, that is, the time derivative of the
+            % plane distance w.r.t the reference frame
+            Jdz  = vec4(nz)'*Jt + vec4(xt)'*Jnz;
+
+            % Plane Jacobian that relates the joint velocities with the time 
+            % derivative of the plane given by n + E_ * d, where n is the
+            % plane normal and d is the distance with respect to the
+            % reference frame.
+            Jplane = [Jnz;Jdz;zeros(3,size(pose_jacobian,2))];
+        end
+
+        
+        function Jp = translation_jacobian(J_pose,x_pose)
+        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
+        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, TRANSLATION_JACOBIAN(J_pose,x_pose) 
+        % returns the Jacobian that satisfies the relation 
+        % vec4(p_dot) = Jp * q_dot, where p_dot is the time derivative of the
+        % translation quaternion p and q_dot is the time derivative of the 
+        % configuration vector
+            if ~is_unit(x_pose)
+                error(['The second argument of translation_jacobian should be'...
+                    ' a unit dual quaternion']);              
+            end
+            Jp = 2*haminus4(x_pose.P')*J_pose(5:8,:)+2*hamiplus4(x_pose.D)*DQ.C4*J_pose(1:4,:);
+        end
+        
+      
+        
+       
+ 
+ 
+        
     end
 end
