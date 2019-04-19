@@ -59,6 +59,8 @@
 %       _________________________GENERAL FUNCTIONS_________________________
 %       cross
 %       dot
+%       is_line
+%       is_plane
 %       is_pure
 %       is_pure_quaternion
 %       is_quaternion
