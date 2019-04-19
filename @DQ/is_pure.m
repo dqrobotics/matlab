@@ -1,6 +1,7 @@
 % IS_PURE(x) receives a dual quaternion x and returns 1 if it is pure
 % (i.e., Re(dq) = 0), and 0 otherwise.
-% See also is_quaternion, is_real, is_real_number, is_unit
+% See also is_line, is_plane, is_pure_quaternion, is_quaternion, is_real,
+% is_real_number, is_unit
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 % 
