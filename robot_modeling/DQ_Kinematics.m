@@ -265,7 +265,7 @@ classdef DQ_Kinematics < handle
         % Surgical Robots using Vector Field Inequalities. 
         % http://arxiv.org/abs/1804.11270 
         %
-        % See also point_to_point_distance_jacobian
+        % See also point_to_line_distance_jacobian
 
             if ~is_pure_quaternion(robot_point) || ~is_pure(workspace_line) || ...
                     ~is_pure(workspace_line_derivative)
@@ -285,6 +285,50 @@ classdef DQ_Kinematics < handle
             residual = double(2*dot(hA2,hA1));
         end
         
+        function J = point_to_plane_distance_jacobian(translation_jacobian, ...
+                robot_point, workspace_plane)
+        % POINT_TO_PLANE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the distance between a plane in the workspace and a point in 
+        % in the robot.
+        %
+        % For more details, see Eq. (59) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_plane_residual
+
+            if ~is_pure_quaternion(robot_point) || ~is_plane(workspace_plane)
+                error('%s must be a pure quaternion and %s must be a plane',...
+                    inputname(2), inputname(3));
+            end
+            n = P(workspace_plane);
+            J = vec4(n)'*translation_jacobian;
+        end
+
+        function residual = point_to_plane_residual(point, plane_derivative)
+        % POINT_TO_PLANE_RESIDUAL returns the residual related to
+        % the moving plane in the workspace that is independent of the
+        % robot motion (i.e., which does not depend on the robot
+        % joint velocities)
+        %
+        % For more details, see Eq. (59) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_plane_distance_jacobian
+            if ~is_pure(point)
+                error('The argument %s has to be pure',inputname(point));
+            end
+            
+            n_dot = P(plane_derivative);
+            d_dot = D(plane_derivative);
+
+            residual =  double(dot(point,n_dot) - d_dot);
+        end
+        
         function J = point_to_point_distance_jacobian(translation_jacobian,...
                 robot_point, workspace_point)
         % POINT_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
@@ -302,8 +346,8 @@ classdef DQ_Kinematics < handle
             if ~is_pure_quaternion(robot_point) ||...
                     ~is_pure_quaternion(workspace_point)
     
-                error(['The arguments translation and position have to be'...
-                    'pure quaternions.']);
+                error(['The arguments %s and %s have to be'...
+                    'pure quaternions.',inputname(2), inputname(3)]);
             end
             J = 2 * vec4(robot_point - workspace_point)'*translation_jacobian;
         end
@@ -324,14 +368,12 @@ classdef DQ_Kinematics < handle
             if ~is_pure_quaternion(robot_point) || ...
                ~is_pure_quaternion(workspace_point) || ...
                ~is_pure_quaternion(workspace_point_derivative)
-               error(['The arguments translation, position, and '...
-                   'position_derivative have to be imaginary quaternions.']);
+               error('All arguments must be pure quaternions.');
             end
             tmp = 2.0*dot(robot_point-workspace_point, ...
                                             -1.0*workspace_point_derivative);
             residual = double(tmp);
          end
-        
         
         function Jp = translation_jacobian(J_pose,x_pose)
         % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
@@ -346,12 +388,5 @@ classdef DQ_Kinematics < handle
             end
             Jp = 2*haminus4(x_pose.P')*J_pose(5:8,:)+2*hamiplus4(x_pose.D)*DQ.C4*J_pose(1:4,:);
         end
-        
-      
-        
-       
- 
- 
-        
     end
 end
