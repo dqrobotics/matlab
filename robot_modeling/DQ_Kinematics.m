@@ -226,6 +226,65 @@ classdef DQ_Kinematics < handle
             Jplane = [Jnz;Jdz;zeros(3,size(pose_jacobian,2))];
         end
 
+        function J = point_to_line_distance_jacobian(translation_jacobian,...
+                robot_point, workspace_line)
+        % POINT_TO_LINE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the square distance between a line in the workspace and a point in 
+        % in the robot.
+        %
+        % For more details, see Eq. (32) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_line_residual
+
+            if ~is_pure_quaternion(robot_point_translation) || ...
+                    ~is_pure(workspace_line)
+                error(['robot_point has to be a pure quaternion and'...
+                    'workspace_line must be a pure dual quaternion']);
+            end
+
+            l = P(workspace_line);
+            m = D(workspace_line);
+
+            J = 2.0*vec4(cross(robot_point,l) - m)'*crossmatrix4(l)'* ...
+               translation_jacobian;
+        end
+
+        function residual = point_to_line_residual(robot_point, workspace_line,...
+                                workspace_line_derivative)
+        % POINT_TO_LINE_RESIDUAL returns the residual related to
+        % the moving line in the workspace that is independent of the
+        % robot motion (i.e., which does not depend on the robot
+        % joint velocities)
+        %
+        % For more details, see Eq. (32) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_point_distance_jacobian
+
+            if ~is_pure_quaternion(robot_point) || ~is_pure(workspace_line) || ...
+                    ~is_pure(workspace_line_derivative)
+                error(['robot_point has to be a pure quaternion and'...
+                    'both workspace_line and workspace_line_derivative must '...
+                    'be pure dual quaternions']);
+            end
+           
+            l = P(workspace_line);
+            m = D(workspace_line);
+            l_dot = P(workspace_line_derivative);
+            m_dot = D(workspace_line_derivative);
+            
+            % See Eq. (30) in Marinho et al. (2018)
+            hA1 = cross(robot_point,l) - m;
+            hA2 = cross(robot_point,l_dot) - m_dot;
+            residual = double(2*dot(hA2,hA1));
+        end
+        
         function J = point_to_point_distance_jacobian(translation_jacobian,...
                 robot_point, workspace_point)
         % POINT_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
