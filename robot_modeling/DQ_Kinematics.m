@@ -196,7 +196,7 @@ classdef DQ_Kinematics < handle
         % respectively, the x-axis, y-axis, and z-axis of the end-effector
         % frame given by x_pose
         %
-        % For more details, see Section IV.F?of Marinho, M. M., Adorno, B. V., 
+        % For more details, see Section IV.F of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
         % Surgical Robots using Vector Field Inequalities. 
         % http://arxiv.org/abs/1804.11270
@@ -226,6 +226,53 @@ classdef DQ_Kinematics < handle
             Jplane = [Jnz;Jdz;zeros(3,size(pose_jacobian,2))];
         end
 
+        function J = point_to_point_distance_jacobian(translation_jacobian,...
+                robot_point, workspace_point)
+        % POINT_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the square distance between a point in the workspace and a point in 
+        % in the robot.
+        %
+        % For more details, see Eq. (22) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_point_residual
+
+            if ~is_pure_quaternion(robot_point) ||...
+                    ~is_pure_quaternion(workspace_point)
+    
+                error(['The arguments translation and position have to be'...
+                    'pure quaternions.']);
+            end
+            J = 2 * vec4(robot_point - workspace_point)'*translation_jacobian;
+        end
+
+        function residual = point_to_point_residual(robot_point,...
+                workspace_point, workspace_point_derivative)
+        % POINT_TO_POINT_RESIDUAL returns the residual related to
+        % the moving point in the workspace that is independent of the
+        % robot motion (i.e., which does not depend on the robot
+        % joint velocities)
+        %
+        % For more details, see Eq. (22) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also point_to_point_distance_jacobian
+            if ~is_pure_quaternion(robot_point) || ...
+               ~is_pure_quaternion(workspace_point) || ...
+               ~is_pure_quaternion(workspace_point_derivative)
+               error(['The arguments translation, position, and '...
+                   'position_derivative have to be imaginary quaternions.']);
+            end
+            tmp = 2.0*dot(robot_point-workspace_point, ...
+                                            -1.0*workspace_point_derivative);
+            residual = double(tmp);
+         end
+        
         
         function Jp = translation_jacobian(J_pose,x_pose)
         % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
