@@ -60,6 +60,7 @@
 %       cross
 %       dot
 %       is_pure
+%       is_pure_quaternion
 %       is_quaternion
 %       is_real
 %       is_real_number
