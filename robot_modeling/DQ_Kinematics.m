@@ -19,6 +19,8 @@
 %       line_to_point_distance_jacobian
 %       line_to_point_residual
 %       plane_jacobian
+%       plane_to_point_distance_jacobian
+%       plane_to_point_residual
 %       point_to_line_distance_jacobian
 %       point_to_line_residual
 %       point_to_plane_distance_jacobian
@@ -403,6 +405,49 @@ classdef DQ_Kinematics < handle
             % plane normal and d is the distance with respect to the
             % reference frame.
             Jplane = [Jnz;Jdz;zeros(3,size(pose_jacobian,2))];
+        end
+        
+        function J = plane_to_point_distance_jacobian(plane_jacobian, ...
+                workspace_point)
+        % PLANE_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the distance between a plane attached to the robot and a point  
+        % in the workspace.
+        %
+        % For more details, see Eq. (56) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also plane_to_point_residual
+            n_columns = size(plane_jacobian,2);
+            
+            % Break plane_jacobian into blocks corresponding to the plane
+            % direction and plane distance
+            Jnz = plane_jacobian(1:4, 1:n_columns);
+            Jdz = plane_jacobian(5,1:n_columns);
+
+            % Plane distance Jacobian---Eq. 56 of Marinho et al. (2019)
+            J =  vec4(workspace_point)'*Jnz - Jdz;
+        end
+
+        function residual = plane_to_point_residual(robot_plane,...
+                workspace_point_derivative)
+        % PLANE_TO_POINT_RESIDUAL returns the residual related to the time
+        % derivative of the distance between a plane rigidly attached
+        % to the robot and a moving point in the workspace that is
+        % independent of the robot motion (i.e., which does not depend on
+        % the robot joint velocities)
+        %
+        % For more details, see Eq. (55) of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also plane_to_point_distance_jacobian
+
+            n_pi = P(robot_plane);
+            residual = double(dot(workspace_point_derivative,n_pi));    
         end
 
         function J = point_to_line_distance_jacobian(translation_jacobian,...
