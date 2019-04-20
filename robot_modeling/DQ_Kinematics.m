@@ -14,6 +14,8 @@
 % Static:
 %       distance_jacobian
 %       line_jacobian
+%       line_to_line_distance_jacobian 
+%       line_to_line_residual
 %       line_to_point_distance_jacobian
 %       line_to_point_residual
 %       plane_jacobian
@@ -150,6 +152,119 @@ classdef DQ_Kinematics < handle
              p = translation(x_pose);
              Jp = DQ_Kinematics.translation_jacobian(J_pose,x_pose);
              Jd = 2*vec4(p)'*Jp;
+        end
+        
+        function J = line_to_line_distance_jacobian(line_jacobian, ...
+                                                    robot_line, workspace_line)
+        % LINE_TO_LINE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % relates the joint velocities (q_dot) to the time derivative of
+        % the square distance between a line rigidly attached to the robot and 
+        % a line in the workspace.
+        %
+        % For more details, see Section IV.E of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also line_to_line_residual
+
+            DOFS = size(line_jacobian,2);
+            
+            % Inner-product Jacobian (Eq. 39 of Marinho et al., 2019)
+            Jinner = -0.5*(hamiplus8(workspace_line) + ...
+                                        haminus8(workspace_line))*line_jacobian;
+            
+            % Jacobian of the square of the norm of the dual part of 
+            % dot(robot_line, workspace_line)---Eq. 43 of Marinho et al., 2019.
+            lz_inner_l = dot(robot_line,workspace_line);
+            D_lz_inner_l = D(lz_inner_l);
+            Jnorm_inner_dual = 2*vec4(D_lz_inner_l)'*Jinner(5:8,1:DOFS);
+
+            % Cross product Jacobian (Eq. 40 of Marinho et al., 2019)
+            Jcross = 0.5*(haminus8(workspace_line) - hamiplus8(workspace_line))...
+                * line_jacobian;
+            
+            % Jacobian of the square of the norm of the primary part of
+            % cross(robot_line, workspace_line)---Eq. 44 of Marinho et al.
+            % (2019).
+            lz_cross_l = cross(robot_line, workspace_line);
+            P_lz_cross_l = P(lz_cross_l);
+            Jnorm_cross_primary = 2*vec4(P_lz_cross_l)'*Jcross(1:4,1:DOFS);
+            
+            % Retrieve the angle between the lines---Eq. 35 of Marinho et
+            % al. (2019)
+            phi = acos(double(P(lz_inner_l)));
+
+            % If robot_line and workspace_line are not parallel
+            if ~mod(phi,pi)            
+                % Non-parallel Distance Jacobian---Eq. 42 if Marinho et al. 
+                % (2019)
+                a = 1.0/(norm(P_lz_cross_l) * norm(P_lz_cross_l));
+                b = -norm(D_lz_inner_l)*norm(D_lz_inner_l) * a * a;
+
+                % Robot line--line squared distance Jacobian---Eq. 45 of
+                % Marinho et al. (2019).
+                J = double(a)*Jnorm_inner_dual + double(b)*Jnorm_cross_primary;
+            else
+                % robot_line and workspace_line are parallel
+                D_lz_cross_l = D(lz_cross_l);
+                % Eq. 47 of Marinho et al. (2019)
+                J = 2*vec4(D_lz_cross_l)'*Jcross(5:8,1:DOFS);
+            end
+        end
+
+
+        function residual = line_to_line_residual(robot_line, workspace_line,...
+                workspace_line_derivative)
+        % LINE_TO_LINE_RESIDUAL returns the residual related to the time
+        % derivative of the square distance between a line rigidly attached
+        % to the robot and a moving line in the workspace that is
+        % independent of the robot motion (i.e., which does not depend on
+        % the robot joint velocities)
+        %
+        % For more details, see Section IV.E of Marinho, M. M., Adorno, B. V., 
+        % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
+        % Surgical Robots using Vector Field Inequalities. 
+        % http://arxiv.org/abs/1804.11270 
+        %
+        % See also line_to_line_distance_jacobian
+           
+            % Inner product residual---Eq. 39 of Marinho et al. (2019)
+            zeta_lz_inner_l = dot(robot_line, workspace_line_derivative);
+            D_zeta_lz_inner_l = D(zeta_lz_inner_l);
+            
+            % Residual of the square of the norm of the dual part of 
+            % dot(robot_line, workspace_line)---Eq. 43 of Marinho et al., 2019.
+            lz_inner_l = dot(robot_line,workspace_line);
+            D_lz_inner_l = D(lz_inner_l);
+            zeta_norm_inner_dual = 2*vec4(D_lz_inner_l)'*vec4(D_zeta_lz_inner_l);
+
+            % Cross product residual---Eq. 40 of Marinho et al. (2019)
+            zeta_lz_cross_l = cross(robot_line,workspace_line_derivative);
+            P_zeta_lz_cross_l = P(zeta_lz_cross_l);
+            D_zeta_lz_cross_l = D(zeta_lz_cross_l);
+            
+            % Residual of the square of the norm of the primary part of
+            % cross(robot_line, workspace_line)
+            lz_cross_l = cross(robot_line,workspace_line);
+            zeta_norm_cross_primary = 2*vec4(lz_cross_l)'*vec4(P_zeta_lz_cross_l);
+            
+            % Retrieve the angle between the lines---Eq. 35 of Marinho et
+            % al. (2019)
+            phi = acos(double(P(lz_inner_l)));
+
+            % If robot_line and workspace_line are not parallel
+            if ~mod(phi,pi)            
+                % Non-parallel Distance Jacobian---Eq. 42 if Marinho et al. 
+                % (2019)
+                a = 1.0/(norm(P_lz_cross_l) * norm(P_lz_cross_l));
+                b = -norm(D_lz_inner_l)*norm(D_lz_inner_l) * a * a;
+                
+                residual = a*zeta_norm_inner_dual + b*zeta_norm_cross_primary;
+            else
+                % robot_line and workspace_line are parallel
+                residual = 2*vec4(D(lz_cross_l))'*vec4(D_zeta_lz_cross_l);
+            end 
         end
         
         function J = line_to_point_distance_jacobian(line_jacobian, ...
