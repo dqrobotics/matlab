@@ -420,6 +420,11 @@ classdef DQ_Kinematics < handle
         % http://arxiv.org/abs/1804.11270 
         %
         % See also plane_to_point_residual
+        
+            if ~is_pure_quaternion(workspace_point)
+                error('The argument %s should be a pure quaternion',inputname(2));
+            end
+        
             n_columns = size(plane_jacobian,2);
             
             % Break plane_jacobian into blocks corresponding to the plane
@@ -445,7 +450,11 @@ classdef DQ_Kinematics < handle
         % http://arxiv.org/abs/1804.11270 
         %
         % See also plane_to_point_distance_jacobian
-
+            if ~is_plane(robot_plane) ||...
+                    ~is_pure_quaternion(workspace_point_derivative)
+                error(['The argument %s should be a plane and %s should be '...
+                      'a pure quaternion'],inputname(1), inputname(2));
+            end
             n_pi = P(robot_plane);
             residual = double(dot(workspace_point_derivative,n_pi));    
         end
@@ -465,7 +474,7 @@ classdef DQ_Kinematics < handle
         % See also point_to_line_residual
 
             if ~is_pure_quaternion(robot_point_translation) || ...
-                    ~is_pure(workspace_line)
+                    ~is_line(workspace_line)
                 error(['robot_point has to be a pure quaternion and'...
                     'workspace_line must be a pure dual quaternion']);
             end
@@ -491,7 +500,7 @@ classdef DQ_Kinematics < handle
         %
         % See also point_to_line_distance_jacobian
 
-            if ~is_pure_quaternion(robot_point) || ~is_pure(workspace_line) || ...
+            if ~is_pure_quaternion(robot_point) || ~is_line(workspace_line) || ...
                     ~is_pure(workspace_line_derivative)
                 error(['robot_point has to be a pure quaternion and'...
                     'both workspace_line and workspace_line_derivative must '...
@@ -543,8 +552,13 @@ classdef DQ_Kinematics < handle
         % http://arxiv.org/abs/1804.11270 
         %
         % See also point_to_plane_distance_jacobian
-            if ~is_pure(point)
-                error('The argument %s has to be pure',inputname(point));
+            if ~is_pure_quaternion(point) ||...
+                ~(is_pure_quaternion(P(plane_derivative)) ...
+                                                && is_real(D(plane_derivative)))
+                error(['The argument %s has to be pure and %s must be the '...
+                       'plane derivative; that is, it must have a pure '...
+                       'quaternion in the primary part and a real number in '...
+                       'the dual part'],inputname(point));
             end
             
             n_dot = P(plane_derivative);
