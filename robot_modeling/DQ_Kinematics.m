@@ -285,8 +285,8 @@ classdef DQ_Kinematics < handle
         
             n_columns = size(line_jacobian,2);
 
-            Jl = line_jacobian(1:4, n_columns);
-            Jm = line_jacobian(5:8, n_columns);
+            Jl = line_jacobian(1:4, 1:n_columns);
+            Jm = line_jacobian(5:8, 1:n_columns);
 
             % Extract line direction
             l = P(robot_line);
