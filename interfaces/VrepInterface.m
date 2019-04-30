@@ -20,7 +20,7 @@
 % Contributors to this file:
 %     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 
-classdef vrep_interface < handle
+classdef VrepInterface < handle
     % VREP 3.5.0 remote API and DQ Robotics interface
     %   Connects to VREP remote API and retrieves/sends data compatible
     %   with DQ Robotics.
@@ -57,7 +57,7 @@ classdef vrep_interface < handle
         end
         
         %% Constructor
-        function obj = vrep_interface()
+        function obj = VrepInterface()
             obj.vrep=remApi('remoteApi');
             obj.handles_map = containers.Map;
             obj.clientID = -1;
