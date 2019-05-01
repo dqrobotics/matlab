@@ -82,8 +82,8 @@ classdef DQ_Kinematics < handle
         end
         
         function set_reference_frame(obj,reference_frame)
-            % sets the reference frame used for the fkm() and pose_jacobian() 
-            % methods   
+            % SET_REFERENCE_FRAME(reference_frame) sets the reference frame
+            % used for the fkm() and pose_jacobian() methods
             if is_unit(reference_frame)
                 obj.reference_frame = reference_frame;
             else
@@ -141,12 +141,13 @@ classdef DQ_Kinematics < handle
     methods(Static)
         
         function Jd = distance_jacobian(J_pose, x_pose)
-         % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
-         % that satisfy vec8(x_pose_dot) = J_pose * q_dot, DISTANCE_JACOBIAN(J_pose,x_pose) returns 
-         % the distance Jacobian; that it, the Jacobian that satisfies the 
-         % relation dot(d^2) = Jd * q_dot, where dot(d^2) is the time 
-         % derivative of the square of the distance between the origin of the 
-         % frame represented by 'x_pose' and the origin of the reference frame.
+         % Given the Jacobian 'J_pose' and the corresponding unit dual
+         % quaternion 'x_pose' that satisfy vec8(x_pose_dot) = J_pose *
+         % q_dot, DISTANCE_JACOBIAN(J_pose,x_pose) returns the distance
+         % Jacobian; that it, the Jacobian that satisfies the relation
+         % dot(d^2) = Jd * q_dot, where dot(d^2) is the time derivative of
+         % the square of the distance between the origin of the frame
+         % represented by 'x_pose' and the origin of the reference frame.
              if ~is_unit(x_pose)
                 error(['The second argument of distance_jacobian should be'...
                         ' a unit dual quaternion']);
@@ -158,10 +159,11 @@ classdef DQ_Kinematics < handle
         
         function J = line_to_line_distance_jacobian(line_jacobian, ...
                                                     robot_line, workspace_line)
-        % LINE_TO_LINE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
-        % relates the joint velocities (q_dot) to the time derivative of
-        % the square distance between a line rigidly attached to the robot and 
-        % a line in the workspace.
+        % LINE_TO_LINE_DISTANCE_JACOBIAN(line_jacobian, robot_line,
+        % workspace_line) returns the Jacobian 'J' that relates the joint
+        % velocities (q_dot) to the time derivative of the square distance
+        % between a line rigidly attached to the robot and a line in the
+        % workspace.
         %
         % For more details, see Section IV.E of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -218,9 +220,10 @@ classdef DQ_Kinematics < handle
 
         function residual = line_to_line_residual(robot_line, workspace_line,...
                 workspace_line_derivative)
-        % LINE_TO_LINE_RESIDUAL returns the residual related to the time
-        % derivative of the square distance between a line rigidly attached
-        % to the robot and a moving line in the workspace that is
+        % LINE_TO_LINE_RESIDUAL(robot_line, workspace_line,
+        % workspace_line_derivative) returns the residual related to the
+        % time derivative of the square distance between a line rigidly
+        % attached to the robot and a moving line in the workspace that is
         % independent of the robot motion (i.e., which does not depend on
         % the robot joint velocities)
         %
@@ -271,10 +274,10 @@ classdef DQ_Kinematics < handle
         
         function J = line_to_point_distance_jacobian(line_jacobian, ...
             robot_line, workspace_point)
-        % LINE_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
-        % relates the joint velocities (q_dot) to the time derivative of
-        % the square distance between a line in the robot and a point in 
-        % in the workspace.
+        % LINE_TO_POINT_DISTANCE_JACOBIAN(line_jacobian, robot_line,
+        % workspace_point) returns the Jacobian 'J' that relates the joint
+        % velocities (q_dot) to the time derivative of the square distance
+        % between a line in the robot and a point in in the workspace.
         %
         % For more details, see Eq. (34) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -300,9 +303,10 @@ classdef DQ_Kinematics < handle
 
         function residual = line_to_point_residual(robot_line, ...
                 workspace_point, workspace_point_derivative)
-        % LINE_TO_POINT_RESIDUAL returns the residual related to the time
-        % derivative of the square distance between a line rigidly attached
-        % to the robot and a moving point in the workspace that is
+        % LINE_TO_POINT_RESIDUAL(robot_line, workspace_point,
+        % workspace_point_derivative) returns the residual related to the
+        % time derivative of the square distance between a line rigidly
+        % attached to the robot and a moving point in the workspace that is
         % independent of the robot motion (i.e., which does not depend on
         % the robot joint velocities)
         %
@@ -353,16 +357,18 @@ classdef DQ_Kinematics < handle
                                hamiplus4(r*line_direction)*DQ.C4)*Jr;
             Jmx = crossmatrix4(l)'*Jt + crossmatrix4(t)*Jrx;
 
-            % Assemble the 8-by-n line Jacobian, where n = dim_configuration_space          
+            % Assemble the 8-by-n line Jacobian, where n =
+            % dim_configuration_space
             Jlx = [Jrx; Jmx];
         end
         
         function Jr = rotation_jacobian(J_pose)
-        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
-        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, ROTATION_JACOBIAN(J_pose) returns 
-        % the Jacobian Jr that satisfies vec4(r_dot) = Jr * q_dot, where r_dot 
-        % is the time derivative of the rotation quaternion r in 
-        % x_pose = r + DQ.E*(1/2)*p*r and q_dot is the time derivative of the 
+        % Given the Jacobian 'J_pose' and the corresponding unit dual
+        % quaternion 'x_pose' that satisfy vec8(x_pose_dot) = J_pose *
+        % q_dot, ROTATION_JACOBIAN(J_pose) returns the Jacobian Jr that
+        % satisfies vec4(r_dot) = Jr * q_dot, where r_dot is the time
+        % derivative of the rotation quaternion r in x_pose = r +
+        % DQ.E*(1/2)*p*r and q_dot is the time derivative of the
         % configuration vector.
             Jr = J_pose(1:4,:);
         end
@@ -409,10 +415,10 @@ classdef DQ_Kinematics < handle
         
         function J = plane_to_point_distance_jacobian(plane_jacobian, ...
                 workspace_point)
-        % PLANE_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
-        % relates the joint velocities (q_dot) to the time derivative of
-        % the distance between a plane attached to the robot and a point  
-        % in the workspace.
+        % PLANE_TO_POINT_DISTANCE_JACOBIAN(plane_jacobian, workspace_point)
+        % returns the Jacobian 'J' that relates the joint velocities
+        % (q_dot) to the time derivative of the distance between a plane
+        % attached to the robot and a point in the workspace.
         %
         % For more details, see Eq. (56) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -438,11 +444,12 @@ classdef DQ_Kinematics < handle
 
         function residual = plane_to_point_residual(robot_plane,...
                 workspace_point_derivative)
-        % PLANE_TO_POINT_RESIDUAL returns the residual related to the time
-        % derivative of the distance between a plane rigidly attached
-        % to the robot and a moving point in the workspace that is
-        % independent of the robot motion (i.e., which does not depend on
-        % the robot joint velocities)
+        % PLANE_TO_POINT_RESIDUAL(robot_plane, workspace_point_derivative)
+        % returns the residual related to the time derivative of the
+        % distance between a plane rigidly attached to the robot and a
+        % moving point in the workspace that is independent of the robot
+        % motion (i.e., which does not depend on the robot joint
+        % velocities)
         %
         % For more details, see Eq. (55) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -461,10 +468,11 @@ classdef DQ_Kinematics < handle
 
         function J = point_to_line_distance_jacobian(translation_jacobian,...
                 robot_point, workspace_line)
-        % POINT_TO_LINE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % POINT_TO_LINE_DISTANCE_JACOBIAN(translation_jacobian,
+        % robot_point, workspace_line) returns the Jacobian 'J' that
         % relates the joint velocities (q_dot) to the time derivative of
-        % the square distance between a line in the workspace and a point in 
-        % in the robot.
+        % the square distance between a line in the workspace and a point
+        % in in the robot.
         %
         % For more details, see Eq. (32) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -488,10 +496,11 @@ classdef DQ_Kinematics < handle
 
         function residual = point_to_line_residual(robot_point, workspace_line,...
                                 workspace_line_derivative)
-        % POINT_TO_LINE_RESIDUAL returns the residual related to
-        % the moving line in the workspace that is independent of the
-        % robot motion (i.e., which does not depend on the robot
-        % joint velocities)
+        % POINT_TO_LINE_RESIDUAL(robot_point, workspace_line,
+        % workspace_line_derivative) returns the residual related to the
+        % moving line in the workspace that is independent of the robot
+        % motion (i.e., which does not depend on the robot joint
+        % velocities)
         %
         % For more details, see Eq. (32) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -520,10 +529,11 @@ classdef DQ_Kinematics < handle
         
         function J = point_to_plane_distance_jacobian(translation_jacobian, ...
                 robot_point, workspace_plane)
-        % POINT_TO_PLANE_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % POINT_TO_PLANE_DISTANCE_JACOBIAN(translation_jacobian,
+        % robot_point, workspace_plane) returns the Jacobian 'J' that
         % relates the joint velocities (q_dot) to the time derivative of
-        % the distance between a plane in the workspace and a point in 
-        % in the robot.
+        % the distance between a plane in the workspace and a point in in
+        % the robot.
         %
         % For more details, see Eq. (59) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -541,10 +551,10 @@ classdef DQ_Kinematics < handle
         end
 
         function residual = point_to_plane_residual(point, plane_derivative)
-        % POINT_TO_PLANE_RESIDUAL returns the residual related to
-        % the moving plane in the workspace that is independent of the
-        % robot motion (i.e., which does not depend on the robot
-        % joint velocities)
+        % POINT_TO_PLANE_RESIDUAL(point, plane_derivative) returns the
+        % residual related to the moving plane in the workspace that is
+        % independent of the robot motion (i.e., which does not depend on
+        % the robot joint velocities)
         %
         % For more details, see Eq. (59) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -569,10 +579,11 @@ classdef DQ_Kinematics < handle
         
         function J = point_to_point_distance_jacobian(translation_jacobian,...
                 robot_point, workspace_point)
-        % POINT_TO_POINT_DISTANCE_JACOBIAN returns the Jacobian 'J' that
+        % POINT_TO_POINT_DISTANCE_JACOBIAN(translation_jacobian,
+        % robot_point, workspace_point) returns the Jacobian 'J' that
         % relates the joint velocities (q_dot) to the time derivative of
-        % the square distance between a point in the workspace and a point in 
-        % in the robot.
+        % the square distance between a point in the workspace and a point
+        % in in the robot.
         %
         % For more details, see Eq. (22) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -592,10 +603,11 @@ classdef DQ_Kinematics < handle
 
         function residual = point_to_point_residual(robot_point,...
                 workspace_point, workspace_point_derivative)
-        % POINT_TO_POINT_RESIDUAL returns the residual related to
-        % the moving point in the workspace that is independent of the
-        % robot motion (i.e., which does not depend on the robot
-        % joint velocities)
+        % POINT_TO_POINT_RESIDUAL(robot_point, workspace_point,
+        % workspace_point_derivative) returns the residual related to the
+        % moving point in the workspace that is independent of the robot
+        % motion (i.e., which does not depend on the robot joint
+        % velocities)
         %
         % For more details, see Eq. (22) of Marinho, M. M., Adorno, B. V., 
         % Harada, K., and Mitsuishi, M. (2018). Dynamic Active Constraints for 
@@ -614,12 +626,12 @@ classdef DQ_Kinematics < handle
          end
         
         function Jp = translation_jacobian(J_pose,x_pose)
-        % Given the Jacobian 'J_pose' and the corresponding unit dual quaternion 'x_pose' 
-        % that satisfy vec8(x_pose_dot) = J_pose * q_dot, TRANSLATION_JACOBIAN(J_pose,x_pose) 
-        % returns the Jacobian that satisfies the relation 
-        % vec4(p_dot) = Jp * q_dot, where p_dot is the time derivative of the
-        % translation quaternion p and q_dot is the time derivative of the 
-        % configuration vector
+        % Given the Jacobian 'J_pose' and the corresponding unit dual
+        % quaternion 'x_pose' that satisfy vec8(x_pose_dot) = J_pose *
+        % q_dot, TRANSLATION_JACOBIAN(J_pose,x_pose) returns the Jacobian
+        % that satisfies the relation vec4(p_dot) = Jp * q_dot, where p_dot
+        % is the time derivative of the translation quaternion p and q_dot
+        % is the time derivative of the configuration vector
             if ~is_unit(x_pose)
                 error(['The second argument of translation_jacobian should be'...
                     ' a unit dual quaternion']);              
