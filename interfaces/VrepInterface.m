@@ -79,22 +79,22 @@ classdef VrepInterface < handle
         end
         
         %% Close all
-        function disconnectAll(obj)
+        function disconnect_all(obj)
             obj.vrep.simxFinish(-1);
         end
         
         %% Start Simulation
-        function startSimulation(obj)
+        function start_simulation(obj)
             obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
         end
         
         %% Stop Simulation
-        function stopSimulation(obj)
+        function stop_simulation(obj)
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
         end
         
         %% Get Handles
-        function handles = getHandles(obj,names)
+        function handles = get_handles(obj,names)
             handles = [];
             if(iscell(names))
                 for i=1:length(names)
@@ -106,56 +106,56 @@ classdef VrepInterface < handle
         end
         
         %% Get Handle
-        function handle = getHandle(obj,name)
+        function handle = get_handle(obj,name)
             [~,handle] = obj.vrep.simxGetObjectHandle(obj.clientID,name,obj.vrep.simx_opmode_blocking);
         end
         
         %% Get Object Translation
-        function t = getObjectTranslation(obj,handle,relative_to_handle,opmode)
+        function t = get_object_translation(obj,handle,relative_to_handle,opmode)
             [~,object_position]  = obj.vrep.simxGetObjectPosition(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
             t = DQ([0,double(object_position)]);
         end
         
         %% Set Object Translation
-        function setObjectTranslation(obj,handle,relative_to_handle,t,opmode)
+        function set_object_translation(obj,handle,relative_to_handle,t,opmode)
             obj.vrep.simxSetObjectPosition(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),t.q(2:4),opmode);
         end
         
         %% Get Object Rotation
-        function r = getObjectRotation(obj,handle,relative_to_handle,opmode)
+        function r = get_object_rotation(obj,handle,relative_to_handle,opmode)
             [~,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
             r = normalize(DQ(double(object_rotation)));
         end
         
         %% Set Object Rotation
-        function setObjectRotation(obj,handle,relative_to_handle,r,opmode)
+        function set_object_rotation(obj,handle,relative_to_handle,r,opmode)
             obj.vrep.simxSetObjectOrientation(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r.q(1:4),opmode);
         end
         
         %% Get Object Pose
-        function x = getObjectPose(obj,handle,relative_to_handle,opmode)
-            t = obj.getObjectTranslation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
-            r = obj.getObjectRotation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
+        function x = get_object_pose(obj,handle,relative_to_handle,opmode)
+            t = obj.get_object_translation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
+            r = obj.get_object_rotation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
             x = r + 0.5*DQ.E*t*r;
         end
         
         %% Set Object Pose
-        function setObjectPose(obj,handle,relative_to_handle,x,opmode)
+        function set_object_pose(obj,handle,relative_to_handle,x,opmode)
             t = translation(x);
             r = rotation(x);
-            obj.setObjectTranslation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),t,opmode);
-            obj.setObjectRotation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r,opmode);
+            obj.set_object_translation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),t,opmode);
+            obj.set_object_rotation(obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r,opmode);
         end
         
         %% Set Joint Positions
-        function setJointPositions(obj,handles,thetas,opmode)
+        function set_joint_positions(obj,handles,thetas,opmode)
             for joint_index=1:length(handles)
                 obj.vrep.simxSetJointPosition(obj.clientID,handles(joint_index),thetas(joint_index),opmode);
             end
         end
         
         %% Set Joint Target Positions
-        function setJointTargetPositions(obj,handles,thetas,opmode)
+        function set_joint_target_positions(obj,handles,thetas,opmode)
             obj.vrep.simxPauseCommunication(obj.clientID,1)
             for joint_index=1:length(handles)
                 obj.vrep.simxSetJointTargetPosition(obj.clientID,handles(joint_index),thetas(joint_index),opmode);
@@ -164,7 +164,7 @@ classdef VrepInterface < handle
         end
         
         %% Get Joint Positions
-        function [thetas,retval]=getJointPositions(obj,handles,opmode)
+        function [thetas,retval]=get_joint_positions(obj,handles,opmode)
             thetas = zeros(length(handles),1);
             for joint_index=1:length(handles)
                 [retval,tmp] = obj.vrep.simxGetJointPosition(obj.clientID,handles(joint_index),opmode);
@@ -173,7 +173,7 @@ classdef VrepInterface < handle
         end
         
         %% Get image
-        function img=getVisionSensorImageBlocking(obj,handle)
+        function img=get_vision_sensor_image_blocking(obj,handle)
             [~,~,img]=obj.vrep.simxGetVisionSensorImage2(obj.clientID,obj.handle_from_string_or_handle(handle),0,obj.vrep.simx_opmode_blocking);
         end
     end
