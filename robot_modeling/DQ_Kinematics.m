@@ -200,7 +200,7 @@ classdef DQ_Kinematics < handle
             phi = acos(double(P(lz_inner_l)));
 
             % If robot_line and workspace_line are not parallel
-            if ~mod(phi,pi)            
+            if mod(phi,pi)            
                 % Non-parallel Distance Jacobian---Eq. 42 if Marinho et al. 
                 % (2019)
                 a = 1.0/(norm(P_lz_cross_l) * norm(P_lz_cross_l));
