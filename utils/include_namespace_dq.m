@@ -3,6 +3,9 @@
 % j_ = DQ.j;
 % k_ = DQ.k;
 % E_ = DQ.E;
+% Define shorcuts for the conjugator matrices:
+% C4 = DQ.C4
+% C8 = DQ.C8;
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -30,3 +33,5 @@ i_ = DQ.i;
 j_ = DQ.j;
 k_ = DQ.k;
 E_ = DQ.E;
+C4 = DQ.C4;
+C8 = DQ.C8;
