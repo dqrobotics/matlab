@@ -148,15 +148,21 @@ classdef DQ_WholeBody < DQ_Kinematics
             end
         end
         
-        function x = fkm(obj,q,ith)
+        function x = fkm(obj,q,ith, jth)
             % Returns the forward kinematic model of the whole-body chain.
             %
             % x = FKM(q) receives the configuration vector q of the whole
             % kinematic chain and returns the pose of the last frame.
             % x = FKM(q, ith) calculates the forward kinematics up to the ith
             % kinematic chain.
+            % x = RAW_FKM(q, ith, jth) calculates the forward kinematics up to
+            % the jth link of the ith kinematic chain.
             % FKM takes into account the reference frame.
-            if nargin > 2
+            if nargin > 4
+                error('Invalid number of arguments');
+            elseif nargin == 4 
+                x = obj.reference_frame * raw_fkm(obj,q,ith,jth);
+            elseif nargin == 3
                 x = obj.reference_frame * raw_fkm(obj,q,ith);
             else
                 x = obj.reference_frame * raw_fkm(obj,q);
@@ -257,7 +263,7 @@ classdef DQ_WholeBody < DQ_Kinematics
             
         end
         
-        function J = pose_jacobian(obj,q,ith)
+        function J = pose_jacobian(obj,q,ith,jth)
             % Returns the whole-body pose Jacobian.
             %
             % J = POSE_JACOBIAN(q) receives the configuration vector q of the whole
@@ -267,8 +273,25 @@ classdef DQ_WholeBody < DQ_Kinematics
             % represents the end-effector pose.
             % J = POSE_JACOBIAN(q, ith) calculates the Jacobian up to the ith
             % kinematic chain.
-            if nargin > 2
-                % find the jacobian up to the ith intermediate kinematic
+            % J = POSE_JACOBIAN(q, ith,jth) calculates the Jacobian up to the 
+            % jth link of the ith kinematic chain.
+            % 
+            % For more details, see Eq. (4.7) of ?B. V. Adorno,
+            % ?Two-arm Manipulation: From Manipulators to Enhanced
+            % Human-Robot Collaboration [Contribution ? la manipulation ?
+            % deux bras : des manipulateurs ? la collaboration
+            % homme-robot],? Universit? Montpellier 2, 2011.
+            
+            partial_chain = false;
+            if nargin > 4
+                error('Invalid number of parameters')
+            elseif nargin == 4
+                % find the Jacobian up to the jth link of the ith
+                % intermediate kinematic chain
+                partial_chain = true;
+                n = ith;            
+            elseif nargin == 3
+                % find the Jacobian up to the ith intermediate kinematic
                 % chain
                 n = ith;
             else
@@ -276,12 +299,22 @@ classdef DQ_WholeBody < DQ_Kinematics
                 n = length(obj.chain);
             end
             
-            x_0_to_n = obj.fkm(q,n);
+            if partial_chain == true                
+                x_0_to_n = obj.fkm(q,n,jth);
+            else
+                x_0_to_n = obj.fkm(q,n);
+            end
+            
             j = 1;
             
             for i = 0:n-1
-                x_0_to_iplus1 = obj.fkm(q,i+1);
+                if partial_chain == true && i == n-1
+                    x_0_to_iplus1 = obj.fkm(q,i+1,jth);
+                else                    
+                    x_0_to_iplus1 = obj.fkm(q,i+1);
+                end
                 x_iplus1_to_n = x_0_to_iplus1'*x_0_to_n;
+                
                 
                 % Constant rigid transformations in the chain do not change the
                 % dimension of the configuration space.
@@ -291,11 +324,25 @@ classdef DQ_WholeBody < DQ_Kinematics
                     j = j + dim;
                     
                     if obj.reversed(i+1) == true
-                        L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
-                            DQ.C8*obj.chain{i+1}.pose_jacobian(q_iplus1);
+                        if partial_chain == true && i == n-1
+                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                                haminus8(x_iplus1_to_n) * DQ.C8 * ...
+                                    obj.chain{i+1}.pose_jacobian(q_iplus1,jth);
+                        else
+                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                                haminus8(x_iplus1_to_n) * DQ.C8 * ...
+                                    obj.chain{i+1}.pose_jacobian(q_iplus1);
+                        end
                     else
-                        L{i+1} = hamiplus8(obj.fkm(q,i))*haminus8(x_iplus1_to_n)*...
-                            obj.chain{i+1}.pose_jacobian(q_iplus1);
+                        if partial_chain == true && i == n-1
+                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                                haminus8(x_iplus1_to_n) * ...
+                                    obj.chain{i+1}.pose_jacobian(q_iplus1,jth);
+                        else
+                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                                haminus8(x_iplus1_to_n) * ...
+                                    obj.chain{i+1}.pose_jacobian(q_iplus1);
+                        end
                     end
                 end
             end
@@ -305,18 +352,33 @@ classdef DQ_WholeBody < DQ_Kinematics
         
         
         
-        function x = raw_fkm(obj,q,ith)
-            % Analogous to FKM, but without considering base and end-effector changes.
-            %
-            % x = RAW_FKM(q) receives the configuration vector q of the whole
-            % kinematic chain and returns the pose of the last frame.
-            % x = RAW_FKM(q, ith) calculates the forward kinematics up to the ith
-            % kinematic chain.
-            % RAW_FKM does not take into account the reference frame.
+        function x = raw_fkm(obj, q, ith, jth)
+        % Analogous to FKM, but without considering base and end-effector changes.
+        %
+        % x = RAW_FKM(q) receives the configuration vector q of the whole
+        % kinematic chain and returns the pose of the last frame.
+        % x = RAW_FKM(q, ith) calculates the forward kinematics up to the ith
+        % kinematic chain.
+        % x = RAW_FKM(q, ith, jth) calculates the forward kinematics up to
+        % the jth link of the ith kinematic chain.
+        % RAW_FKM does not take into account the reference frame.
             
-            if nargin > 2
+            % By default, the fkm is taken up to the end of the ith
+            % kinematic chain.
+            partial_chain = false;
+            if nargin > 4
+                error('Invalid number of arguments');
+            elseif nargin == 4
+                % the forward kinematics is calculated up to the jth link
+                % of the ith kinematic chain.
+                n = ith;
+                partial_chain = true;
+            elseif nargin == 3
+                % the forward kinematics is calculated up to the ith
+                % kinematic chain
                 n = ith;
             else
+                % the whole-body kinematic chain is taken into consideration
                 n = length(obj.chain);
             end
             
@@ -337,7 +399,11 @@ classdef DQ_WholeBody < DQ_Kinematics
                 
                 if obj.reversed(i) == true
                     % The chain is reversed
-                    x = x*obj.chain{i}.fkm(qi)';
+                    if partial_chain == true && i == n
+                        x = x*obj.chain{i}.fkm(qi,jth)';
+                    else
+                        x = x*obj.chain{i}.fkm(qi)';
+                    end
                 elseif isa(obj.chain{i}, 'DQ')
                     % Is it a rigid transformation? (Rigid transformations are
                     % never reversed in the chain because a reverse rigid
@@ -347,7 +413,11 @@ classdef DQ_WholeBody < DQ_Kinematics
                 else
                     % It's neither a rigid transformation nor a reversed
                     % chain; that is, it's just a regular one.
-                    x = x*obj.chain{i}.fkm(qi);
+                    if partial_chain == true && i == n
+                        x = x*obj.chain{i}.fkm(qi,jth);
+                    else                        
+                        x = x*obj.chain{i}.fkm(qi);
+                    end
                 end
             end
         end
