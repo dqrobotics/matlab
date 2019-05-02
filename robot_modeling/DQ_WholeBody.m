@@ -321,7 +321,6 @@ classdef DQ_WholeBody < DQ_Kinematics
                 end
                 x_iplus1_to_n = x_0_to_iplus1'*x_0_to_n;
                 
-                
                 % Constant rigid transformations in the chain do not change the
                 % dimension of the configuration space.
                 if isa(obj.chain{i+1}, 'DQ_Kinematics')
@@ -329,11 +328,19 @@ classdef DQ_WholeBody < DQ_Kinematics
                     q_iplus1 = q(j : j + dim - 1);
                     j = j + dim;
                     
+                    % TODO: The code below can be cleaned up to prevent
+                    % duplication.
                     if obj.reversed(i+1) == true
                         if partial_chain == true && i == n-1
+                            reverse_pose_jacobian_jth = haminus8(obj.chain{i+1}.fkm(dim-jth)) * ...
+                            DQ.C8 * obj.chain{i+1}.pose_jacobian(q_iplus1) + ...
+                            hamiplus8(obj.chain{i+1}.fkm(q_iplus1)) * ...
+                            obj.chain{i+1}.pose_jacobian(q_iplus1,dim-jth);
+                        
                             L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
-                                haminus8(x_iplus1_to_n) * DQ.C8 * ...
-                                    obj.chain{i+1}.pose_jacobian(q_iplus1,jth);
+                                        haminus8(x_iplus1_to_n) * ...
+                                            reverse_pose_jacobian_jth;
+                                    
                         else
                             L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
                                 haminus8(x_iplus1_to_n) * DQ.C8 * ...
@@ -346,8 +353,8 @@ classdef DQ_WholeBody < DQ_Kinematics
                                     obj.chain{i+1}.pose_jacobian(q_iplus1,jth);
                         else
                             L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
-                                haminus8(x_iplus1_to_n) * ...
-                                    obj.chain{i+1}.pose_jacobian(q_iplus1);
+                                        haminus8(x_iplus1_to_n) * ...
+                                        obj.chain{i+1}.pose_jacobian(q_iplus1);
                         end
                     end
                 end
