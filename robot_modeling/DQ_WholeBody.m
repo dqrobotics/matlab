@@ -169,9 +169,15 @@ classdef DQ_WholeBody < DQ_Kinematics
             end
         end
         
-        function ret = get_chain(obj)
+        function ret = get_chain(obj,ith)
             % Returns the complete kinematic chain.
-            ret = obj.chain;
+            if nargin > 2
+                error('Invalid number of parameters');
+            elseif nargin == 2
+                ret = obj.chain{ith};
+            else
+                ret = obj.chain;
+            end
         end
         
         function ret = get_dim_configuration_space(obj)
@@ -400,7 +406,12 @@ classdef DQ_WholeBody < DQ_Kinematics
                 if obj.reversed(i) == true
                     % The chain is reversed
                     if partial_chain == true && i == n
-                        x = x*obj.chain{i}.fkm(qi,jth)';
+                        x_base_to_effector = obj.chain{i}.fkm(qi);
+                        kth = dim - jth;
+                        x_base_to_kth = obj.chain{i}.fkm(qi,kth);
+                        
+                        x_effector_to_kth = x_base_to_effector'*x_base_to_kth;
+                        x = x * x_effector_to_kth;
                     else
                         x = x*obj.chain{i}.fkm(qi)';
                     end
