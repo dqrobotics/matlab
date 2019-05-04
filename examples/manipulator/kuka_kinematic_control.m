@@ -5,52 +5,52 @@ function kuka_kinematic_control()
     kuka.name = 'KUKA';
 
     %Initial configuration
-    thetastart =[0    0.3770    0.1257   -0.5655         0         0         0]';
+    qstart =[0    0.3770    0.1257   -0.5655         0         0         0]';
     %Final configuration
-    thetad = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
-    theta = thetastart;
+    qd = [1.7593    0.8796    0.1257   -1.4451   -1.0053    0.0628         0]';
+    q = qstart;
 
     epsilon = 0.001; %The error must be bellow this value in order to stop the robot
     gain = 0.1; %Gain of the controllers
 
-    xd = kuka.fkm(thetad); %Desired end-effector's pose
+    xd = kuka.fkm(qd); %Desired end-effector's pose
 
     figure;
     axis equal;
-    plot(kuka, theta);
+    plot(kuka, q);
 
     grid off;
     view(-0,0)
     hold on;
 
-    plot(kuka, theta);
+    plot(kuka, q);
 
 
     fprintf('Performing standard kinematic control using dual quaternion coordinates');
-    xm = kuka.fkm(theta);
+    xm = kuka.fkm(q);
     error = epsilon+1;
     while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(theta);
-        xm = kuka.fkm(theta);
+        jacob = kuka.pose_jacobian(q);
+        xm = kuka.fkm(q);
         error = vec8(xd-xm);
-        theta = theta+pinv(jacob)*gain*error;
-        plot(kuka, theta');    
+        q = q+pinv(jacob)*gain*error;
+        plot(kuka, q');    
         drawnow;
     end
 
     fprintf('\nNow let us control only the translation part\n');
     %The end-effector will touch the base
-    pd = [0,0,0,0];
+    pd = 0*DQ_i + 0*DQ_j + 0*DQ_k;
 
     error = epsilon+1;
     while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(theta);
-        xm = kuka.fkm(theta);
+        jacob = kuka.pose_jacobian(q);
+        xm = kuka.fkm(q);
         jacobp = kuka.translation_jacobian(jacob,xm);
         pm = translation(xm);
         error = vec4(pd-pm);    
-        theta = theta+pinv(jacobp)*gain*error;
-        plot(kuka, theta'); 
+        q = q+pinv(jacobp)*gain*error;
+        plot(kuka, q'); 
         drawnow;
     end
 
@@ -61,13 +61,13 @@ function kuka_kinematic_control()
 
     error = epsilon+1;
     while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(theta);
-        xm = kuka.fkm(theta);
+        jacob = kuka.pose_jacobian(q);
+        xm = kuka.fkm(q);
         jacobr = kuka.rotation_jacobian(jacob);
         rm = xm.P;
         error = vec4(rd-rm);    
-        theta = theta+pinv(jacobr)*gain*error;
-        plot(kuka, theta');  
+        q = q+pinv(jacobr)*gain*error;
+        plot(kuka, q');  
         drawnow;
     end
 
@@ -81,13 +81,13 @@ function kuka_kinematic_control()
     dd=0.2^2;
     error = epsilon+1;
     while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(theta);
-        xm = kuka.fkm(theta);
+        jacob = kuka.pose_jacobian(q);
+        xm = kuka.fkm(q);
         jacobd = kuka.distance_jacobian(jacob,xm);
         dm = norm(vec4(translation(xm)))^2;
         error = dd-dm;    
-        theta = theta+pinv(jacobd)*gain*error;
-        plot(kuka, theta');
+        q = q+pinv(jacobd)*gain*error;
+        plot(kuka, q');
         drawnow;
     end
 end
