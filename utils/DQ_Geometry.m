@@ -32,13 +32,13 @@ classdef DQ_Geometry
             
             if ~is_pure_quaternion(point1)
                 error('Input point1 is not a pure quaternion.');
-            elseif ~is_pure_quaternion(point2))
+            elseif ~is_pure_quaternion(point2)
                 error('Input point2 is not a pure quaternion.');
             end
             
-            point = point1-point2;
+            point = vec3(point1-point2);
             
-            ret = vec4(point)'*vec4(point);
+            ret = point'*point;
         end
         
         
