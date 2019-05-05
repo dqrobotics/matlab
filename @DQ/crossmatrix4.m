@@ -1,5 +1,7 @@
-% CROSSMATRIX4(u) maps the pure quaternion 'u' into a expanded skew-symmetric
-% matrix such that vec4(cross(u,v)) = crossmatrix4(u)*vec4(v).
+% Maps a pure quaternion into an expanded skew-symmetric
+%
+% CROSSMATRIX4(u) maps the pure quaternion 'u' into an expanded
+% skew-symmetric matrix such that vec4(cross(u,v)) = crossmatrix4(u)*vec4(v).
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 % 
