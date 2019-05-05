@@ -40,7 +40,7 @@ function kuka_kinematic_control()
 
     fprintf('\nNow let us control only the translation part\n');
     %The end-effector will touch the base
-    pd = 0*DQ_i + 0*DQ_j + 0*DQ_k;
+    pd = 0*DQ.i + 0*DQ.j + 0*DQ.k;
 
     error = epsilon+1;
     while norm(error) > epsilon
