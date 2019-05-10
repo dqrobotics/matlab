@@ -111,5 +111,21 @@ classdef DQ_Geometry
                 ret = vec4(dual_l1_cross_l2)'*vec4(dual_l1_cross_l2);
             end                
         end
+        
+        function ret = line_to_line_angle(line1, line2)
+            % LINE_TO_LINE_ANGLE(line1,line2) returns the angle between two lines,
+            % where 'line1' and 'line2' are unit-norm pure dual quaternions.
+            
+            if ~is_line(line1)
+                error('Input line1 is not a line.');
+            elseif ~is_line(line2)
+                error('Input line2 is not a line.');
+            end            
+            
+            l1_dot_l2   = dot(line1, line2);
+            % Retrieve the angle between the lines---Eq. 35 of Marinho et
+            % al. (2019)
+            ret = acos(double(P(l1_dot_l2)));    
+        end
     end
 end
