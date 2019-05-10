@@ -102,13 +102,13 @@ classdef DQ_Geometry
             l1_dot_l2   = dot(line1, line2);
             
             % If the lines are not parallel
-            if P(l1_dot_l2) ~= 0
+            if norm(P(l1_cross_l2)) ~= 0
                 norm_p_cross_product = norm(P(l1_cross_l2));
                 norm_d_dot_product = norm(D(l1_dot_l2));
                 ret = double(norm_d_dot_product/norm_p_cross_product)^2;
             else
                 dual_l1_cross_l2 = D(l1_cross_l2);
-                ret = vec4(dual_l1_cross_l2)'*dual_l1_cross_l2;
+                ret = vec4(dual_l1_cross_l2)'*vec4(dual_l1_cross_l2);
             end                
         end
     end
