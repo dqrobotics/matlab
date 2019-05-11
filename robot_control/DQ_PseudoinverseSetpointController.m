@@ -1,9 +1,9 @@
 % Implements a classic control law based on the Jacobian pseudoinverse and an Euclidean error.
 %
-% Usage: controller = DQ_TaskSpacePseudoInverseController(robot), where robot is a
-% DQ_Kinematics object.
+% Usage: controller = DQ_PseudoinverseSetpointController(robot), where
+% robot is a DQ_Kinematics object.
 %
-% DQ_TaskSpacePseudoInverseController Methods:
+% DQ_PseudoinverseSetpointController Methods:
 %   compute_control_signal - Based on the task reference, compute the control signal.
 %   verify_stability - Verify if the closed-loop system has reached a stable region.
 %
@@ -32,34 +32,27 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef DQ_TaskSpacePseudoInverseController < DQ_KinematicController
+classdef DQ_PseudoinverseSetpointController < DQ_KinematicSetpointController
     methods
-        function controller = DQ_TaskSpacePseudoInverseController(robot)
-            controller = controller@DQ_KinematicController(robot);
+        function controller = DQ_PseudoinverseSetpointController(robot)
+            controller = controller@DQ_KinematicSetpointController(robot);
         end
         
-        function u = compute_control_signal(controller, q, task_reference, primitive)
+        function u = compute_control_signal(controller, q, task_reference)
             % Based on the task reference, compute the control signal
             if controller.is_set()
-                % Plane control and line control
-                if nargin == 4
-                    %  disp('4')
-                    % get the task variable according to the control objective
-                    task_variable = controller.get_task_variable(q, primitive);
-                    % get the Jacobian according to the control objective
-                    J = controller.get_jacobian(q, primitive);
-                elseif nargin == 3
-                    %    disp('3')
-                    % get the task variable according to the control objective
-                    task_variable = controller.get_task_variable(q);
-                    % get the Jacobian according to the control objective
-                    J = controller.get_jacobian(q);
-                end
+                % get the task variable according to the control objective
+                task_variable = controller.get_task_variable(q);
+                % get the Jacobian according to the control objective
+                J = controller.get_jacobian(q);
+
                 % calculate the Euclidean error
                 task_error = task_reference - task_variable;
                 % compute the control signal
                 u = pinv(J)*controller.gain*task_error;
                 
+                % verify if the closed-loop system has reached a stable
+                % region and update the appropriate flags accordingly.
                 controller.verify_stability(task_error);
                 
                 % Store the values of the last error signal and last

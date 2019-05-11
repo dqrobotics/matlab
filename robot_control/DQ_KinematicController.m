@@ -1,4 +1,4 @@
-% Abstract superclass used to define kinematic controllers.
+% Abstract superclass used to define task-space kinematic controllers.
 %
 % DQ_KinematicController Properties:
 %   control_objective - Control objective given by ControlObjective enum.
@@ -10,15 +10,17 @@
 %   robot - DQ_Kinematics object related to the robot to be controlled.
 %
 % DQ_KinematicController Methods:
+%    attach_primitive_to_effector - Attach primitive to the end-effector.
 %    get_control_objective - Return the control objective.
 %    get_jacobian - Return the correct Jacobian based on the control objective.
 %    get_task_variable - Return the task variable based on the control objective.
 %    is_set - Verify if the controller is set and ready to be used.
+%    is_stable - Return true if the system has reached a stable region, false otherwise.
 %    set_control_objective - Set the control objective using predefined goals in ControlObjective.
 %    set_gain - Set the controller gain.
 %    set_stability_threshold - Set the threshold that determines if a stable region has been reached.
-%    stable - Return true if the system has reached a stable region, false otherwise.
-%
+%    verify_stability - (ABSTRACT) Verify if the closed-loop region has reached a stable region.
+
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -44,18 +46,34 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 classdef DQ_KinematicController < handle
     properties (Access=protected)
-        robot; % DQ_Kinematics object
-        control_objective = ControlObjective.None;
-        gain = 0.0; % Default gain is zero to force the user to choose a gain.
+        % Controlled primitive attached to the end-effector. It is
+        % initialized with zero and, in case the controller needs to use an
+        % attached primitive that was not previously initialized, an error
+        % is thrown.
+        attached_primitive = DQ;
         
-        is_stable_ = false; % True if reached a stable region, false otherwise
-        last_control_signal = 0; % Last value computed for the control signal.
+        % The controller must always be explicitly set.
+        control_objective = ControlObjective.None; 
+        
+        % Default gain is zero to force the user to choose a gain.
+        gain = 0.0; 
+        
+        % True if reached a stable region, false otherwise.
+        is_stable_ = false; 
+        
+        % Last value computed for the control signal.
+        last_control_signal = 0; 
+        
+        % Last value computed for the error signal
         last_error_signal;
+        
+        % DQ_Kinematics object
+        robot; 
+        
+        % If the stability threshold is never set to a value greater than
+        % zero, the controller will run forever for all controllers that
+        % ensure asymptotic stability.
         stability_threshold = 0;
-    end
-    
-    methods (Abstract)
-        control_signal = compute_control_signal(obj);        
     end
     
     methods (Abstract, Access = protected)
@@ -70,12 +88,25 @@ classdef DQ_KinematicController < handle
             obj.robot = robot;
         end
         
+        
+        function attach_primitive_to_effector(obj, primitive)
+        % Attach primitive to the end-effector
+        %
+        % ATTACH_PRIMITIVE_TO_EFFECTOR(primitive) attach the primitive to
+        % be controlled to the end-effector. For example, if the goal is
+        % to align a line collinear with the end-effector z-axis with a
+        % line in the workspace, then primitive = k_. If the goal is to
+        % align a plane coplanar to the yz-end-effector end-effector plane,
+        % then primitive = i_.
+            obj.attached_primitive = primitive;
+        end
+        
         function ret = get_control_objective(controller)
             % Return the control objective
             ret = controller.control_objective;
         end
         
-        function J = get_jacobian(controller, q, primitive)
+        function J = get_jacobian(controller, q)
             % Return the correct Jacobian based on the control objective
             %
             % GET_JACOBIAN(q, primitive) returns the Jacobian related to the
@@ -86,19 +117,30 @@ classdef DQ_KinematicController < handle
             
             J_pose = controller.robot.pose_jacobian(q);
             x_pose = controller.robot.fkm(q);
+            primitive = controller.attached_primitive;
             
             switch controller.control_objective
                 case ControlObjective.Distance
                     J = controller.robot.distance_jacobian(J_pose, x_pose);
                     
                 case ControlObjective.Line
-                    J = controller.robot.line_jacobian(J_pose, x_pose, primitive);
+                    if controller.attached_primitive
+                        J = controller.robot.line_jacobian(J_pose, x_pose, ...
+                                                                    primitive);
+                    else
+                        error('The primitive to be controlled is not set yet.');
+                    end
                     
                 case ControlObjective.Rotation
                     J = controller.robot.rotation_jacobian(J_pose);
                     
                 case ControlObjective.Plane
-                    J = controller.robot.plane_jacobian(J_pose, x_pose, primitive);
+                    if controller.attached_primitive
+                        J = controller.robot.plane_jacobian(J_pose, x_pose, ...
+                                                                    primitive);
+                    else
+                        error('The primitive to be controlled is not set yet.');
+                    end
                     
                 case ControlObjective.Pose
                     J = J_pose;
@@ -112,7 +154,7 @@ classdef DQ_KinematicController < handle
             end
         end
         
-        function task_variable = get_task_variable(controller, q, primitive)
+        function task_variable = get_task_variable(controller, q)
             % Return the task variable based on the control objective
             %
             % GET_TASK_VARIABLE(q) returns the task variable related to the
@@ -122,6 +164,7 @@ classdef DQ_KinematicController < handle
             % of the following values: {Line, Plane};
             
             x_pose = controller.robot.fkm(q);
+            primitive = controller.attached_primitive;
             
             switch controller.control_objective
                 case ControlObjective.Distance
@@ -160,7 +203,6 @@ classdef DQ_KinematicController < handle
             else
                 ret = true;
             end
-            
         end
                 
         function set_control_objective(controller,control_objective)

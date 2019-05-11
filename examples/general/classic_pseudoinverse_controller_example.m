@@ -48,7 +48,7 @@ function classic_pseudoinverse_controller_example()
     % the desired value and the current task variable. When the task error
     % derivative is below stability_threshold, the systems is said to have
     % reached a stable region.
-    pseudoinverse_controller = DQ_TaskSpacePseudoInverseController(kuka);
+    pseudoinverse_controller = DQ_PseudoinverseSetpointController(kuka);
     pseudoinverse_controller.set_gain(100);
     pseudoinverse_controller.set_stability_threshold(0.001);
     
@@ -73,7 +73,7 @@ function classic_pseudoinverse_controller_example()
                 %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
                 x_pose = kuka.fkm([1.7593, 0.8796, 0.1257, -1.4451,...
                                           -1.0053, 0.0628, 0]'); 
-                parameters{1} = vec8(x_pose);
+                task_reference = vec8(x_pose);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % choose the next objective to accomplish when this one is
@@ -89,8 +89,8 @@ function classic_pseudoinverse_controller_example()
             case ControlObjective.Translation
                 
                 %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                reference = vec4(0*i_ + 0*j_ + 0*k_);
-                parameters{1} = reference;
+                task_reference = vec4(0*i_ + 0*j_ + 0*k_);
+               
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % choose the next control objective
@@ -111,7 +111,7 @@ function classic_pseudoinverse_controller_example()
             case ControlObjective.Rotation
                 
                 %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                parameters{1} = vec4(DQ(1));        
+                task_reference = vec4(DQ(1));        
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
 
                 % Choose next objective
@@ -125,7 +125,7 @@ function classic_pseudoinverse_controller_example()
             case ControlObjective.Distance
                 
                 %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                parameters{1} = 0.2^2; % The reference already is a 'vector'                
+                task_reference = 0.2^2; % The reference already is a 'vector'                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
                 % Choose next objective
@@ -150,12 +150,10 @@ function classic_pseudoinverse_controller_example()
                 line_d = line_direction + ...
                                         E_ * cross(line_point, line_direction);
                 % The task reference is always mapped to a vector
-                parameters{1} = vec8(line_d);
+                task_reference = vec8(line_d);
                 % The line passing through the end-effector x-axis is the
-                % second parameter. It'll be aligned with the desired line.
-                % Furthermore, the geometric primitive associated with the
-                % end-effector is *not* mapped to a vector
-                parameters{2} = i_;
+                % second parameter. It'll be aligned with the desired line.                
+                pseudoinverse_controller.attach_primitive_to_effector(i_);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % Choose next objective  
@@ -177,11 +175,11 @@ function classic_pseudoinverse_controller_example()
                 plane_point =  DQ(-0.3*ones(3,1)+ 0.6*rand(3,1));
                 plane_d = -(plane_normal + E_ * dot(plane_point, plane_normal));
                 % The reference is always mapped to a vector
-                parameters{1} = vec8(plane_d); 
+                task_reference = vec8(plane_d); 
                 % But the geometric primitive associated with the
                 % end-effector is not. Furthermore, the goal is to align a
                 % plane perpendicular to the robot end-effector's z-axis,
-                parameters{2} = k_;
+                pseudoinverse_controller.attach_primitive_to_effector(k_);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
                 % Choose next objective 
@@ -202,7 +200,8 @@ function classic_pseudoinverse_controller_example()
         
         % This is actually the important part on how to use the controller. 
         while ~pseudoinverse_controller.is_stable()
-            u = pseudoinverse_controller.compute_control_signal(q, parameters{:});
+            u = pseudoinverse_controller.compute_control_signal(q, ...
+                                                                task_reference);
             q = q + T*u;
             plot(kuka,q,'nojoints');
             drawnow;
