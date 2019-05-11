@@ -35,7 +35,7 @@
 classdef DQ_TaskSpacePseudoInverseController < DQ_KinematicController
     methods
         function controller = DQ_TaskSpacePseudoInverseController(robot)
-            controller = controller@DQ_KinematicController(robot);    
+            controller = controller@DQ_KinematicController(robot);
         end
         
         function u = compute_control_signal(controller, q, task_reference, primitive)
@@ -43,14 +43,14 @@ classdef DQ_TaskSpacePseudoInverseController < DQ_KinematicController
             if controller.is_set()
                 % Plane control and line control
                 if nargin == 4
-                  %  disp('4')
+                    %  disp('4')
                     % get the task variable according to the control objective
                     task_variable = controller.get_task_variable(q, primitive);
                     % get the Jacobian according to the control objective
                     J = controller.get_jacobian(q, primitive);
                 elseif nargin == 3
-                 %    disp('3')
-                     % get the task variable according to the control objective
+                    %    disp('3')
+                    % get the task variable according to the control objective
                     task_variable = controller.get_task_variable(q);
                     % get the Jacobian according to the control objective
                     J = controller.get_jacobian(q);
@@ -68,18 +68,20 @@ classdef DQ_TaskSpacePseudoInverseController < DQ_KinematicController
                 controller.last_error_signal = task_error;
             end
         end
-        
+    end
+    
+    methods (Access = protected)
         function verify_stability(controller, task_error)
-        % Verify if the closed-loop system has reached a stable region.
-        %
-        % If the task error changes below a threshold, then we consider
-        % that the system has reached a stable region.
-        % TODO: Choose different criteria
-
+            % Verify if the closed-loop system has reached a stable region.
+            %
+            % If the task error changes below a threshold, then we consider
+            % that the system has reached a stable region.
+            % TODO: Choose different criteria
+            
             if norm(controller.last_error_signal - task_error) < ...
-                controller.stability_threshold
-                controller.is_stable = true;
+                    controller.stability_threshold
+                controller.is_stable_ = true;
             end
-        end      
+        end
     end
 end

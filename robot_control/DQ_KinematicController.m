@@ -48,14 +48,17 @@ classdef DQ_KinematicController < handle
         control_objective = ControlObjective.None;
         gain = 0.0; % Default gain is zero to force the user to choose a gain.
         
-        is_stable = false; % True if reached a stable region, false otherwise
+        is_stable_ = false; % True if reached a stable region, false otherwise
         last_control_signal = 0; % Last value computed for the control signal.
         last_error_signal;
         stability_threshold = 0;
     end
     
     methods (Abstract)
-        control_signal = compute_control_signal(obj);
+        control_signal = compute_control_signal(obj);        
+    end
+    
+    methods (Abstract, Access = protected)
         verify_stability(obj, task_error);
     end
     
@@ -163,7 +166,7 @@ classdef DQ_KinematicController < handle
         function set_control_objective(controller,control_objective)
         % Set the control objective using predefined goals in ControlObjective
             if isa(control_objective, 'ControlObjective')
-                controller.is_stable = false;
+                controller.is_stable_ = false;
                 
                 controller.control_objective = control_objective;
                 
@@ -198,9 +201,9 @@ classdef DQ_KinematicController < handle
             controller.stability_threshold = threshold;
         end
         
-        function ret = stable(controller)
+        function ret = is_stable(controller)
         % Return true if the system has reached a stable region, false otherwise.    
-            ret = controller.is_stable;
+            ret = controller.is_stable_;
         end
     end
 end

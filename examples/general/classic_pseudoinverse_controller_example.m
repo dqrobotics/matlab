@@ -201,7 +201,7 @@ function classic_pseudoinverse_controller_example()
         end
         
         % This is actually the important part on how to use the controller. 
-        while ~pseudoinverse_controller.stable()
+        while ~pseudoinverse_controller.is_stable()
             u = pseudoinverse_controller.compute_control_signal(q, parameters{:});
             q = q + T*u;
             plot(kuka,q,'nojoints');
