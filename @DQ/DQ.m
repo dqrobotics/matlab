@@ -24,67 +24,70 @@
 %               5) An one-dimensional v contains the coefficient of a real
 %               number.
 % 
-% See also
-%       ___________________________CONSTANTS_______________________________
-%       DQ.E (dual unit)
-%       DQ.i (imaginary i)
-%       DQ.j (imaginary j)
-%       DQ.k (imaginary k)
-%       C8 (conjugator matrix associated to vec8)
-%       C4 (conjugator matrix associated to vec4)
-%       ________________________BINARY OPERATIONS__________________________
-%       +  (plus)
-%       -  (minus)
-%       *  (mtimes)
-%       .* (times)
-%       /  (mrdivide)
-%       \  (mldivide)
-%       ./ (rdivide)
-%       .\ (ldivide)
-%       == (eq)
-%       ~= (ne)
-%       ^  (mpower)
-%       Ad
-%       Adsharp
-%       _________________________UNARY OPERATIONS__________________________
-%       '  (ctranspose)
-%       .' (transpose)
-%       conj (_same_ as ')
-%       inv
-%       dinv
-%       P, D, Re, Im
-%       sharp (_same_ as .')
-%       ________________________CASTING OPERATORS__________________________
-%       double
-%       _________________________GENERAL FUNCTIONS_________________________
-%       cross
-%       dot
-%       is_line
-%       is_plane
-%       is_pure
-%       is_pure_quaternion
-%       is_quaternion
-%       is_real
-%       is_real_number
-%       is_unit
-%       norm
-%       normalize
-%       ______________VECTOR OPERATIONS ON DUAL QUATERNIONS________________
-%       crossmatrix4
-%       hamiplus4, haminus4, hamiplus8, haminus8
-%       vec3, vec4, vec6, vec8
-%       __________FUNCTIONS APPLIED ONLY TO UNIT DUAL QUATERNIONS__________
-%       exp
-%       log
-%       plot 
-%       rotation
-%       rotation_axis
-%       rotation_angle
-%       translation
-%       T
-%       _________________________RELATED CLASSES___________________________
-%       DQ_Kinematics
-%       DQ_KinematicController
+%   DQ Properties:
+%       E - dual unit
+%       i - imaginary i
+%       j - imaginary j
+%       k - imaginary k
+%       C8 - conjugator matrix associated to vec8
+%       C4 - conjugator matrix associated to vec4
+%
+%   DQ Methods (binary operations and relations):
+%       + (plus) - dual quaternion addition
+%       -(minus) - dual quaternion subtraction
+%       * (mtimes) - dual quaternion multiplication
+%       .* (times) - dual quaternion decompositional multiplication
+%       / (mrdivide) - dual quaternion right division
+%       \ (mldivide) - dual quaternion left division
+%       ./ (rdivide) - dual quaternion right division under decompositional multiplication 
+%       .\ (ldivide) - dual quaternion left division under decompositional multiplication
+%       == (eq) - return true if two dual quaternions are equal, false otherwise
+%       ~= (ne) - return true if two dual quaternions are different, false otherwise
+%       ^  (mpower) - exponentiation of quaternions
+%       Ad - adjoint operation
+%       Adsharp - sharp adjoint operation
+%       cross - cross product between two pure dual quaternions
+%       dot - dot product between two pure dual quaternions
+%
+%   DQ Methods (unary operations):
+%       ' (ctranspose) - dual quaternion conjugate 
+%       .' (transpose) - dual quaternion sharp conjugate
+%       conj - _same_ as '
+%       inv - dual quaternion inverse
+%       dinv - dual quaternion inverse under decompositional multiplication
+%       P, D, Re, Im - returns the primary, dual, real, and imaginary parts, respectively
+%       sharp - _same_ as .'
+%
+%   DQ Methods (general):
+%       double - functional casting of real dual quaternions to double
+%       is_line - verify if a dual quaternion is a line 
+%       is_plane - verify if a dual quaternion is a plane
+%       is_pure - verify if a dual quaternion is pure
+%       is_pure_quaternion - verify if a quaternion is pure
+%       is_quaternion - verify if it the dual part is zero
+%       is_real - verify if the imaginary part is zero
+%       is_real_number - verify if both dual and imaginary components are zero
+%       is_unit - verify if a unit dual quaternion as unit norm
+%       norm - return the norm of dual quaternion
+%       logical - return true if different from zero, false otherwise
+%       normalize - normalize a dual quaternion
+%       plot - draw primitives represented by dual quaternions
+%
+%       DQ Methods (vector operations on dual quaternions)
+%       crossmatrix4 -  map a pure quaternion into an expanded skew-symmetric matrix
+%       hamiplus4, haminus4, hamiplus8, haminus8 - return the Hamilton operators
+%       vec3, vec4, vec6, vec8 - map quaternions and dual quaternions to vectors
+%     
+%       DQ Methods (unit dual quaternions)
+%       exp - dual quaternion exponential
+%       log - dual quaternion logarithm
+%       rotation - return a rotation component of a dual quaternion (unit-norm quaternion)
+%       rotation_axis - return the rotation axis (pure quaternion)
+%       rotation_angle - return the rotation angle (real scalar)
+%       translation - return the translation quaternion (pure quaternion)
+%       T - return the translational part represented by dual quaternions
+%
+%       See also DQ_Kinematics, DQ_KinematicController
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 % 
