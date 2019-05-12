@@ -1,6 +1,6 @@
-% LOG(x) returns the logarithm of the dual quaternion x
+% Returns the logarithm of the dual quaternion x
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -17,13 +17,12 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function ret = log(x)
-x = DQ(x);
 
 if norm(x) ~= 1
     error('The log function is currently defined only for unit dual quaternions.');
