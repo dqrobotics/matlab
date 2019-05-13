@@ -76,6 +76,7 @@
 %       DQ Methods (vector operations on dual quaternions)
 %       crossmatrix4 -  map a pure quaternion into an expanded skew-symmetric matrix
 %       hamiplus4, haminus4, hamiplus8, haminus8 - return the Hamilton operators
+%       Q8 - return the partial derivative of the unit dual quaternion x with respect to log(x)
 %       vec3, vec4, vec6, vec8 - map quaternions and dual quaternions to vectors
 %     
 %       DQ Methods (unit dual quaternions)
