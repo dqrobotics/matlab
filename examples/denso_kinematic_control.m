@@ -3,6 +3,10 @@ close all;
 clear classes;
 clc;
 
+% setenv('ROS_MASTER_URI','http://172.16.66.22:11311')
+% setenv('ROS_IP','172.16.66.22')
+% rosinit;
+
 %Create a new DQ_kinematics object with the Denso standard Denavit-Hartenberg parameters           
 denso_kine = DQ_DENSO;
 
@@ -11,8 +15,8 @@ theta = [0,0,0,0,0,0]';
 
 % Move Arm
 
-
-position = [0.4,0.0,0.02]
+position = [0.3892, 0.154 ,0.1981]
+%position = [0.4,0.0,0.02]
 
 thetad = [0,0,0,0,0,0]';
 
@@ -49,9 +53,15 @@ lambda = 0.5;
 [pub, msg] = rospublisher('/ik_joint_states', 'sensor_msgs/JointState');
 msg.Name = [{'joint1'},{'joint2'},{'joint3'},{'joint4'},{'joint5'},{'joint6'}, {'gripper_finger1_joint'}];
 
+
 pause(1);
 
-while norm(error) > epsilon  
+% Create Subscriber
+
+
+while norm(error) > epsilon 
+    
+    
     jacob = denso_kine.jacobian(theta);
     xm = denso_kine.fkm(theta);
     error = vec8(xd-xm);
@@ -71,8 +81,23 @@ while norm(error) > epsilon
     msg.Position = [theta1,theta2,theta3,theta4,theta5,theta6, 1.0];
     send(pub,msg);
     
-    pause(0.01)
+    pause(0.1)
     display('Execute')
+    
+    sub = rossubscriber('/posestamped');
+    my_sub= receive(sub,10);
+    
+    new_position = [my_sub.Pose.Position.X,my_sub.Pose.Position.Y,my_sub.Pose.Position.Z];
+    
+    if (new_position ~= position)
+        xd = set_xd(new_position)
+    end
+    
+    
+    
+    
+    
+    
     
     
 %     norm(error)
