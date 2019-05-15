@@ -47,7 +47,7 @@ classdef VrepInterface < handle
                 if(obj.handles_map.isKey(name))
                     handle = obj.handles_map(name);
                 else
-                    handle = obj.getHandle(name);
+                    handle = obj.get_handle(name);
                     obj.handles_map(name) = handle;
                 end
                 
@@ -101,7 +101,7 @@ classdef VrepInterface < handle
                     [~,handles(i)] = obj.vrep.simxGetObjectHandle(obj.clientID,char(names(i)),obj.vrep.simx_opmode_blocking);
                 end
             else
-                error('Error in getHandles: argument names must be of type cell, e.g. names = [{joint1,joint2}];');
+                error('Error in get_handles: argument names must be of type cell, e.g. names = [{joint1,joint2}];');
             end
         end
         
@@ -129,7 +129,7 @@ classdef VrepInterface < handle
         
         %% Set Object Rotation
         function set_object_rotation(obj,handle,relative_to_handle,r,opmode)
-            obj.vrep.simxSetObjectOrientation(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r.q(1:4),opmode);
+            obj.vrep.simxSetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r.q(1:4),opmode);
         end
         
         %% Get Object Pose
