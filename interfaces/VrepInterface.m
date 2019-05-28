@@ -47,7 +47,7 @@ classdef VrepInterface < handle
                 if(obj.handles_map.isKey(name))
                     handle = obj.handles_map(name);
                 else
-                    handle = obj.getHandle(name);
+                    handle = obj.get_handle(name);
                     obj.handles_map(name) = handle;
                 end
                 
@@ -101,7 +101,7 @@ classdef VrepInterface < handle
                     [~,handles(i)] = obj.vrep.simxGetObjectHandle(obj.clientID,char(names(i)),obj.vrep.simx_opmode_blocking);
                 end
             else
-                error('Error in getHandles: argument names must be of type cell, e.g. names = [{joint1,joint2}];');
+                error('Error in get_handles: argument names must be of type cell, e.g. names = [{joint1,joint2}];');
             end
         end
         
@@ -124,12 +124,13 @@ classdef VrepInterface < handle
         %% Get Object Rotation
         function r = get_object_rotation(obj,handle,relative_to_handle,opmode)
             [~,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
-            r = normalize(DQ(double(object_rotation)));
+            object_rotation_double = double(object_rotation); 
+            r = normalize(DQ([object_rotation_double(4) object_rotation_double(1) object_rotation_double(2) object_rotation_double(3)])); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
         end
         
         %% Set Object Rotation
         function set_object_rotation(obj,handle,relative_to_handle,r,opmode)
-            obj.vrep.simxSetObjectOrientation(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),r.q(1:4),opmode);
+            obj.vrep.simxSetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),[r.q(2:4); r.q(1)],opmode); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
         end
         
         %% Get Object Pose
