@@ -9,6 +9,7 @@
 %   'line'  - Draw a line using dual quaternion representation.
 %   'plane' - Draw a plane using dual quaternion representation.
 %   'color' - Define line and plane colors.   
+%   'noaxisname' - Do not plot the axes' names.
 %
 % Note: All options require an option attribute.
 %
@@ -71,6 +72,7 @@ optargin = length(varargin);
 erase = 0; % Only erase the primitive only if there is a corresponding argument.
 primitive_type = 'frame'; % The default primitive is a coordinate system.
 scale = 1; % Variable for scaling coordinate systems.
+noaxisname = false; % Default behavior is to print the axes names
 
 if optargin > 0
     % All parameters in the variable-length list have the form <type>
@@ -79,9 +81,9 @@ if optargin > 0
     for j = 1:2:optargin
         
         % Convert the cell to a string in order to use the SWITCH command.
-        primitive_name = char(varargin(j));
+        option_name = char(varargin(j));
         
-        switch lower(primitive_name)
+        switch lower(option_name)
             case 'erase'
                 erase = 1;
                 handle_cell = varargin(j+1);
@@ -97,8 +99,10 @@ if optargin > 0
                 frame_name = char(varargin(j+1));
             case 'color'
                 primitive_color = char(varargin(j+1));
+            case 'noaxisname'
+                noaxisname = true;
             otherwise
-                warning('Unknown plot parameter: %s', primitive_name);
+                warning('Unknown plot parameter: %s', option_name);
         end
     end
 end
@@ -115,7 +119,9 @@ switch primitive_type
                 % TODO: Maybe a better option is to move the axes and the
                 % text instead of deleting them.
                 delete(handle.handle_axis{i});
-                delete(handle.handle_text{i});                
+                if noaxisname == false
+                    delete(handle.handle_text{i});    
+                end
             end
         end
         
@@ -142,23 +148,30 @@ switch primitive_type
             hold on;
         end
         
-        handle.handle_text{1} = text(dq_t(1) + x(1), dq_t(2) + x(2),...
-            dq_t(3) + x(3), 'x');
-        set(handle.handle_text{1} , 'Color', 'k');
         
         % Plot the y-axis
         handle.handle_axis{2} = plot3([0;y(1)] + dq_t(1), [0;y(2)] + dq_t(2),...
             [0; y(3)] + dq_t(3), 'g','Linewidth',1);
-        handle.handle_text{2} = text(y(1) + dq_t(1), y(2) + dq_t(2),...
-            y(3) + dq_t(3), 'y');
-        set(handle.handle_text{2}, 'Color', 'k');
         
         % Plot the z-axis
         handle.handle_axis{3} = plot3([0;z(1)] + dq_t(1), [0;z(2)] + dq_t(2),...
             [0,z(3)] + dq_t(3), 'b','Linewidth',1);
-        handle.handle_text{3}  = text(z(1) + dq_t(1), z(2) + dq_t(2),...
-            z(3) + dq_t(3), 'z');
-        set(handle.handle_text{3}, 'Color', 'k');
+        
+        % Plot the axes texts
+        
+        if noaxisname == false
+            handle.handle_text{1} = text(dq_t(1) + x(1), dq_t(2) + x(2),...
+                dq_t(3) + x(3), 'x');
+            set(handle.handle_text{1} , 'Color', 'k');
+            handle.handle_text{2} = text(y(1) + dq_t(1), y(2) + dq_t(2),...
+                y(3) + dq_t(3), 'y');
+            set(handle.handle_text{2}, 'Color', 'k');
+            handle.handle_text{3}  = text(z(1) + dq_t(1), z(2) + dq_t(2),...
+                z(3) + dq_t(3), 'z');
+            set(handle.handle_text{3}, 'Color', 'k');
+        end
+        
+        
         if(~old_ishold)
             hold off;
         end
