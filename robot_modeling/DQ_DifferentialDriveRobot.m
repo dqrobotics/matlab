@@ -1,34 +1,20 @@
-% CLASS DQ_DifferentialDriveRobot
-%
-% This class inherits from DQ_HolonomicBase
+% Basic implementation of a Differential Drive Mobile robot.
 % 
 % Usage: robot = DQ_DifferentialDriveRobot(wheel_radius,distance_between_wheels), 
 % where both wheel_radius and distance_between_wheels are given in meters. 
 %
-% For more information about the available methods, see also
-% Concrete:
-%       constraint_jacobian
-% Concrete (Inherited from DQ_HolonomicBase):
-%       base_frame
-%       get_dim_configuration_space
-%       fkm
-%       create_new_robot (Protected)
-%       pose_jacobian (overloaded)
-%       plot
-%       raw_fkm
-%       raw_pose_jacobian
-%       set_base_diameter
-%       update_robot     (Protected)
-% Concrete (Inherited from DQ_Kinematics):
-%       set_base_frame
-%       set_reference_frame
-% Static (Inherited from DQ_Kinematics):
-%       distance_jacobian
-%       rotation_jacobian
-%       translation_jacobian
+% DQ_DifferentialDriveRobot Properties:
+%       wheel_radius - radius of the wheels.
+%       distance_between_wheels - distance between the wheels.
+%
+% DQ_DifferentialDriveRobot Methods (Concrete):
+%       constraint_jacobian - Compute the Jacobian that relates the wheels velocities to the configuration velocities.
+%       pose_jacobian (overloaded) - Compute the pose Jacobian by taking into account the nonholonomic constraints.
+%
+% See also DQ_HolonomicBase.
 
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -51,6 +37,12 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 classdef DQ_DifferentialDriveRobot < DQ_HolonomicBase
+    
+    properties (Access = protected)
+        wheel_radius;
+        distance_between_wheels; 
+    end
+    
     methods
         function obj = DQ_DifferentialDriveRobot(wheel_radius,...
                 distance_between_wheels)
@@ -86,10 +78,5 @@ classdef DQ_DifferentialDriveRobot < DQ_HolonomicBase
             J_holonomic = pose_jacobian@DQ_HolonomicBase(obj,q);
             J = J_holonomic*obj.constraint_jacobian(q(3));
         end
-    end
-    
-    properties (Access = protected)
-        wheel_radius;
-        distance_between_wheels; 
     end
 end

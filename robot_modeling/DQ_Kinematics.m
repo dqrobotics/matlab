@@ -1,34 +1,37 @@
-% CLASS DQ_Kinematics
-% 
-% Abstract class that defines an interface for all subclasses that need to
-% implement robot kinematics.
+% Abstract class that defines an interface to implement robot kinematics.
 %
-% For more information about the available methods, see also
-% Abstract:
-%       get_dim_configuration_space
-%       fkm
-%       pose_jacobian
-% Concrete:
-%       set_base_frame
-%       set_reference_frame
-% Static:
-%       distance_jacobian
-%       line_jacobian
-%       line_to_line_distance_jacobian 
-%       line_to_line_residual
-%       line_to_point_distance_jacobian
-%       line_to_point_residual
-%       plane_jacobian
-%       plane_to_point_distance_jacobian
-%       plane_to_point_residual
-%       point_to_line_distance_jacobian
-%       point_to_line_residual
-%       point_to_plane_distance_jacobian
-%       point_to_plane_residual
-%       point_to_point_distance_jacobian
-%       point_to_point_residual
-%       rotation_jacobian
-%       translation_jacobian
+% DQ_Kinematics Properties:
+%   base_frame - Frame used to determine the robot physical location.
+%   name - Unique name that is generated randomly.
+%   reference_frame - Reference frame (not always coincident with base_frame).
+%   q - Robot configuration vector.
+%
+% DQ_Kinematics Methods (Abstract):
+%       get_dim_configuration_space - Returns the dimension of the configuration space.
+%       fkm - Compute the forward kinematics.
+%       pose_jacobian - Compute the Jacobian that maps the configurations velocities to the time derivative of the pose of a frame attached to the robot.
+% DQ_Kinematics Methods (Concrete):
+%       set_base_frame - Set the physical location of the robot in space.
+%       set_reference_frame - Set the reference frame for all calculations.
+% DQ_Kinematics Methods (Static):
+%       distance_jacobian - Compute the (squared) distance Jacobian.
+%       line_jacobian - Compute the line Jacobian.
+%       line_to_line_distance_jacobian  - Compute the line-to-line distance Jacobian.
+%       line_to_line_residual - Compute the line-to-line residual.
+%       line_to_point_distance_jacobian - Compute the line-to-line distance Jacobian.
+%       line_to_point_residual - Compute the line-to-point residual.
+%       plane_jacobian - Compute the plane Jacobian.
+%       plane_to_point_distance_jacobian - Compute the plane-to-point distance Jacobian.
+%       plane_to_point_residual - Compute the plane-to-point residual.
+%       point_to_line_distance_jacobian - Compute the point-to-line distance Jacobian.
+%       point_to_line_residual - Compute the point to line residual.
+%       point_to_plane_distance_jacobian - Compute the point to plane distance Jacobian.
+%       point_to_plane_residual - Compute the point to plane residual.
+%       point_to_point_distance_jacobian - Compute the point to point distance Jacobian.
+%       point_to_point_residual - Compute the point to point residual.
+%       rotation_jacobian - Compute the rotation Jacobian.
+%       translation_jacobian - Compute the translation Jacobian.
+% See also DQ_SerialManipulator, DQ_MobileBase, DQ_CooperativeDualTaskSpace.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %

@@ -1,23 +1,28 @@
-% CLASS DQ_cdts
-% Usage: cdts = DQ_cdts(robot1,robot2), where:
-% - robot1 and robot2 are objects of type DQ_kinematics;
+% Implement bimanual manipulation in terms of the cooperative dual taskspace framework.
+%
+% The cooperative system is described by the cooperative variables, 
+% namely absolute_pose and relative_pose, and their respective Jacobians, 
+% namely absolute_pose_jacobian and relative_pose_jacobian.
+%
+% Usage: cdts = DQ_CooperativeDualTaskSpace(robot1,robot2), where:
+% - robot1 and robot2 are objects of type DQ_Kinematics;
 % 
-% By using this class, the cooperative system is described by the
-% cooperative variables absolute_pose and relative_pose, and their respective Jacobians absolute_pose_jacobian and relative_pose_jacobian
+% DQ_CooperativeDualTaskSpace Properties:
+%       robot1 - Any object from a class that inherits from DQ_Kinematics.
+%       robot2 - Any object from a class that inherits from DQ_Kinematics.
 %
-% Type DQ_cdts.(method or property) for specific help.
-% Ex.: help DQ_cdts.absolute_pose
-%
-% METHODS:
-%       absolute_pose
-%       relative_pose
-%       absolute_pose_jacobian
-%       relative_pose_jacobian
-%       pose1
-%       pose2
+% DQ_CooperativeDualTaskSpace Methods (Concrete):
+%       absolute_pose - Compute the absolute pose.
+%       absolute_pose_jacobian - Compute the Jacobian related to the time derivative of the absolute pose.
+%       pose_jacobian1 - Return the pose Jacobian of the first robot.
+%       pose_jacobian2 - Return the pose Jacobian of the second robot.
+%       pose1 - Return the pose of the first end-effector.
+%       pose2 - Return the pose of the second end-effector.
+%       relative_pose - Compute the rigid transformation between the two end-effectors.
+%       relative_pose_jacobian - Compute the Jacobian related to the time derivative of relative pose.
 %
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -34,7 +39,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
@@ -72,16 +77,16 @@ classdef DQ_CooperativeDualTaskSpace
             x = obj.robot2.fkm(q2);
         end
         
-        function J = jacobian1(obj,q)
-            % J = jacobian1(q) returns the jacobian of the first arm,
+        function J = pose_jacobian1(obj,q)
+            % J = pose_jacobian1(q) returns the jacobian of the first arm,
             % where q is the joint position of the resultant system;
             % that is, q = [q1;q2]
             q1 = q(1:obj.robot1.get_dim_configuration_space);
             J = obj.robot1.pose_jacobian(q1);
         end
         
-        function J = jacobian2(obj,q)
-            % J = jacobian2(q) returns the jacobian of the second arm,
+        function J = pose_jacobian2(obj,q)
+            % J = pose_jacobian2(q) returns the jacobian of the second arm,
             % where q is the joint position of the resultant system;
             % that is, q = [q1;q2]
             q2 = q(obj.robot1.get_dim_configuration_space+1:end);
@@ -89,16 +94,17 @@ classdef DQ_CooperativeDualTaskSpace
         end
         
         function x = relative_pose(obj,q)
-            % x = relative_pose(q) returns the relative dual position,
-            % where theta is the joint position of the resultant system;
+            % x = relative_pose(q) returns the relative pose,
+            % where q is the joint position of the resultant system;
             % that is, q = [q1;q2]
                        
             x = obj.pose2(q)'*obj.pose1(q);
         end
         
         function x = absolute_pose(obj,q)
-            % x = absolute_pose(q) returns the absolute dual position,
-            % where 'q' is the joint position of the resultant system;
+            % x = absolute_pose(q) returns the absolute pose; that is, the
+            % pose of a frame located in between the two end-effectors,
+            % where 'q' is the configuration vector of the resultant system;
             % that is, q = [q1;q2]            
             x = obj.pose2(q)*(obj.relative_pose(q)^0.5);
         end
@@ -107,8 +113,8 @@ classdef DQ_CooperativeDualTaskSpace
             % jac = relative_pose_jacobian(q) returns the relative Jacobian,
             % where 'q' is the joint position of the resultant system;
             % that is, q = [q1;q2]
-            Jr = [hamiplus8(obj.pose2(q)')*obj.jacobian1(q), ...
-                   haminus8(obj.pose1(q))*DQ.C8*obj.jacobian2(q)];
+            Jr = [hamiplus8(obj.pose2(q)')*obj.pose_jacobian1(q), ...
+                   haminus8(obj.pose1(q))*DQ.C8*obj.pose_jacobian2(q)];
         end
         
         function Ja = absolute_pose_jacobian(obj, q)
@@ -117,7 +123,7 @@ classdef DQ_CooperativeDualTaskSpace
             % that is, q = [q1;q2]
             x2 = obj.pose2(q);
             
-            jacob2 = obj.jacobian2(q);            
+            jacob2 = obj.pose_jacobian2(q);            
             jacobr = obj.relative_pose_jacobian(q);
             xr=obj.relative_pose(q);
             

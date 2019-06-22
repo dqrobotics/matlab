@@ -1,29 +1,20 @@
-% CLASS DQ_HolonomicBase 
-%
 % Basic implementation of a holonomic base.
 % 
 % Usage: robot = DQ_MobileBase()
-%      
-% For more information about the available methods, see also
-% Concrete:
-%       base_frame
-%       fkm
-%       create_new_robot (Protected)
-%       pose_jacobian
-%       raw_fkm
-%       raw_pose_jacobian
-%       set_base_diameter
-%       update_robot     (Protected)
-% Concrete (Inherited from DQ_MobileBase):
-%       get_dim_configuration_space
-%       plot
-% Concrete (Inherited from DQ_Kinematics):
-%       set_base_frame
-%       set_reference_frame
-% Static (Inherited from DQ_Kinematics):
-%       distance_jacobian
-%       rotation_jacobian
-%       translation_jacobian
+%
+% DQ_HolonomicBase Properties:
+%       base_diameter - The default base diameter is 0.5 m.
+%
+% DQ_HolonomicBase Methods (Concrete):
+%       fkm - Compute the mobile base pose while considering any base offset.
+%       create_new_robot (Protected) - Create new robot graphics.
+%       pose_jacobian - Compute the mobile base Jacobian while considering the base offset.
+%       raw_fkm - Compute the mobile base pose without considering any base offset.
+%       raw_pose_jacobian - Compute the mobile base Jacobian without considering the base offset.
+%       set_base_diameter - Change the base diameter.
+%       update_robot (Protected) - Move an existing graphical robot to a specified configuration.
+%
+%       See also DQ_MobileBase.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %

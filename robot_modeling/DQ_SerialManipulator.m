@@ -1,5 +1,6 @@
-% CLASS DQ_SerialManipulator
-% Usage: robot_kine = DQ_kinematics(A,convention)
+% Concrete class that defines serial manipulators.
+%
+% Usage: robot = DQ_SerialManipulator(A,convention)
 % - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
@@ -12,26 +13,16 @@
 % The first row of 'A' contains the joint offsets. More specifically,
 % theta_i is the offset for the i-th joint.
 %
-% Type DQ_SerialManipulator.(method,property) for specific help.
-% Ex.: help DQ_kinematics.fkm
-%
-% For more information about the available methods, see also
-% Concrete:
-%       get_dim_configuration_space
-%       fkm
-%       plot
-%       pose_jacobian
-%       pose_jacobian_derivative
-%       raw_fkm
-%       raw_pose_jacobian
-%       set_effector
-% Concrete (Inherited from DQ_Kinematics):
-%       set_base_frame
-%       set_reference_frame
-% Static (Inherited from DQ_Kinematics):
-%       distance_jacobian
-%       rotation_jacobian
-%       translation_jacobian
+% DQ_SerialManipulator Methods (Concrete):
+%       get_dim_configuration_space - Return the dimension of the configuration space.
+%       fkm - Compute the forward kinematics while taking into account base and end-effector's rigid transformations.
+%       plot - Plots the serial manipulator.
+%       pose_jacobian - Compute the pose Jacobian while taking into account base's and end-effector's rigid transformations.
+%       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
+%       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
+%       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
+%       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
+% See also DQ_Kinematics.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %

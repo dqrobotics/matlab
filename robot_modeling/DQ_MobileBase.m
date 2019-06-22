@@ -1,26 +1,22 @@
-% CLASS DQ_MobileBase
-% This is an abstract class that provides the basic functionalities that
-% all concrete classes must implement. 
+% Abstract class that defines an interface for all mobile robots.
+%
+% DQ_MobileBase Properties:
+%       handle - Graphics handle.
+%       dim_configuration_space - Dimension of the configuration space.
+%       frame_displacement - Rigid transformation for the base frame.
 % 
-% For more information about the available methods, see also
-% Abstract:
-%       create_new_robot (Protected)
-%       raw_fkm
-%       raw_pose_jacobian
-%       update_robot     (Protected)
-% Abstract (Inherited from DQ_Kinematics):
-%       fkm
-%       pose_jacobian
-% Concrete:
-%       get_dim_configuration_space
-%       plot
-% Concrete (Inherited from DQ_Kinematics):
-%       set_base_frame
-%       set_reference_frame
-% Static (Inherited from DQ_Kinematics):
-%       distance_jacobian
-%       rotation_jacobian
-%       translation_jacobian
+% DQ_MobileBase Methods (Abstract):
+%       create_new_robot (Protected) - Create new robot graphics.
+%       raw_fkm - Return the pose given the configuration [x,y,phi]' without considering the base frame displacement. 
+%       raw_pose_jacobian - Return the pose Jacobian without considering the base frame displacement.
+%       update_robot (Protected) - Move an existing graphical robot to a specified configuration.
+%
+% DQ_MobileBase Methods (Concrete):
+%       get_dim_configuration_space - Return the dimension of the configuration space.
+%       plot - Plot the robot.
+%       set_frame_displacement - Set the rigid transformation for the base frame.
+%
+% See also DQ_Kinematics, DQ_HolonomicBase.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
