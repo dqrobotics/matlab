@@ -14,7 +14,7 @@
 %       set_base_diameter - Change the base diameter.
 %       update_robot (Protected) - Move an existing graphical robot to a specified configuration.
 %
-%       See also DQ_MobileBase.
+%       See also DQ_MobileBase, DQ_DifferentialDriveRobot
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
