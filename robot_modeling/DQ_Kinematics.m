@@ -330,6 +330,30 @@ classdef DQ_Kinematics < handle
 
             residual = double(2.0*dot(hc2,hc1));
         end
+        
+        
+        function J = line_to_line_angle_jacobian(line_jacobian,...
+                robot_line, workspace_line)
+        % LINE_TO_LINE_ANGLE_JACOBIAN(line_jacobian, robot_line, 
+        % workspace_line) returns the Jacobian 'J' that relates the joint
+        % velocities (q_dot) to the time derivative of f(d), where f(d) 
+        % is the square distance  between the robot line orientation and 
+        % the workspace line orientation.
+        % 
+        % As f(d) is a continuous bijective function, controlling f(d) is
+        % equivalent to controlling the angle between the lines.
+        
+        %
+        % For more details, see Eq. (10) of Juan José Quiroz-Omaña, and
+        % Bruno Vilhena Adorno (2019). Whole-Body Control with (Self) Collision
+        % Avoidance using Vector Field Inequalities. 
+        % https://arxiv.org/abs/1906.07322
+                
+            n_columns = size(line_jacobian,2);
+            Jl = line_jacobian(1:4, 1:n_columns);
+            J = 2*vec4(robot_line - workspace_line)'*Jl;
+            
+        end
    
         
         function Jlx = line_jacobian(pose_jacobian, x, line_direction)
