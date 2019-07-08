@@ -20,6 +20,7 @@
 %       line_to_line_residual - Compute the line-to-line residual.
 %       line_to_point_distance_jacobian - Compute the line-to-line distance Jacobian.
 %       line_to_point_residual - Compute the line-to-point residual.
+%       line_to_line_angle_jacobian - Compute the line-to-line angle Jacobian.
 %       plane_jacobian - Compute the plane Jacobian.
 %       plane_to_point_distance_jacobian - Compute the plane-to-point distance Jacobian.
 %       plane_to_point_residual - Compute the plane-to-point residual.
