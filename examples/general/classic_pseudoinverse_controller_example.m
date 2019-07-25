@@ -46,8 +46,8 @@ function classic_pseudoinverse_controller_example()
     % pinv(J)*gain*task_error, where J is the robot Jacobian, gain
     % determines the convergence rate and task_error is the error between
     % the desired value and the current task variable. When the task error
-    % derivative is below stability_threshold, the systems is said to have
-    % reached a stable region.
+    % derivative is below stability_threshold, the closed-loop system is 
+    % said to have reached a stable region.
     pseudoinverse_controller = DQ_PseudoinverseSetpointController(kuka);
     pseudoinverse_controller.set_gain(100);
     pseudoinverse_controller.set_stability_threshold(0.001);
@@ -202,7 +202,12 @@ function classic_pseudoinverse_controller_example()
         while ~pseudoinverse_controller.is_stable()
             u = pseudoinverse_controller.compute_control_signal(q, ...
                                                                 task_reference);
+            % Do a numerical integration to update the robot in Matlab. In
+            % an actual robot actuated by means of velocity inputs, this step
+            % is not necessary.
             q = q + T*u;
+            
+            % Draw the robot in Matlab.
             plot(kuka,q,'nojoints');
             drawnow;
         end
