@@ -12,6 +12,7 @@
 % DQ_KinematicController Methods:
 %    attach_primitive_to_effector - Attach primitive to the end-effector.
 %    get_control_objective - Return the control objective.
+%    get_last_error_signal - Return the last error signal.
 %    get_jacobian - Return the correct Jacobian based on the control objective.
 %    get_task_variable - Return the task variable based on the control objective.
 %    is_set - Verify if the controller is set and ready to be used.
@@ -62,7 +63,7 @@ classdef DQ_KinematicController < handle
         is_stable_ = false; 
         
         % Last value computed for the control signal.
-        last_control_signal = 0; 
+        last_control_signal; 
         
         % Last value computed for the error signal
         last_error_signal;
@@ -86,6 +87,7 @@ classdef DQ_KinematicController < handle
                 error('DQ_KinematicController expects a DQ_Kinematics object');
             end
             obj.robot = robot;
+            obj.last_control_signal = zeros(robot.get_dim_configuration_space(),1); 
         end
         
         
@@ -152,6 +154,11 @@ classdef DQ_KinematicController < handle
                     error(['Set the control objective by using the'
                         'set_control_objective() method']);
             end
+        end
+        
+        function ret = get_last_error_signal(controller)
+            % Return the last error signal
+            ret = controller.last_error_signal;
         end
         
         function task_variable = get_task_variable(controller, q)
