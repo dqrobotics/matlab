@@ -11,6 +11,8 @@
 %
 % DQ_KinematicController Methods:
 %    attach_primitive_to_effector - Attach primitive to the end-effector.
+%    compute_setpoint_control_signal - Compute the control input to regulate to a setpoint.
+%    compute_tracking_control_signal - Compute the control input to track a trajectory
 %    get_control_objective - Return the control objective.
 %    get_last_error_signal - Return the last error signal.
 %    get_jacobian - Return the correct Jacobian based on the control objective.
@@ -18,6 +20,7 @@
 %    is_set - Verify if the controller is set and ready to be used.
 %    is_stable - Return true if the system has reached a stable region, false otherwise.
 %    set_control_objective - Set the control objective using predefined goals in ControlObjective.
+%    set_damping - Set the damping to prevent instabilities near singular configurations.
 %    set_gain - Set the controller gain.
 %    set_stability_threshold - Set the threshold that determines if a stable region has been reached.
 %    verify_stability - (ABSTRACT) Verify if the closed-loop region has reached a stable region.
@@ -56,6 +59,9 @@ classdef DQ_KinematicController < handle
         % The controller must always be explicitly set.
         control_objective = ControlObjective.None; 
         
+        % The default damping is zero.
+        damping = 0.0;
+        
         % Default gain is zero to force the user to choose a gain.
         gain = 0.0; 
         
@@ -77,8 +83,9 @@ classdef DQ_KinematicController < handle
         stability_threshold = 0;
     end
     
-    methods (Abstract, Access = protected)
-        verify_stability(obj, task_error);
+    methods (Abstract)        
+        compute_setpoint_control_signal(obj);
+        compute_tracking_control_signal(obj);
     end
     
     methods
@@ -102,6 +109,8 @@ classdef DQ_KinematicController < handle
         % then primitive = i_.
             obj.attached_primitive = primitive;
         end
+        
+        
         
         function ret = get_control_objective(controller)
             % Return the control objective
@@ -211,6 +220,11 @@ classdef DQ_KinematicController < handle
                 ret = true;
             end
         end
+        
+        function ret = is_stable(controller)
+        % Return true if the system has reached a stable region, false otherwise.    
+            ret = controller.is_stable_;
+        end
                 
         function set_control_objective(controller,control_objective)
         % Set the control objective using predefined goals in ControlObjective
@@ -240,6 +254,12 @@ classdef DQ_KinematicController < handle
             end
         end
         
+        function set_damping(controller, damping)
+            % Set the controller damping to prevent instabilities near
+            % singularities.
+            controller.damping = damping;
+        end
+        
         function set_gain(controller,gain)
             % Set the controller gain    
             controller.gain = gain;
@@ -250,9 +270,17 @@ classdef DQ_KinematicController < handle
             controller.stability_threshold = threshold;
         end
         
-        function ret = is_stable(controller)
-        % Return true if the system has reached a stable region, false otherwise.    
-            ret = controller.is_stable_;
+        function verify_stability(controller, task_error)
+            % Verify if the closed-loop system has reached a stable region.
+            %
+            % If the task error changes below a threshold, then we consider
+            % that the system has reached a stable region.
+            % TODO: Choose different criteria
+            
+            if norm(controller.last_error_signal - task_error) < ...
+                    controller.stability_threshold
+                controller.is_stable_ = true;
+            end
         end
     end
 end

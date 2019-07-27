@@ -34,7 +34,7 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef DQ_KinematicConstrainedSetpointController< DQ_KinematicSetpointController
+classdef DQ_KinematicConstrainedController< DQ_KinematicController
     
     properties (Access = protected)
         equality_constraint_matrix;
@@ -43,8 +43,8 @@ classdef DQ_KinematicConstrainedSetpointController< DQ_KinematicSetpointControll
         inequality_constraint_vector;
     end
     methods
-        function controller = DQ_KinematicConstrainedSetpointController(robot)
-            controller = controller@DQ_KinematicSetpointController(robot);
+        function controller = DQ_KinematicConstrainedController(robot)
+            controller = controller@DQ_KinematicController(robot);
             
             controller.equality_constraint_matrix = [];
             controller.equality_constraint_vector = [];

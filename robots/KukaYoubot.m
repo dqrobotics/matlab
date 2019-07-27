@@ -45,7 +45,7 @@ classdef KukaYoubot
 
             include_namespace_dq
 
-            x_bm= 1 + E_*0.5*(0.22575*i_ + 0.1441*k_);
+            x_bm = 1 + E_*0.5*(0.22575*i_ + 0.1441*k_);
 
             base.set_frame_displacement(x_bm);
 

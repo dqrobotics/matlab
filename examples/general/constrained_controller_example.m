@@ -49,7 +49,7 @@ function constrained_controller_example()
     % the desired value and the current task variable. When the task error
     % derivative is below stability_threshold, the closed-loop system is 
     % said to have reached a stable region.
-    controller = DQ_QuadraticProgrammingController(kuka);
+    controller = DQ_ClassicQPController(kuka);
     controller.set_gain(100);
     controller.set_stability_threshold(0.001);
     
@@ -201,8 +201,7 @@ function constrained_controller_example()
         
         % This is actually the important part on how to use the controller. 
         while ~controller.is_stable()
-            u = controller.compute_control_signal(q, ...
-                                                                task_reference);
+            u = controller.compute_setpoint_control_signal(q, task_reference);
             % Do a numerical integration to update the robot in Matlab. In
             % an actual robot actuated by means of velocity inputs, this step
             % is not necessary.

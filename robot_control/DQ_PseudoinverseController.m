@@ -5,7 +5,6 @@
 %
 % DQ_PseudoinverseSetpointController Methods:
 %   compute_control_signal - Based on the task reference, compute the control signal.
-%   verify_stability - Verify if the closed-loop system has reached a stable region.
 %
 % For more methods and properties, see also DQ_KinematicController.
 
@@ -32,13 +31,14 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef DQ_PseudoinverseSetpointController < DQ_KinematicSetpointController
+classdef DQ_PseudoinverseController < DQ_KinematicController
     methods
-        function controller = DQ_PseudoinverseSetpointController(robot)
-            controller = controller@DQ_KinematicSetpointController(robot);
+        function controller = DQ_PseudoinverseController(robot)
+            controller = controller@DQ_KinematicController(robot);
         end
         
-        function u = compute_control_signal(controller, q, task_reference)
+        function u = compute_tracking_control_signal(controller, q, ...
+                task_reference, feedforward)
             % Based on the task reference, compute the control signal
             if controller.is_set()
                 % get the task variable according to the control objective
@@ -47,9 +47,10 @@ classdef DQ_PseudoinverseSetpointController < DQ_KinematicSetpointController
                 J = controller.get_jacobian(q);
 
                 % calculate the Euclidean error
-                task_error = task_reference - task_variable;
+                task_error = task_variable - task_reference;
                 % compute the control signal
-                u = pinv(J)*controller.gain*task_error;
+                u = pinv(J)*(-controller.gain*task_error + ...
+                    feedforward);
                 
                 % verify if the closed-loop system has reached a stable
                 % region and update the appropriate flags accordingly.
@@ -61,20 +62,11 @@ classdef DQ_PseudoinverseSetpointController < DQ_KinematicSetpointController
                 controller.last_error_signal = task_error;
             end
         end
-    end
-    
-    methods (Access = protected)
-        function verify_stability(controller, task_error)
-            % Verify if the closed-loop system has reached a stable region.
-            %
-            % If the task error changes below a threshold, then we consider
-            % that the system has reached a stable region.
-            % TODO: Choose different criteria
-            
-            if norm(controller.last_error_signal - task_error) < ...
-                    controller.stability_threshold
-                controller.is_stable_ = true;
-            end
+        
+        function u = compute_setpoint_control_signal(controller, q, ...
+                task_reference)
+            u = controller.compute_tracking_control_signal(q, ...
+                task_reference, zeros(size(task_reference)));
         end
     end
 end

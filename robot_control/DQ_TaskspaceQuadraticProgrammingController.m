@@ -1,14 +1,17 @@
-% Implements a control law based on quadratic programming.
+% Abstract class that defines a control law based on quadratic programming.
 %
-% Usage: controller = DQ_QuadraticProgrammingController(robot), where
-% robot is a DQ_Kinematics object.
+% Although there are inumerous controllers based on quadratic programming,
+% this class is suitable for those whose objective function is based on
+% task-space variables, such as the robot Jacobian and the task-space
+% error.
 %
 % DQ_QuadraticProgrammingController Methods:
-%   add_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b
-%   add_inequality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot <= b
-%   compute_control_signal - Based on the task reference, compute the control signal.
-%   verify_stability - Verify if the closed-loop system has reached a stable region.
-%
+%   compute_objective_function_symmetric_matrix - (Abstract) Compute the matrix H used in the objective function qdot'*H*qdot + f'*qdot.
+%   compute_objective_function_linear_component - (Abstract) Compute the vector f used in the objective function qdot'*H*qdot + f'*qdot.
+%   add_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b.
+%   add_inequality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot <= b.
+%   compute_setpoint_control_signal - Based on the task setpoint, compute the control signal.
+%   compute_tracking_control_signal - Based on the task trajectory, use the feedforward to compute the control signal.
 % For more methods and properties, see also DQ_KinematicController.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
@@ -34,10 +37,15 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-classdef DQ_QuadraticProgrammingController < DQ_KinematicConstrainedSetpointController
+classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedController
+    methods (Abstract)
+        compute_objective_function_symmetric_matrix(controller, J, task_error);
+        compute_objective_function_linear_component(controller, J, task_error);
+    end
+    
     methods
-        function controller = DQ_QuadraticProgrammingController(robot)
-            controller = controller@DQ_KinematicConstrainedSetpointController(robot);
+        function controller = DQ_TaskspaceQuadraticProgrammingController(robot)
+            controller = controller@DQ_KinematicConstrainedController(robot);
         end        
         
         function add_equality_constraint(obj,B,b)
@@ -50,7 +58,7 @@ classdef DQ_QuadraticProgrammingController < DQ_KinematicConstrainedSetpointCont
             obj.inequality_constraint_vector = b;
         end
         
-        function u = compute_control_signal(controller, q, task_reference)
+        function u = compute_setpoint_control_signal(controller, q, task_reference)
             % Based on the task reference, compute the control signal
             if controller.is_set()
                 % get the task variable according to the control objective
@@ -62,14 +70,19 @@ classdef DQ_QuadraticProgrammingController < DQ_KinematicConstrainedSetpointCont
                 task_error = task_variable - task_reference;
                 
                 % calculate the parameters that quadprog use to solve the 
-                % quadratic problem min 0.5 * norm(J*u+gain*task_error)^2 
+                % quadratic problem min 0.5 * norm(J*u+gain*task_error)^2 + 0.5*norm(u)^2 
                 A = controller.inequality_constraint_matrix;
                 b = controller.inequality_constraint_vector;
                 Aeq = controller.equality_constraint_matrix;
                 beq = controller.equality_constraint_vector;
-           
-                H = J'*J + 0.00001*eye(controller.robot.get_dim_configuration_space());
-                f = controller.gain*task_error'*J;
+                
+                % compute the quadratic component of the objective function
+                H = compute_objective_function_symmetric_matrix(controller,...
+                    J, task_error);
+                
+                % compute the linear component of the objective function
+                f = compute_objective_function_linear_component(controller, ...
+                    J, task_error);
                 
                 % Turn-off quadprog messages
                 options =  optimoptions('quadprog','Display', 'off');
@@ -89,20 +102,13 @@ classdef DQ_QuadraticProgrammingController < DQ_KinematicConstrainedSetpointCont
                 
             end
         end
-    end
-    
-    methods (Access = protected)
-        function verify_stability(controller, task_error)
-            % Verify if the closed-loop system has reached a stable region.
-            %
-            % If the task error changes below a threshold, then we consider
-            % that the system has reached a stable region.
-            % TODO: Choose different criteria
-            
-            if norm(controller.last_error_signal - task_error) < ...
-                    controller.stability_threshold
-                controller.is_stable_ = true;
-            end
+        
+        function u = compute_tracking_control_signal(controller, q, ...
+                task_reference, ~)
+            warning('Only setpoint control is currently implemented.');
+            u = compute_setpoint_control_signal(controller, q, ...
+                task_reference);
         end
+            
     end
 end
