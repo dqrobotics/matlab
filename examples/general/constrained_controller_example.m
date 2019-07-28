@@ -1,11 +1,12 @@
 % Example of a controller based on quadratic programming with Euclidean error calculation.
 %
-% CONSTRAINED_CONTROLLER_EXAMPLE() Runs a simple example where a
-% controller based on quadratic programming and the objective function 
-% min 0.5 * norm(J*u+gain*task_error)^2 is
-% used with an Euclidean error to control different tasks based on common
-% geometric primitives (pose, plane, line, translation, rotation, and
-% distance).
+% CONSTRAINED_CONTROLLER_EXAMPLE(plane_constraint) Runs a simple example where a
+% controller based on classic quadratic programming and the objective function
+% min 0.5 * norm(J*u + gain*task_error)^2 + 0.5*lambda*norm(u)^2 is
+% used with an Euclidean error to control the end-effector pose while it is
+% constrained by a plane.
+% If plane_constraint = 0, the trajectory is NOT constrained by the plane in the
+% workspace, otherwise the trajectory is contrained by the plane.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -29,193 +30,111 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function constrained_controller_example()
-
+function constrained_controller_example(use_plane_constraint)
     % use the namespace
     include_namespace_dq
-    
+
     % We use a KUKA LWR4 robot
     kuka = KukaLwr4Robot.kinematics();
     kuka.name = 'KUKA';
-
+    
     % Initial configuration
-    q = [0, 0.3770, 0.1257, -0.5655, 0, 0, 0]';
+    q = [pi/2, -1.8*pi/2, 0, -1.5*pi/2, -1.5*pi/2, 0, 0]';
     % Integration step
-    T = 0.001; 
+    T = 0.001;
 
-    % The controller is based on u = argmin 0.5 * norm(J*u+gain*task_error)^2,
-    % where J is the robot Jacobian, gain determines the convergence rate 
-    % and task_error is the error between
-    % the desired value and the current task variable. When the task error
-    % derivative is below stability_threshold, the closed-loop system is 
+    % The controller is given by
+    % u = argmin 0.5 * norm(J*qdot + gain*task_error)^2 + 0.5*lambda*norm(qdot)^2,
+    %      qdot
+    % where J is the robot Jacobian, gain determines the convergence rate,
+    % task_error is the error between the current task variable and
+    % the desired one, and lambda is the damping factor. When the task error
+    % derivative is below stability_threshold, the closed-loop system is
     % said to have reached a stable region.
     controller = DQ_ClassicQPController(kuka);
     controller.set_gain(100);
-    controller.set_stability_threshold(0.001);
-    
+    controller.set_stability_threshold(0.0001);
+
     % Prepare the visualization
     figure;
-    view(3);
+    view(143,20);
     axis equal;
+    axis([-0.5, 0.5,-0.6, 0.6, -0.1, 0.6])
     hold on;
+
+    % The task variable to be controlled is the end-effector pose
+    controller.set_control_objective(ControlObjective.Pose);
+
+    % Define the admissible region, which is composed of the intersection
+    % between the region inside a cylinder and the region from one side of
+    % a plane
+    p = -0.15*i_ -0.1*j_ + 0.18*k_;
+    r = cos(pi/16) + i_*sin(pi/16);
+    xplane = r + E_*(1/2)*p*r;
+
+    plane = Adsharp(xplane,-k_);
+
+    %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
+    x_pose = 1 + E_*(1/2)*(-0.15*i_ -0.5*j_ + 0.1*k_);
+    task_reference = vec8(x_pose);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    %%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
+    title('Controlling the pose.');
+    % plot the reference to aid in the visualization
+    plot(x_pose, 'scale', 0.2, 'name', 'desired pose');
+    
+    % plot the plane constraint
+    plot(plane, 'plane', 5, 'color', 'c');
+    
+    %plot the robot
+    plot(kuka,q', 'nojoints');
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    pause(1);
+    
+    % This is actually the important part on how to use the controller.
+    while ~controller.is_stable()
         
-    % Let's define an alias for the method set_control_objective
-    set_control_objective = @controller.set_control_objective;
-    
-    % The first task variable to be controlled is the end-effector pose
-    set_control_objective(ControlObjective.Pose);
-    
-    % The purpose of this first WHILE is just to set the references and some
-    % eye-candy visualization stuff. 
-    while controller.get_control_objective() ~= ControlObjective.None
-        switch controller.get_control_objective()
-            case ControlObjective.Pose
-                
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                x_pose = kuka.fkm([1.7593, 0.8796, 0.1257, -1.4451,...
-                                          -1.0053, 0.0628, 0]'); 
-                task_reference = vec8(x_pose);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                % choose the next objective to accomplish when this one is
-                % fulfilled.
-                control_objective = ControlObjective.Translation;
-                
-                %%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                title('Controlling the pose.');
-                % plot the reference to aid in the visualization
-                handle_plot = plot(x_pose, 'scale', 0.2);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-            case ControlObjective.Translation
-                
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                task_reference = vec4(0*i_ + 0*j_ + 0*k_);
-               
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                % choose the next control objective
-                control_objective = ControlObjective.Rotation;
-                
-                %%%%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                title(['Controlling the translation. The end-effector must '...
-                      'go to the origin.']);
-                % delete the previous plot to have a cleaner figure
-                if exist('handle_plot','var')
-                    for i = 1:3
-                        delete(handle_plot.handle_axis{i});
-                        delete(handle_plot.handle_text{i});
-                    end
-                end
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-            
-            case ControlObjective.Rotation
-                
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                task_reference = vec4(DQ(1));        
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
+        x_pose = kuka.fkm(q);
+        p = translation(x_pose);  
+        
+        if use_plane_constraint ~= 0
+            % First we define a differential inequality given by d_dot >= -eta*d, 
+            % where d is the distance from the end-effector to the
+            % plane, d_dot is its time derivative and eta determines the
+            % maximum rate for the approach velocity.
+            % To calculate the aforementioned differential inequality, we need
+            % to calculate the point-to-plane distance Jacobian
+        
+            J_pose = kuka.pose_jacobian(q);                 
+            J_trans = kuka.translation_jacobian(J_pose,x_pose);
 
-                % Choose next objective
-                control_objective = ControlObjective.Distance;
-                
-                %%%%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                title(['Controlling the rotation. The end-effector frame '...
-                      'be aligned with the global reference frame.']);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-            case ControlObjective.Distance
-                
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                task_reference = 0.2^2; % The reference already is a 'vector'                
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-                % Choose next objective
-                control_objective = ControlObjective.Line;
-                
-                %%%%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                title(['Controlling the distance between the end-effector '...
-                      'and the origin of the global reference frame.']);
-                  
-                % Draw a sphere to better visualize what's happening. The
-                % end-effector should converge to any point on the sphere
-                % surface
-                [X,Y,Z] = sphere;
-                handle_plot = surf(0.2*X, 0.2*Y, 0.2*Z);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-            case ControlObjective.Line
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                line_direction = normalize(DQ(rand(3,1)));
-                line_point =  DQ(-0.3*ones(3,1)+ 0.6*rand(3,1));
-                % The desired line is the first parameter
-                line_d = line_direction + ...
-                                        E_ * cross(line_point, line_direction);
-                % The task reference is always mapped to a vector
-                task_reference = vec8(line_d);
-                % The line passing through the end-effector x-axis is the
-                % second parameter. It'll be aligned with the desired line.                
-                controller.attach_primitive_to_effector(i_);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                % Choose next objective  
-                control_objective = ControlObjective.Plane;
-                
-                %%%%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                if exist('handle_plot','var')
-                    delete(handle_plot); 
-                end
-                title(['Align a line that passes through the end-effector '...
-                      'x-axis with a random black line in the workspace.']);
-                  
-                handle_plot = plot(line_d,'line',3, 'color', 'k');  
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-            case ControlObjective.Plane
-                %%%%%%%%%%%% define reference for the controller %%%%%%%%%%%%%%%
-                plane_normal = normalize(DQ(rand(3,1)));
-                plane_point =  DQ(-0.3*ones(3,1)+ 0.6*rand(3,1));
-                plane_d = -(plane_normal + E_ * dot(plane_point, plane_normal));
-                % The reference is always mapped to a vector
-                task_reference = vec8(plane_d); 
-                % But the geometric primitive associated with the
-                % end-effector is not. Furthermore, the goal is to align a
-                % plane perpendicular to the robot end-effector's z-axis,
-                controller.attach_primitive_to_effector(k_);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-                % Choose next objective 
-                control_objective = ControlObjective.None;
-                
-                %%%%%%%%%%%%%%%%%%%%%% begin eye candy %%%%%%%%%%%%%%%%%%%%%%%%%
-                if exist('handle_plot','var')
-                    delete(handle_plot); 
-                end
-                
-                plot(plane_d, 'plane', 3, 'color', 'yellow');
-                
-                title(['Controlling a plane that passes through the '...
-                        'origin of the end-effector frame and with normal '...
-                        'given by the end-effector z-axis.']);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            Jdist = kuka.point_to_plane_distance_jacobian(J_trans, p, plane);
+            dist = DQ_Geometry.point_to_plane_distance(p,plane);
+        
+            % Add inequality constraint d_dot >= -eta*d, which implies    
+            % -d_dot <= eta*d, where d_dot = Jdist*u; therefore 
+            % -Jdist*u <= eta*d. Let's choose eta = 10.
+            controller.add_inequality_constraint(-Jdist,100*dist);
         end
         
-        % This is actually the important part on how to use the controller. 
-        while ~controller.is_stable()
-            u = controller.compute_setpoint_control_signal(q, task_reference);
-            % Do a numerical integration to update the robot in Matlab. In
-            % an actual robot actuated by means of velocity inputs, this step
-            % is not necessary.
-            q = q + T*u;
-            
-            % Draw the robot in Matlab.
-            plot(kuka,q,'nojoints');
-            drawnow;
-        end
+        % Let us calculate the control input
+        u = controller.compute_setpoint_control_signal(q, task_reference);
         
-        % Set the control objective for the next iteration
-        set_control_objective(control_objective);
-        % Pause three seconds to take a breath.
-        pause(3);
+        % Do a numerical integration to update the robot in Matlab. In
+        % an actual robot actuated by means of velocity inputs, this step
+        % is not necessary.
+        q = q + T*u;
+
+        % Draw the robot in Matlab.
+        plot(kuka,q', 'nojoints');
+        
+        pvec = vec3(p);
+        plot3(pvec(1),pvec(2),pvec(3), 'ro');
+        drawnow;
+        %pause;
     end
 end
 
