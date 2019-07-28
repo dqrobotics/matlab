@@ -1,3 +1,11 @@
+% Class that provides useful methods for geometric calculations
+%
+%   DQ_Geometry methods (Static):
+%       line_to_line_angle - Return the angle between two lines.
+%       line_to_line_squared_distance - Return the square of the Euclidean distance between two lines.
+%       point_to_line_squared_distance - Return the square of the Euclidean distance between a point and a line.
+%       point_to_plane_distance - Return the Euclidean distance between a given point and a given plane.
+%       point_to_point_squared_distance - Return the square of the Euclidean distance between two points.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -23,71 +31,23 @@
 
 classdef DQ_Geometry
     
-    methods (Static)
-        
-        function ret = point_to_point_squared_distance(point1, point2)
-            % POINT_TO_POINT_SQUARED_DISTANCE(point1, point2) returns the
-            % square of the Euclidean distance between point1 and point2, where
-            % point1 and point2 are pure quaternions
+    methods (Static)        
+        function ret = line_to_line_angle(line1, line2)
+            % LINE_TO_LINE_ANGLE(line1,line2) returns the angle between two lines,
+            % where 'line1' and 'line2' are unit-norm pure dual quaternions.
             
-            if ~is_pure_quaternion(point1)
-                error('Input point1 is not a pure quaternion.');
-            elseif ~is_pure_quaternion(point2)
-                error('Input point2 is not a pure quaternion.');
-            end
+            if ~is_line(line1)
+                error('Input line1 is not a line.');
+            elseif ~is_line(line2)
+                error('Input line2 is not a line.');
+            end            
             
-            point = vec3(point1-point2);
-            
-            ret = point'*point;
+            l1_dot_l2   = dot(line1, line2);
+            % Retrieve the angle between the lines---Eq. 35 of Marinho et
+            % al. (2019)
+            ret = acos(double(P(l1_dot_l2)));    
         end
-        
-        
-        function ret = point_to_line_squared_distance(point, line)
-            % POINT_TO_LINE_SQUARED_DISTANCE(point, line) returns the square of the
-            % Euclidean distance between 'point' and 'line', where point is a pure
-            % quaternion and 'line' is a unit-norm pure dual quaternion.
-            % See ?T. Brox, B. Rosenhahn, J. Gall, and D. Cremers, ?Combined region and
-            % motion-based 3d tracking of rigid and articulated objects,? IEEE Transactions
-            % on Pattern Analysis and Machine Intelligence, vol. 32, no. 3, pp. 402?415,
-            % 2010.
-            
-            if ~is_pure_quaternion(point)
-                error('Input point is not a pure quaternion.');
-            elseif ~is_line(line)
-                error('Input line is not a line.');
-            end
-            
-            l = P(line);
-            m = D(line);
-            
-            new_point = vec4(cross(point,l)) - m;
-            ret = vec4(new_point)'*vec4(new_point);
-            
-        end
-        
-        function ret = point_to_plane_distance(point, plane)
-            % POINT_TO_PLANE_DISTANCE(point, plane) returns the Euclidean distance
-            % between a given point and a given plane, where 'point' is a pure
-            % quaternion and 'plane' is a unit norm dual quaternion with pure primary
-            % part and real dual part.
-            %
-            % ?M. M. Marinho, B. V. Adorno, K. Harada, and M. Mitsuishi, ?Active
-            % Constraints Using Vector Field Inequalities for Surgical Robots,? in
-            % 2018 IEEE International Conference on Robotics and Automation (ICRA), 2018,
-            % pp. 5364?5371.
-            if ~is_pure_quaternion(point)
-                error('Input point is not a pure quaternion.');
-            elseif ~is_plane(plane)
-                error('Input plane is not a plane.');
-            end
-            
-            plane_n = P(plane);
-            plane_d = D(plane);
-            
-            ret = double(dot(point,plane_n) - plane_d);
-        end
-        
-        
+                
         function ret = line_to_line_squared_distance(line1, line2)
             % LINE_TO_LINE_SQUARED_DISTANCE(line1,line2) returns the square of the
             % Euclidean distance between two lines, where 'line1' and 'line2' are
@@ -112,20 +72,65 @@ classdef DQ_Geometry
             end                
         end
         
-        function ret = line_to_line_angle(line1, line2)
-            % LINE_TO_LINE_ANGLE(line1,line2) returns the angle between two lines,
-            % where 'line1' and 'line2' are unit-norm pure dual quaternions.
+        function ret = point_to_line_squared_distance(point, line)
+            % POINT_TO_LINE_SQUARED_DISTANCE(point, line) returns the square of the
+            % Euclidean distance between 'point' and 'line', where point is a pure
+            % quaternion and 'line' is a unit-norm pure dual quaternion.
+            % See ?T. Brox, B. Rosenhahn, J. Gall, and D. Cremers, ?Combined region and
+            % motion-based 3d tracking of rigid and articulated objects,? IEEE Transactions
+            % on Pattern Analysis and Machine Intelligence, vol. 32, no. 3, pp. 402?415,
+            % 2010.
             
-            if ~is_line(line1)
-                error('Input line1 is not a line.');
-            elseif ~is_line(line2)
-                error('Input line2 is not a line.');
-            end            
+            if ~is_pure_quaternion(point)
+                error('Input point is not a pure quaternion.');
+            elseif ~is_line(line)
+                error('Input line is not a line.');
+            end
             
-            l1_dot_l2   = dot(line1, line2);
-            % Retrieve the angle between the lines---Eq. 35 of Marinho et
-            % al. (2019)
-            ret = acos(double(P(l1_dot_l2)));    
+            l = P(line);
+            m = D(line);
+            
+            new_point = vec4(cross(point,l)) - m;
+            ret = vec4(new_point)'*vec4(new_point);
+            
+        end  
+        
+        function ret = point_to_plane_distance(point, plane)
+            % POINT_TO_PLANE_DISTANCE(point, plane) returns the Euclidean distance
+            % between a given point and a given plane, where 'point' is a pure
+            % quaternion and 'plane' is a unit norm dual quaternion with pure primary
+            % part and real dual part.
+            %
+            % ?M. M. Marinho, B. V. Adorno, K. Harada, and M. Mitsuishi, ?Active
+            % Constraints Using Vector Field Inequalities for Surgical Robots,? in
+            % 2018 IEEE International Conference on Robotics and Automation (ICRA), 2018,
+            % pp. 5364?5371.
+            if ~is_pure_quaternion(point)
+                error('Input point is not a pure quaternion.');
+            elseif ~is_plane(plane)
+                error('Input plane is not a plane.');
+            end
+            
+            plane_n = P(plane);
+            plane_d = D(plane);
+            
+            ret = double(dot(point,plane_n) - plane_d);
+        end
+        
+        function ret = point_to_point_squared_distance(point1, point2)
+            % POINT_TO_POINT_SQUARED_DISTANCE(point1, point2) returns the
+            % square of the Euclidean distance between point1 and point2, where
+            % point1 and point2 are pure quaternions
+            
+            if ~is_pure_quaternion(point1)
+                error('Input point1 is not a pure quaternion.');
+            elseif ~is_pure_quaternion(point2)
+                error('Input point2 is not a pure quaternion.');
+            end
+            
+            point = vec3(point1-point2);
+            
+            ret = point'*point;
         end
     end
 end
