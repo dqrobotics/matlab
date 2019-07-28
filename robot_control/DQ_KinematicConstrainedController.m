@@ -1,15 +1,16 @@
 % Abstract superclass used to define concrete classes based on constrained setpoint control.
 %
-% DQ_KinematicConstrainedSetpointController Properties:
+% DQ_KinematicConstrainedController Properties:
 %   equality_constraint_matrix - matrix used in the equality constraint
 %   equality_constraint_vector - vector used in the equality constraint
 %   inequality_constraint_matrix - matrix used in the inequality constraint
 %   inequality_constraint_vector - vector used in the inequality constraint
 %   
-% DQ_KinematicConstrainedSetpointController Methods:
+% DQ_KinematicConstrainedController Methods:
 %   add_equality_constraint - (ABSTRACT) Add constraint of type A*qdot = a
 %   add_inequality_constraint - (ABSTRACT) Add inequality constraint of type B*qdot <= b    
-% See also DQ_KinematicController.
+% See also DQ_KinematicController,
+%          DQ_TaskspaceQuadraticProgrammingController.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %

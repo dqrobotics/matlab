@@ -5,7 +5,7 @@
 % task-space variables, such as the robot Jacobian and the task-space
 % error.
 %
-% DQ_QuadraticProgrammingController Methods:
+% DQ_TaskspaceQuadraticProgrammingController Methods:
 %   compute_objective_function_symmetric_matrix - (Abstract) Compute the matrix H used in the objective function qdot'*H*qdot + f'*qdot.
 %   compute_objective_function_linear_component - (Abstract) Compute the vector f used in the objective function qdot'*H*qdot + f'*qdot.
 %   add_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b.
@@ -48,13 +48,23 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
             controller = controller@DQ_KinematicConstrainedController(robot);
         end        
         
-        function add_equality_constraint(obj,B,b)
-            obj.equality_constraint_matrix = B;
-            obj.equality_constraint_vector = b;
+        function add_equality_constraint(obj,Aeq,beq)
+            % Add equality constraint
+            %
+            % ADD_EQUALITY_CONSTRAINT(Aeq,beq) adds the constraint Aeq*u = beq,
+            % where Aeq is the equality matrix, beq is the equality vector
+            % and u is the control input.
+            obj.equality_constraint_matrix = Aeq;
+            obj.equality_constraint_vector = beq;
         end
         
-        function add_inequality_constraint(obj,B,b)
-            obj.inequality_constraint_matrix = B;
+        function add_inequality_constraint(obj,A,b)
+            % Add inequality constraint
+            %
+            % ADD_INEQUALITY_CONSTRAINT(A,b) adds the constraint A*u <= b,
+            % where A is the inequality matrix, b is the inequality vector
+            % and u is the control input.
+            obj.inequality_constraint_matrix = A;
             obj.inequality_constraint_vector = b;
         end
         
