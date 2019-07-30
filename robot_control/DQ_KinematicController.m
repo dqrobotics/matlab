@@ -10,7 +10,7 @@
 %   robot - DQ_Kinematics object related to the robot to be controlled.
 %
 % DQ_KinematicController Methods:
-%    attach_primitive_to_effector - Attach primitive to the end-effector.
+%    set_primitive_to_effector - Attach primitive to the end-effector.
 %    compute_setpoint_control_signal - Compute the control input to regulate to a setpoint.
 %    compute_tracking_control_signal - Compute the control input to track a trajectory
 %    get_control_objective - Return the control objective.
@@ -98,7 +98,7 @@ classdef DQ_KinematicController < handle
         end
         
         
-        function attach_primitive_to_effector(obj, primitive)
+        function set_primitive_to_effector(obj, primitive)
         % Attach primitive to the end-effector
         %
         % ATTACH_PRIMITIVE_TO_EFFECTOR(primitive) attach the primitive to
