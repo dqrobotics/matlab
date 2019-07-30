@@ -7,8 +7,8 @@
 %   inequality_constraint_vector - vector used in the inequality constraint
 %   
 % DQ_KinematicConstrainedController Methods:
-%   add_equality_constraint - (ABSTRACT) Add constraint of type A*qdot = a
-%   add_inequality_constraint - (ABSTRACT) Add inequality constraint of type B*qdot <= b    
+%   set_equality_constraint - (ABSTRACT) Add constraint of type A*qdot = a
+%   set_inequality_constraint - (ABSTRACT) Add inequality constraint of type B*qdot <= b    
 % See also DQ_KinematicController,
 %          DQ_TaskspaceQuadraticProgrammingController.
 
@@ -61,13 +61,13 @@ classdef DQ_KinematicConstrainedController< DQ_KinematicController
         % The constraint is not persistent, that is, it must be *always*
         % defined *before* the control signal is computed in order to be
         % taken into consideration.
-        add_equality_constraint(obj,B, b);    
+        set_equality_constraint(obj,B, b);    
         
         % Given the matrix B and the vector b of compatible dimensions, add
         % the linear (on the control inputs) inequality constraint B*qdot <= b
         % The constraint is not persistent, that is, it must be *always*
         % defined *before* the control signal is computed in order to be
         % taken into consideration.
-        add_inequality_constraint(obj,B, b);    
+        set_inequality_constraint(obj,B, b);    
     end
 end

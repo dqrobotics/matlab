@@ -8,11 +8,11 @@
 % DQ_TaskspaceQuadraticProgrammingController Methods:
 %   compute_objective_function_symmetric_matrix - (Abstract) Compute the matrix H used in the objective function qdot'*H*qdot + f'*qdot.
 %   compute_objective_function_linear_component - (Abstract) Compute the vector f used in the objective function qdot'*H*qdot + f'*qdot.
-%   add_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b.
-%   add_inequality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot <= b.
+%   set_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b.
+%   set_inequality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot <= b.
 %   compute_setpoint_control_signal - Based on the task setpoint, compute the control signal.
 %   compute_tracking_control_signal - Based on the task trajectory, use the feedforward to compute the control signal.
-% For more methods and properties, see also DQ_KinematicController.
+% See also DQ_KinematicController, DQ_ClassicQPController.
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
@@ -48,7 +48,7 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
             controller = controller@DQ_KinematicConstrainedController(robot);
         end        
         
-        function add_equality_constraint(obj,Aeq,beq)
+        function set_equality_constraint(obj,Aeq,beq)
             % Add equality constraint
             %
             % ADD_EQUALITY_CONSTRAINT(Aeq,beq) adds the constraint Aeq*u = beq,
@@ -58,7 +58,7 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
             obj.equality_constraint_vector = beq;
         end
         
-        function add_inequality_constraint(obj,A,b)
+        function set_inequality_constraint(obj,A,b)
             % Add inequality constraint
             %
             % ADD_INEQUALITY_CONSTRAINT(A,b) adds the constraint A*u <= b,

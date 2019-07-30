@@ -126,7 +126,7 @@ function constrained_controller_example(use_constraint)
             % Add inequality constraint d_dot >= -eta*d, which implies    
             % -d_dot <= eta*d, where d_dot = Jdist*u; therefore 
             % -Jdist*u <= eta*d. Let's choose eta = 10.
-            controller.add_inequality_constraint(-Jdist,100*dist);
+            controller.set_inequality_constraint(-Jdist,100*dist);
         end
         
         % Let us calculate the control input

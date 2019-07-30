@@ -24,6 +24,9 @@
 %    set_gain - Set the controller gain.
 %    set_stability_threshold - Set the threshold that determines if a stable region has been reached.
 %    verify_stability - (ABSTRACT) Verify if the closed-loop region has reached a stable region.
+%
+%   See also DQ_PseudoinverseController,
+%   DQ_TaskspaceQuadraticProgrammingController.
 
 
 % (C) Copyright 2011-2019 DQ Robotics Developers
