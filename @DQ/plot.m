@@ -238,7 +238,7 @@ switch primitive_type
         d = dq.D;    
        
         % Now we obtain a vector orthogonal to n.
-        if n ~= DQ.i
+        if (n ~= DQ.i) && (n ~= -DQ.i)
             v = cross(DQ.i,n);            
             v = (v/norm(v))*(plane_length/2);            
         else
@@ -270,7 +270,5 @@ switch primitive_type
         end
         
         % TODO: implement erase option
-        
-        % TODO: implement color option
-end
+    end
 end
