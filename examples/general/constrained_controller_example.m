@@ -30,7 +30,16 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function constrained_controller_example(use_plane_constraint)
+function constrained_controller_example(use_constraint)
+    if nargin == 0
+        use_plane_constraint = 1;
+    elseif use_constraint == 0
+        use_plane_constraint = 0;
+    else
+        use_plane_constraint = 1;
+    end
+
+
     % use the namespace
     include_namespace_dq
 
