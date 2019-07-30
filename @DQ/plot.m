@@ -35,7 +35,9 @@
 % the plane with respect to the origin of the reference frame. Since a plane is 
 % infinite, size is used to determine the diagonal of the visible plane.
 %
-% plot(dq,'plane', size, 'color', 'r') will plot a red plane.
+% plot(dq, 'plane', size, 'color', 'r') will plot a red plane.
+%
+% plot(dq, 'plane', size, 'location', p) will plot a plane located at p. 
 
 
 % (C) Copyright 2015 DQ Robotics Developers
@@ -84,6 +86,11 @@ if optargin > 0
         option_name = char(varargin(j));
         
         switch lower(option_name)
+            case 'location'                
+                location = varargin{j+1};
+                if ~is_pure_quaternion(location)
+                    error('location must be a pure dual quaternion');
+                end
             case 'erase'
                 erase = 1;
                 handle_cell = varargin(j+1);
@@ -246,9 +253,29 @@ switch primitive_type
         end
         
         % u,v,n are perpedicular
-        u = cross(n,v);
+        % u has the same length of v because n has unit norm.
+        u = cross(n,v); 
         
-        p = n*d; % point on the plane
+        if exist('location','var') 
+            % if 'location' is defined, it is used to explicitly define
+            % where the plane will be drawn in the workspace. But first,
+            % let us verify if the center point is indeed on the plane.
+            if dot(location - n*d, n) ~= 0
+                warning(['The point of reference (location) must be '... 
+                    'located on the plane. Since it is not, it will be '...
+                    'ignored.']);
+                
+                % choose an arbitrary point on the plane
+                p = n*d; 
+            else 
+                % location is on the plane. Let's use it.
+                p = location;
+            end
+        else
+            % Location was not defined. Choose an arbitrary point on the
+            % plane.
+            p = n*d;
+        end 
         
         p1 = vec3(p + u);
         p2 = vec3(p + v);
@@ -268,7 +295,5 @@ switch primitive_type
                 handle = patch(arg{:}, 'b');
             end                
         end
-        
-        % TODO: implement erase option
     end
 end
