@@ -104,7 +104,7 @@ classdef DQ_KinematicController < handle
         function set_primitive_to_effector(obj, primitive)
         % Attach primitive to the end-effector
         %
-        % ATTACH_PRIMITIVE_TO_EFFECTOR(primitive) attach the primitive to
+        % SET_PRIMITIVE_TO_EFFECTOR(primitive) attach the primitive to
         % be controlled to the end-effector. For example, if the goal is
         % to align a line collinear with the end-effector z-axis with a
         % line in the workspace, then primitive = k_. If the goal is to
