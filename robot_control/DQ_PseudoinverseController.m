@@ -1,10 +1,11 @@
 % Implements a classic control law based on the Jacobian pseudoinverse and an Euclidean error.
 %
-% Usage: controller = DQ_PseudoinverseSetpointController(robot), where
+% Usage: controller = DQ_PseudoinverseController(robot), where
 % robot is a DQ_Kinematics object.
 %
-% DQ_PseudoinverseSetpointController Methods:
-%   compute_control_signal - Based on the task reference, compute the control signal.
+% DQ_PseudoinverseController Methods:
+%   compute_setpoint_control_signal - Compute the control signal for a setpoint reference.
+%   compute_tracking_control_signal - Compute the control signal for a time-varying trajectory.
 %
 % For more methods and properties, see also DQ_KinematicController.
 
