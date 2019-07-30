@@ -86,9 +86,21 @@ classdef DQ_KinematicController < handle
         stability_threshold = 0;
     end
     
-    methods (Abstract)        
-        compute_setpoint_control_signal(obj);
-        compute_tracking_control_signal(obj);
+    methods (Abstract) 
+        % Compute the control input to regulate to a setpoint.
+        %
+        % COMPUTE_SETPOINT_CONTROL_SIGNAL(q,task_reference) calculates the
+        % control signal to regulate the closed-loop system to a setpoint
+        % given by task_reference, which depends on the control objective.
+        compute_setpoint_control_signal(obj, q, task_reference);
+        
+        % Compute the control input to track a time-varying trajectory.
+        %
+        % COMPUTE_TRACKING_CONTROL_SIGNAL(q, task_reference, feedforward)
+        % calculates the control signal to track a time-varying trajectory
+        % given by task_reference, which depends on the control objective.
+        % feedforward is the first time-derivative of task_reference.
+        compute_tracking_control_signal(obj, q, task_reference, feedforward);
     end
     
     methods
