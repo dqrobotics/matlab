@@ -112,10 +112,10 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
         end
         
         function u = compute_tracking_control_signal(controller, q, ...
-                task_reference, ~)
-            warning('Only setpoint control is currently implemented.');
+                task_reference, feedforward)
+            task = task_reference - (1/controller.gain)*feedforward;
             u = compute_setpoint_control_signal(controller, q, ...
-                task_reference);
+                task);
         end
             
     end
