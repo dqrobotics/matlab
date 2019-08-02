@@ -1,4 +1,5 @@
-function [fail_count, fail_log] = integrated_test()
+function [fail_count, fail_log] = integrated_test(varargin)
+    
     file = {'ax18_kinematic_control',...
             'comau_kinematic_control',...
             'wam_kinematic_control',...
@@ -16,13 +17,26 @@ function [fail_count, fail_log] = integrated_test()
             'whole_body_control_example(''novisual'')',...
             'two_legs_kinematic_control',...
             'kuka_line_control',...
-            'kuka_plane_control'...
-            'constrained_controller_example'...
+            'kuka_plane_control',...
+            'constrained_controller_example',...
+            'kuka_plane_tracking_control'            
             };
+        
+        
+    if nargin == 0
+        % run all examples
+        initial = 1;
+        final = length(file)     ;
+    elseif nargin ~= 2
+        error('USAGE: integrated_test() or integrated_test(start,end)');
+    else
+        initial = varargin{1};
+        final = varargin{2};
+    end
 
     fail_log = sprintf('This is the list of failed tests: ');
     fail_count = 0;
-    for i = 1:length(file)        
+    for i = initial:final       
         try
             close all;
             fprintf('\n%d of %d: Executing %s', i, length(file), file{i});
