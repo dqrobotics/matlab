@@ -1,3 +1,9 @@
+% Mobile manipulator composed of a holonomic mobile base serially coupled to a 5-DOF arm. 
+%
+%   KukaYoubot methods:
+%       kinematics - (Static) Return a DQ_WholeBody object.
+
+
 % (C) Copyright 2011-2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
@@ -23,10 +29,9 @@
 classdef KukaYoubot
     methods (Static)
         function robot = kinematics()
-            % Mobile manipulator composed of a holonomnic mobile base 
-            % serially coupled to a 5-DOF arm 
             
-            % The DH parameters are based on Kuka's documentation:
+            % The DH parameters and other geometric parameters are based on
+            % Kuka's documentation:
             % http://www.youbot-store.com/wiki/index.php/YouBot_Detailed_Specifications
             % https://www.generationrobots.com/img/Kuka-YouBot-Technical-Specs.pdf
             
