@@ -47,7 +47,7 @@ classdef DQ_ClassicQPController < DQ_TaskspaceQuadraticProgrammingController
         function f = compute_objective_function_linear_component(controller,...
                 J, task_error)
             % Compute the vector f used in the objective function qdot'*H*qdot + f'*qdot    
-            f = controller.gain*task_error'*J;
+            f = J'*controller.gain*task_error;
         end
     end
 end
