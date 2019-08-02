@@ -51,6 +51,8 @@ function constrained_controller_example(use_constraint)
     q = [pi/2, -1.8*pi/2, 0, -1.5*pi/2, -1.5*pi/2, 0, 0]';
     % Integration step
     T = 0.001;
+    
+    solver = DQ_QuadprogSolver;
 
     % The controller is given by
     % u = argmin 0.5 * norm(J*qdot + gain*task_error)^2 + 0.5*lambda*norm(qdot)^2,
@@ -60,7 +62,7 @@ function constrained_controller_example(use_constraint)
     % the desired one, and lambda is the damping factor. When the task error
     % derivative is below stability_threshold, the closed-loop system is
     % said to have reached a stable region.
-    controller = DQ_ClassicQPController(kuka);
+    controller = DQ_ClassicQPController(kuka,solver);
     controller.set_gain(100);
     controller.set_stability_threshold(0.0001);
 

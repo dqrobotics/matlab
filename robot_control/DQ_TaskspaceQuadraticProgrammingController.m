@@ -38,14 +38,19 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedController
+    properties (Access = protected)
+        solver;
+    end
+    
     methods (Abstract)
         compute_objective_function_symmetric_matrix(controller, J, task_error);
         compute_objective_function_linear_component(controller, J, task_error);
     end
     
     methods
-        function controller = DQ_TaskspaceQuadraticProgrammingController(robot)
+        function controller = DQ_TaskspaceQuadraticProgrammingController(robot, solver)
             controller = controller@DQ_KinematicConstrainedController(robot);
+            controller. solver = solver;
         end        
         
         function set_equality_constraint(obj,Aeq,beq)
@@ -87,19 +92,12 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
                 beq = controller.equality_constraint_vector;
                 
                 % compute the quadratic component of the objective function
-                H = compute_objective_function_symmetric_matrix(controller,...
-                    J, task_error);
+                H = controller.compute_objective_function_symmetric_matrix(J, task_error);
                 
                 % compute the linear component of the objective function
-                f = compute_objective_function_linear_component(controller, ...
-                    J, task_error);
+                f = controller.compute_objective_function_linear_component(J, task_error);
                 
-                % Turn-off quadprog messages
-                options =  optimoptions('quadprog','Display', 'off');
-                
-                % compute the control signal
-                u = quadprog(H,f,A,b,Aeq,beq,[],[],...
-                    [],options);
+                u = controller.solver.solve_quadratic_program(H,f,A,b,Aeq,beq);
                 
                 % verify if the closed-loop system has reached a stable
                 % region and update the appropriate flags accordingly.

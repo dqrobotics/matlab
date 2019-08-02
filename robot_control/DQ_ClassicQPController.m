@@ -31,8 +31,8 @@
 
 classdef DQ_ClassicQPController < DQ_TaskspaceQuadraticProgrammingController
     methods
-        function controller = DQ_ClassicQPController(robot)
-            controller = controller@DQ_TaskspaceQuadraticProgrammingController(robot);
+        function controller = DQ_ClassicQPController(robot,solver)
+            controller = controller@DQ_TaskspaceQuadraticProgrammingController(robot,solver);
             % Default damping
             controller.damping = 1e-3; 
         end        
