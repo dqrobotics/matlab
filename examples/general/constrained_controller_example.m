@@ -76,8 +76,7 @@ function constrained_controller_example(use_constraint)
     % The task variable to be controlled is the end-effector pose
     controller.set_control_objective(ControlObjective.Pose);
 
-    % Define the admissible region, which is composed of the intersection
-    % between the region inside a cylinder and the region from one side of
+    % Define the admissible region, which is the region from one side of
     % a plane
     p = -0.15*i_ -0.1*j_ + 0.18*k_;
     r = cos(pi/16) + i_*sin(pi/16);
