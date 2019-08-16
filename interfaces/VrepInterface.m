@@ -1,4 +1,57 @@
-% (C) Copyright 2018 DQ Robotics Developers
+% CLASS VrepInterface - Communicate with V-REP using dual quaternions.
+%
+% Installation:
+%   1) Enable V-REP's remote API on the Server Side: http://www.coppeliarobotics.com/helpFiles/en/remoteApiServerSide.htm
+%       - Port 19997 is enabled by default, please refer to the V-REP
+%       documentation if you need more ports.
+%   2) Enable V-REP's remote API on the Client Side: http://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm
+%       You have to add two folders to your MATLAB path. For example, on
+%       64bit Windows:
+%           - YOUR_VREP_FOLDER\programming\remoteApiBindings\matlab\matlab
+%           - YOUR_VREP_FOLDER\programming\remoteApiBindings\lib\lib\Windows\64Bit
+% For more information refer to the remote API documentation.
+%
+% Usage:
+%   If your installation is done correctly, the following minimal example
+%   will start the V-REP simulation, sleep for one second, and stop the simulation:
+%       1) Open V-REP with the default scene
+%       2) Run
+%           >> vi = VrepInterface();
+%           >> vi.connect('127.0.0.1',19997);
+%           >> vi.start_simulation();
+%           >> pause(1);
+%           >> vi.stop_simulation();
+%           >> vi.disconnect();
+%
+% Familiarizing yourself with V-REP's remote API terminology might be
+% helpful to fully understand the documentation.
+% http://www.coppeliarobotics.com/helpFiles/en/legacyRemoteApiOverview.htm
+%
+%   VrepInterface Methods:
+%       connect - Connects to a V-REP Remote API Server
+%       disconnect - Disconnects from currently connected server
+%       disconnect_all - Flushes all Remote API connections
+%       start_simulation - Start V-REP simulation
+%       stop_simulation - Stop V-REP simulation
+%       get_object_translation - Get object translation as a pure
+%       quaternion
+%       set_object_translation - Set object translation with a pure
+%       quaternion
+%       get_object_rotation - Get object rotation as a unit quaternion
+%       set_object_rotation - Set object rotation with a unit quaternion
+%       get_object_pose - Get object pose as a unit dual quaternion
+%       set_object_pose - Set object pose with a unit dual quaternion
+%       set_joint_positions - Set the joint positions of a robot
+%       set_joint_target_positions - Set the joint target positions of a
+%       robot
+%       get_joint_positions - Get the joint positions of a robot
+%
+%   VrepInterface Methods (For advanced users) 
+%       get_handle - Get the handle of a V-REP object
+%       get_handles - Get the handles for multiple V-REP objects
+%
+
+% (C) Copyright 2018-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -21,26 +74,29 @@
 %     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 
 classdef VrepInterface < handle
-    % VREP 3.5.0 remote API and DQ Robotics interface
-    %   Connects to VREP remote API and retrieves/sends data compatible
-    %   with DQ Robotics.
-    % VREP remote API's performance is quite dependent on the correct usage of the
-    % opmodes. Refer to http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm
     
-    properties
+    properties (Access = private)
+        % the V-REP remote API instance used by this interface
         vrep;
+        % the client ID of this remote API connection
         clientID;
+        % a map between V-REP object names and VrepInterfaceMapElements
         handles_map;
     end
+    
     properties (Constant)
+        % Constant that denotes the V-VREP's remote API blocking operation mode
         OP_BLOCKING  = remApi('remoteApi').simx_opmode_blocking;
+        % Constant that denotes the V-VREP's remote API streaming operation mode
         OP_STREAMING = remApi('remoteApi').simx_opmode_streaming;
+        % Constant that denotes the V-VREP's remote API oneshot operation mode
         OP_ONESHOT   = remApi('remoteApi').simx_opmode_oneshot;
+        % Constant that denotes the V-VREP's remote API buffer operation mode
         OP_BUFFER    = remApi('remoteApi').simx_opmode_buffer;
     end
     
-    methods
-        %% Internal functions
+    methods (Access = private)
+        
         function handle = handle_from_string_or_handle(obj,name_or_handle)
             if(ischar(name_or_handle))
                 name = name_or_handle;
@@ -60,8 +116,10 @@ classdef VrepInterface < handle
             obj.handle_from_string_or_handle(name); %Add new handle if needed
             element = obj.handles_map(name);
         end
+    end
+    
+    methods
         
-        %% Constructor
         function obj = VrepInterface()
             obj.vrep=remApi('remoteApi');
             obj.handles_map = containers.Map;
@@ -70,6 +128,7 @@ classdef VrepInterface < handle
         end
         
         function connect(obj,ip,port)
+            %% Connects to a V-REP remote API server on a given ip and port
             obj.clientID = obj.vrep.simxStart(ip,port,true,true,5000,5);
             if (obj.clientID>-1)
                 disp('Connected to the remote API server');
@@ -80,26 +139,31 @@ classdef VrepInterface < handle
         
         %% Close
         function disconnect(obj)
+            %% Disconnects from the V-REP remote API server
             obj.vrep.simxFinish(obj.clientID);
         end
         
         %% Close all
         function disconnect_all(obj)
+            %% Flushes all V-REP remote API connections from the server
             obj.vrep.simxFinish(-1);
         end
         
         %% Start Simulation
         function start_simulation(obj)
+            %% Starts the V-REP simulation
             obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
         end
         
         %% Stop Simulation
         function stop_simulation(obj)
+            %% Stops the V-REP simulation
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
         end
         
         %% Get Handles
         function handles = get_handles(obj,names)
+            %% Get the V-REP handles for a cell array of object names
             handles = [];
             if(iscell(names))
                 for i=1:length(names)
@@ -112,11 +176,15 @@ classdef VrepInterface < handle
         
         %% Get Handle
         function handle = get_handle(obj,name)
+            %% Get the V-REP handle for a given object
             [~,handle] = obj.vrep.simxGetObjectHandle(obj.clientID,name,obj.vrep.simx_opmode_blocking);
         end
         
         %% Get Object Translation
         function t = get_object_translation(obj,handle,relative_to_handle,opmode)
+            %% Get the translation of an object in V-REP
+            %%  >> t = vi.get_object_translation('DefaultCamera');
+            
             % First approach to the auto-management using
             % VrepInterfaceMapElements. If the user does not specify the
             % opmode, it is chosen first as STREAMING and then as BUFFER,
@@ -142,6 +210,10 @@ classdef VrepInterface < handle
         
         %% Set Object Translation
         function set_object_translation(obj,handle,t,relative_to_handle,opmode)
+            %% Set the translation of an object in V-REP
+            %%  >> t = DQ.i*0.01;
+            %%  >> vi.set_object_translation('DefaultCamera',t);
+            
             if nargin == 3
                 obj.vrep.simxSetObjectPosition(obj.clientID,obj.handle_from_string_or_handle(handle),-1,t.q(2:4),obj.OP_ONESHOT);
             else
@@ -151,6 +223,9 @@ classdef VrepInterface < handle
         
         %% Get Object Rotation
         function r = get_object_rotation(obj,handle,relative_to_handle,opmode)
+            %% Get the rotation of an object in V-REP
+            %%  >> r = vi.get_object_rotation('DefaultCamera');
+            
             % First approach to the auto-management using
             % VrepInterfaceMapElements. If the user does not specify the
             % opmode, it is chosen first as STREAMING and then as BUFFER,
@@ -177,6 +252,10 @@ classdef VrepInterface < handle
         
         %% Set Object Rotation
         function set_object_rotation(obj,handle,r,relative_to_handle,opmode)
+            %% Set the rotation of an object in V-REP
+            %%  >> r = DQ.i;
+            %%  >> vi.set_object_rotation('DefaultCamera',r);
+            
             if nargin == 3
                 obj.vrep.simxSetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),-1,[r.q(2:4); r.q(1)],obj.OP_ONESHOT); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
             else
@@ -186,6 +265,9 @@ classdef VrepInterface < handle
         
         %% Get Object Pose
         function x = get_object_pose(obj,handle,relative_to_handle,opmode)
+            %% Get the pose of an object in V-REP
+            %%  >> x = vi.get_object_pose('DefaultCamera');
+            
             if nargin <= 2
                 t = obj.get_object_translation(handle);
                 r = obj.get_object_rotation(handle);
@@ -198,6 +280,11 @@ classdef VrepInterface < handle
         
         %% Set Object Pose
         function set_object_pose(obj,handle,x,relative_to_handle,opmode)
+            %% Set the pose of an object in V-REP
+            %%  >> t = DQ.i*0.01;
+            %%  >> r = DQ.i;
+            %%  >> x = r+0.5*DQ.E*t*r;
+            
             if nargin == 3
                 t = translation(x);
                 r = rotation(x);
@@ -213,6 +300,10 @@ classdef VrepInterface < handle
         
         %% Set Joint Positions
         function set_joint_positions(obj,handles,thetas,opmode)
+            %% Set the joint positions of a robot in V-REP. For joints that are in 'Passive Mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.set_joint_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+            
             if nargin == 3
                 for joint_index=1:length(handles)
                     obj.vrep.simxSetJointPosition(obj.clientID,obj.handle_from_string_or_handle(handles{joint_index}),thetas(joint_index),obj.OP_ONESHOT);
@@ -226,6 +317,10 @@ classdef VrepInterface < handle
         
         %% Set Joint Target Positions
         function set_joint_target_positions(obj,handles,thetas,opmode)
+            %% Set the joint target positions of a robot in V-REP. For joints that are in 'Force/Torque Mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.set_joint_target_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+            
             if nargin == 3
                 obj.vrep.simxPauseCommunication(obj.clientID,1)
                 for joint_index=1:length(handles)
@@ -248,6 +343,10 @@ classdef VrepInterface < handle
         
         %% Get Joint Positions
         function [thetas,retval]=get_joint_positions(obj,handles,opmode)
+            %% Get joint positions
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.get_joint_positions(joint_names)
+                        
             thetas = zeros(length(handles),1);
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
@@ -276,10 +375,6 @@ classdef VrepInterface < handle
             end
         end
         
-        %% Get image
-        function img=get_vision_sensor_image_blocking(obj,handle)
-            [~,~,img]=obj.vrep.simxGetVisionSensorImage2(obj.clientID,obj.handle_from_string_or_handle(handle),0,obj.vrep.simx_opmode_blocking);
-        end
     end
     
 end
