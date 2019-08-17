@@ -1,10 +1,12 @@
 % CLASS VrepInterface - Communicate with V-REP using dual quaternions.
 %
 % Installation:
-%   1) Enable V-REP's remote API on the Server Side: http://www.coppeliarobotics.com/helpFiles/en/remoteApiServerSide.htm
+%   1) Enable V-REP's remote API on the Server Side:
+%   http://www.coppeliarobotics.com/helpFiles/en/remoteApiServerSide.htm
 %       - Port 19997 is enabled by default, please refer to the V-REP
 %       documentation if you need more ports.
-%   2) Enable V-REP's remote API on the Client Side: http://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm
+%   2) Enable V-REP's remote API on the Client Side:
+%   http://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm
 %       You have to add two folders to your MATLAB path. For example, on
 %       64bit Windows:
 %           - YOUR_VREP_FOLDER\programming\remoteApiBindings\matlab\matlab
@@ -13,7 +15,8 @@
 %
 % Usage:
 %   If your installation is done correctly, the following minimal example
-%   will start the V-REP simulation, sleep for one second, and stop the simulation:
+%   will start the V-REP simulation, sleep for one second, and stop the
+%   simulation:
 %       1) Open V-REP with the default scene
 %       2) Run
 %           >> vi = VrepInterface();
@@ -46,7 +49,7 @@
 %       robot
 %       get_joint_positions - Get the joint positions of a robot
 %
-%   VrepInterface Methods (For advanced users) 
+%   VrepInterface Methods (For advanced users)
 %       get_handle - Get the handle of a V-REP object
 %       get_handles - Get the handles for multiple V-REP objects
 %
@@ -124,7 +127,8 @@ classdef VrepInterface < handle
             obj.vrep=remApi('remoteApi');
             obj.handles_map = containers.Map;
             obj.clientID = -1;
-            disp('This version of DQ Robotics VrepInterface is compatible with VREP 3.5.0')
+            disp(['This version of DQ Robotics VrepInterface is compatible'...
+                  ' with VREP 3.5.0']);
         end
         
         function connect(obj,ip,port)
@@ -222,9 +226,14 @@ classdef VrepInterface < handle
         end
         
         %% Get Object Rotation
-        function r = get_object_rotation(obj,handle,relative_to_handle,opmode)
+        function r = get_object_rotation(obj, handle, relative_to_handle, opmode)
             %% Get the rotation of an object in V-REP
             %%  >> r = vi.get_object_rotation('DefaultCamera');
+            
+            % Create some aliases
+            id = obj.clientID;
+            handle1 = obj.handle_from_string_or_handle(handle);
+            
             
             % First approach to the auto-management using
             % VrepInterfaceMapElements. If the user does not specify the
@@ -233,21 +242,32 @@ classdef VrepInterface < handle
             if nargin <= 2
                 element = obj.element_from_string(handle);
                 if(~element.state_from_function_signature('get_object_rotation'))
-                    [~,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),-1,obj.OP_STREAMING);
+                    [~,obj_rot] = obj.vrep.simxGetObjectQuaternion(id, ...
+                                                     handle1,-1,obj.OP_STREAMING);
                     % We need to check the buffer until it is not empty,
                     % TODO add a timeout.
                     retval = 1;
                     while retval==1
-                        [retval,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),-1,obj.OP_BUFFER);
+                        [retval,obj_rot] = obj.vrep.simxGetObjectQuaternion(id,...
+                                                    handle1, -1, obj.OP_BUFFER);
                     end
                 else
-                    [~,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),-1,obj.OP_BUFFER);
+                    [~,obj_rot] = obj.vrep.simxGetObjectQuaternion(id,handle1,...
+                                                             -1, obj.OP_BUFFER);
                 end
             else
-                [~,object_rotation] = obj.vrep.simxGetObjectQuaternion(obj.clientID,obj.handle_from_string_or_handle(handle),obj.handle_from_string_or_handle(relative_to_handle),opmode);
+                handle2 = obj.handle_from_string_or_handle(relative_to_handle);
+                [~,obj_rot] = obj.vrep.simxGetObjectQuaternion(id, handle1,...
+                                                               handle2, opmode);
             end
-            object_rotation_double = double(object_rotation);
-            r = normalize(DQ([object_rotation_double(4) object_rotation_double(1) object_rotation_double(2) object_rotation_double(3)])); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
+            object_rotation_double = double(obj_rot);
+            
+            %V-Rep's quaternion representation is [x y z w] so we have to
+            %take that into account
+            r = normalize(DQ([object_rotation_double(4),...
+                object_rotation_double(1),...
+                object_rotation_double(2),...
+                object_rotation_double(3)]));
         end
         
         %% Set Object Rotation
@@ -346,7 +366,7 @@ classdef VrepInterface < handle
             %% Get joint positions
             %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
             %%  >> vi.get_joint_positions(joint_names)
-                        
+            
             thetas = zeros(length(handles),1);
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
