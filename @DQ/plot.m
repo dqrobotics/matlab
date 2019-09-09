@@ -188,11 +188,11 @@ switch primitive_type
             % Verify if the handle_name field exists, that is, the frame
             % already has a name
             if isfield(handle, 'handle_name')
-                set(handle.handle_name,'Position',dq_t'+ scale*0.05);
+                set(handle.handle_name,'Position',dq_t'+ scale*0.2);
             % In case the frame does not have a name, create a new one
             else
-                handle.handle_name = text(dq_t(1) + scale*0.05, dq_t(2) + ...
-                scale*0.05, dq_t(3) + scale*0.05, frame_name,'Interpreter',...
+                handle.handle_name = text(dq_t(1) + scale*0.2, dq_t(2) + ...
+                scale*0.2, dq_t(3) + scale*0.2, frame_name,'Interpreter',...
                 'latex');
             end
         end
