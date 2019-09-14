@@ -27,13 +27,13 @@ function kuka_kinematic_control()
 
 
     fprintf('Performing standard kinematic control using dual quaternion coordinates');
-    xm = kuka.fkm(q);
-    error = epsilon+1;
-    while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(q);
-        xm = kuka.fkm(q);
-        error = vec8(xd-xm);
-        q = q+pinv(jacob)*gain*error;
+    x = kuka.fkm(q);
+    e = epsilon+1;
+    while norm(e) > epsilon
+        J = kuka.pose_jacobian(q);
+        x = kuka.fkm(q);
+        e = vec8(xd-x);
+        q = q+pinv(J)*gain*e;
         plot(kuka, q');    
         drawnow;
     end
@@ -42,14 +42,14 @@ function kuka_kinematic_control()
     %The end-effector will touch the base
     pd = 0*DQ.i + 0*DQ.j + 0*DQ.k;
 
-    error = epsilon+1;
-    while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(q);
-        xm = kuka.fkm(q);
-        jacobp = kuka.translation_jacobian(jacob,xm);
-        pm = translation(xm);
-        error = vec4(pd-pm);    
-        q = q+pinv(jacobp)*gain*error;
+    e = epsilon+1;
+    while norm(e) > epsilon
+        J = kuka.pose_jacobian(q);
+        x = kuka.fkm(q);
+        jacobp = kuka.translation_jacobian(J,x);
+        pm = translation(x);
+        e = vec4(pd-pm);    
+        q = q+pinv(jacobp)*gain*e;
         plot(kuka, q'); 
         drawnow;
     end
@@ -59,14 +59,14 @@ function kuka_kinematic_control()
     %The end-effector will be aligned with the world frame
     rd = DQ(1);
 
-    error = epsilon+1;
-    while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(q);
-        xm = kuka.fkm(q);
-        jacobr = kuka.rotation_jacobian(jacob);
-        rm = xm.P;
-        error = vec4(rd-rm);    
-        q = q+pinv(jacobr)*gain*error;
+    e = epsilon+1;
+    while norm(e) > epsilon
+        J = kuka.pose_jacobian(q);
+        x = kuka.fkm(q);
+        jacobr = kuka.rotation_jacobian(J);
+        rm = x.P;
+        e = vec4(rd-rm);    
+        q = q+pinv(jacobr)*gain*e;
         plot(kuka, q');  
         drawnow;
     end
@@ -79,14 +79,14 @@ function kuka_kinematic_control()
     %ADORNO, B. V., Two-arm manipulation: from manipulators to enhanced human-robot
     % collaboration, Universit? Montpellier 2, Montpellier, France, 2011.
     dd=0.2^2;
-    error = epsilon+1;
-    while norm(error) > epsilon
-        jacob = kuka.pose_jacobian(q);
-        xm = kuka.fkm(q);
-        jacobd = kuka.distance_jacobian(jacob,xm);
-        dm = norm(vec4(translation(xm)))^2;
-        error = dd-dm;    
-        q = q+pinv(jacobd)*gain*error;
+    e = epsilon+1;
+    while norm(e) > epsilon
+        J = kuka.pose_jacobian(q);
+        x = kuka.fkm(q);
+        jacobd = kuka.distance_jacobian(J,x);
+        dm = norm(vec4(translation(x)))^2;
+        e = dd-dm;    
+        q = q+pinv(jacobd)*gain*e;
         plot(kuka, q');
         drawnow;
     end
