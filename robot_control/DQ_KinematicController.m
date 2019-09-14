@@ -10,7 +10,6 @@
 %   robot - DQ_Kinematics object related to the robot to be controlled.
 %
 % DQ_KinematicController Methods:
-%    set_primitive_to_effector - Attach primitive to the end-effector.
 %    compute_setpoint_control_signal - Compute the control input to regulate to a setpoint.
 %    compute_tracking_control_signal - Compute the control input to track a trajectory
 %    get_control_objective - Return the control objective.
@@ -22,6 +21,7 @@
 %    set_control_objective - Set the control objective using predefined goals in ControlObjective.
 %    set_damping - Set the damping to prevent instabilities near singular configurations.
 %    set_gain - Set the controller gain.
+%    set_primitive_to_effector - Attach primitive to the end-effector.
 %    set_stability_threshold - Set the threshold that determines if a stable region has been reached.
 %    verify_stability - (ABSTRACT) Verify if the closed-loop region has reached a stable region.
 %
