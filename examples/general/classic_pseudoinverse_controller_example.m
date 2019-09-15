@@ -153,7 +153,7 @@ function classic_pseudoinverse_controller_example()
                 task_reference = vec8(line_d);
                 % The line passing through the end-effector x-axis is the
                 % second parameter. It'll be aligned with the desired line.                
-                pseudoinverse_controller.attach_primitive_to_effector(i_);
+                pseudoinverse_controller.set_primitive_to_effector(i_);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % Choose next objective  
@@ -179,7 +179,7 @@ function classic_pseudoinverse_controller_example()
                 % But the geometric primitive associated with the
                 % end-effector is not. Furthermore, the goal is to align a
                 % plane perpendicular to the robot end-effector's z-axis,
-                pseudoinverse_controller.attach_primitive_to_effector(k_);
+                pseudoinverse_controller.set_primitive_to_effector(k_);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
                 % Choose next objective 
