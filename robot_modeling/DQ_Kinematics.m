@@ -11,6 +11,8 @@
 %       fkm - Compute the forward kinematics.
 %       pose_jacobian - Compute the Jacobian that maps the configurations velocities to the time derivative of the pose of a frame attached to the robot.
 % DQ_Kinematics Methods (Concrete):
+%       get_base_frame - Get the physical location of the robot base in the workspace.
+%       get_reference_frame - Get the reference frame used in the calculation of the FKM and all Jacobians.
 %       set_base_frame - Set the physical location of the robot in space.
 %       set_reference_frame - Set the reference frame for all calculations.
 % DQ_Kinematics Methods (Static):
@@ -84,6 +86,16 @@ classdef DQ_Kinematics < handle
             obj.name = sprintf('%f',rand(1));
         end
         
+        function ret = get_base_frame(obj)
+            % Get the physical location of the robot base in the workspace.
+            ret = obj.base_frame;
+        end
+        
+        function ret = get_reference_frame(obj)
+            % Get the reference frame used in the calculation of the FKM and all Jacobians.
+            ret = obj.reference_frame;
+        end
+        
         function set_reference_frame(obj,reference_frame)
             % SET_REFERENCE_FRAME(reference_frame) sets the reference frame
             % used for the fkm() and pose_jacobian() methods
@@ -92,10 +104,6 @@ classdef DQ_Kinematics < handle
             else
                 error('The reference frame must be a unit dual quaternion.');
             end
-        end
-        
-        function ret = get_reference_frame(obj)
-            ret = obj.reference_frame;
         end
         
         function set_base_frame(obj, base_frame)
@@ -113,9 +121,7 @@ classdef DQ_Kinematics < handle
             end
         end
         
-        function ret = get_base_frame(obj)
-            ret = obj.base_frame;
-        end
+      
     end
     
     methods (Abstract)
