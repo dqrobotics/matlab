@@ -1,3 +1,7 @@
+% Create a new KUKA LW4 robot manipulator
+% KukaLwr4Robot Methods (Static):
+%   kinematics - Return a DQ_SerialManipulator object with the KUKA LW4 robot manipulator kinematic parameters
+
 % (C) Copyright 2011-2019 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
