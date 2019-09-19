@@ -24,7 +24,13 @@
 
 function res = rotation_angle(x)
     if is_unit(x)
-        res = 2*acos(Re(P(x)));
+        cos_phi_over_2 = double(Re(P(x))); 
+        % It can be the case that the dual quaternion has unit norm and equals
+        % 1, according to the DQ Robotics precision, but it is slightly greater
+        % than 1 (usually 1 + 1e-15). In that case, Matlab would return an 
+        % imaginary number with a very small imaginary component. To
+        % prevent that, we force the acos function to return a real number 
+        res = real(2*acos(cos_phi_over_2));
     else
         error('The dual quaternion does not have unit norm.')
     end
