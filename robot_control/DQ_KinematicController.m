@@ -13,6 +13,7 @@
 %    compute_setpoint_control_signal - (ABSTRACT) Compute the control input to regulate to a setpoint.
 %    compute_tracking_control_signal - (ABSTRACT) Compute the control input to track a trajectory
 %    get_control_objective - Return the control objective.
+%    get_damping - Return the current damping used to prevent kinematic singularities.
 %    get_last_error_signal - Return the last error signal.
 %    get_jacobian - Return the correct Jacobian based on the control objective.
 %    get_task_variable - Return the task variable based on the control objective.
@@ -130,6 +131,11 @@ classdef DQ_KinematicController < handle
         function ret = get_control_objective(controller)
             % Return the control objective
             ret = controller.control_objective;
+        end
+        
+        function ret = get_damping(controller)
+            % Return the current damping used to prevent kinematic singularities.
+            ret = controller.damping;
         end
         
         function J = get_jacobian(controller, q)
