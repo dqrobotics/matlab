@@ -113,9 +113,41 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
         
         function u = compute_tracking_control_signal(controller, q, ...
                 task_reference, feedforward)
-            task = task_reference + (1/controller.gain)*feedforward;
-            u = compute_setpoint_control_signal(controller, q, ...
-                task);
+            if controller.is_set()
+                % get the task variable according to the control objective
+                task_variable = controller.get_task_variable(q);
+                % get the Jacobian according to the control objective
+                J = controller.get_jacobian(q);
+
+                % calculate the Euclidean error
+                task_error = task_variable - task_reference;
+                
+                % calculate the parameters that quadprog use to solve the 
+                % quadratic problem min 0.5 * norm(J*u+gain*task_error)^2 + 0.5*norm(u)^2 
+                A = controller.inequality_constraint_matrix;
+                b = controller.inequality_constraint_vector;
+                Aeq = controller.equality_constraint_matrix;
+                beq = controller.equality_constraint_vector;
+                
+                % compute the quadratic component of the objective function
+                H = controller.compute_objective_function_symmetric_matrix(J,...
+                    task_error - (1/controller.gain)*feedforward);
+                
+                % compute the linear component of the objective function
+                f = controller.compute_objective_function_linear_component(J,...
+                    task_error - (1/controller.gain)*feedforward);
+                
+                u = controller.solver.solve_quadratic_program(H,f,A,b,Aeq,beq);
+                
+                % verify if the closed-loop system has reached a stable
+                % region and update the appropriate flags accordingly.
+                controller.verify_stability(task_error);
+                
+                % Store the values of the last error signal and last
+                % control signal
+                controller.last_control_signal = u;
+                controller.last_error_signal = task_error;                
+            end
         end
             
     end
