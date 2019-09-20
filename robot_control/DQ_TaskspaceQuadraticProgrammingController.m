@@ -113,7 +113,7 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
         
         function u = compute_tracking_control_signal(controller, q, ...
                 task_reference, feedforward)
-            task = task_reference - (1/controller.gain)*feedforward;
+            task = task_reference + (1/controller.gain)*feedforward;
             u = compute_setpoint_control_signal(controller, q, ...
                 task);
         end
