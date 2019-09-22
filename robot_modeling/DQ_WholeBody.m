@@ -23,7 +23,7 @@
 %       fkm - Returns the forward kinematic model of the whole-body chain.
 %       get_chain - Returns the complete kinematic chain.
 %       get_dim_configuration_space - Returns the dimension of the whole-body
-%                                      configuration space.
+%                                     configuration space.
 %       plot - Draws the whole kinematic chain.
 %       pose_jacobian - Returns the whole-body pose Jacobian.
 %
@@ -33,6 +33,9 @@
 %                    ordering required by each kinematic chain (i.e.,
 %                    the vector blocks corresponding to reversed chains are
 %                    reversed).
+%       set_effector - If the last element in the kinematic chain is a
+%                      DQ_SerialManipulator object, then add a rigid
+%                      transformation to the last link.
 %
 % For a complete list of methods, including the one from the super classes,
 % type 'doc DQ_WholeBody'
@@ -467,6 +470,14 @@ classdef DQ_WholeBody < DQ_Kinematics
             end
         end
         
-        
+        function set_effector(obj,effector)
+            % SET_EFFECTOR(effector) sets the pose of the effector
+            if isa(obj.get_chain{end}, 'DQ_SerialManipulator')
+                obj.get_chain{end}.set_effector(effector);
+            else
+                error(['set_effector() is available only if the last element'...
+                    ' in the kinematic chain is a DQ_SerialManipulator object']);
+            end
+        end
     end
 end
