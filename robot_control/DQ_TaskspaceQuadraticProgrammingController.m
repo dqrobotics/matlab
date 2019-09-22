@@ -8,8 +8,6 @@
 % DQ_TaskspaceQuadraticProgrammingController Methods:
 %   compute_objective_function_symmetric_matrix - (Abstract) Compute the matrix H used in the objective function qdot'*H*qdot + f'*qdot.
 %   compute_objective_function_linear_component - (Abstract) Compute the vector f used in the objective function qdot'*H*qdot + f'*qdot.
-%   set_equality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot = b.
-%   set_inequality_constraint - Add the matrix B and the vector b to enforce the constraint B*qdot <= b.
 %   compute_setpoint_control_signal - Based on the task setpoint, compute the control signal.
 %   compute_tracking_control_signal - Based on the task trajectory, use the feedforward to compute the control signal.
 % See also DQ_KinematicController, DQ_ClassicQPController.
@@ -52,27 +50,7 @@ classdef DQ_TaskspaceQuadraticProgrammingController < DQ_KinematicConstrainedCon
             controller = controller@DQ_KinematicConstrainedController(robot);
             controller. solver = solver;
         end        
-        
-        function set_equality_constraint(obj,Aeq,beq)
-            % Add equality constraint
-            %
-            % ADD_EQUALITY_CONSTRAINT(Aeq,beq) adds the constraint Aeq*u = beq,
-            % where Aeq is the equality matrix, beq is the equality vector
-            % and u is the control input.
-            obj.equality_constraint_matrix = Aeq;
-            obj.equality_constraint_vector = beq;
-        end
-        
-        function set_inequality_constraint(obj,A,b)
-            % Add inequality constraint
-            %
-            % ADD_INEQUALITY_CONSTRAINT(A,b) adds the constraint A*u <= b,
-            % where A is the inequality matrix, b is the inequality vector
-            % and u is the control input.
-            obj.inequality_constraint_matrix = A;
-            obj.inequality_constraint_vector = b;
-        end
-        
+              
         function u = compute_setpoint_control_signal(controller, q, task_reference)
             % Based on the task reference, compute the control signal
             if controller.is_set()

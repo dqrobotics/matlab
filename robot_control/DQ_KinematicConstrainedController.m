@@ -7,8 +7,8 @@
 %   inequality_constraint_vector - vector used in the inequality constraint
 %   
 % DQ_KinematicConstrainedController Methods:
-%   set_equality_constraint - (ABSTRACT) Add constraint of type A*qdot = a
-%   set_inequality_constraint - (ABSTRACT) Add inequality constraint of type B*qdot <= b    
+%   set_equality_constraint - Add constraint of type A*qdot = a
+%   set_inequality_constraint - Add inequality constraint of type B*qdot <= b    
 % See also DQ_KinematicController,
 %          DQ_TaskspaceQuadraticProgrammingController.
 
@@ -54,20 +54,31 @@ classdef DQ_KinematicConstrainedController< DQ_KinematicController
         end
     end
     
-    methods (Abstract)
+    methods 
+        function set_equality_constraint(obj,Aeq,beq)
+            % Add equality constraint
+            %
+            % ADD_EQUALITY_CONSTRAINT(Aeq,beq) adds the constraint Aeq*u = beq,
+            % where Aeq is the equality matrix, beq is the equality vector
+            % and u is the control input.
+            % The constraint is not persistent, that is, it must be *always*
+            % defined *before* the control signal is computed in order to be
+            % taken into consideration.
+            obj.equality_constraint_matrix = Aeq;
+            obj.equality_constraint_vector = beq;
+        end
         
-        % Given the matrix B and the vector b of compatible dimensions, add
-        % the linear (on the control inputs) equality constraint B*qdot = b
-        % The constraint is not persistent, that is, it must be *always*
-        % defined *before* the control signal is computed in order to be
-        % taken into consideration.
-        set_equality_constraint(obj,B, b);    
-        
-        % Given the matrix B and the vector b of compatible dimensions, add
-        % the linear (on the control inputs) inequality constraint B*qdot <= b
-        % The constraint is not persistent, that is, it must be *always*
-        % defined *before* the control signal is computed in order to be
-        % taken into consideration.
-        set_inequality_constraint(obj,B, b);    
+        function set_inequality_constraint(obj,A,b)
+            % Add inequality constraint
+            %
+            % ADD_INEQUALITY_CONSTRAINT(A,b) adds the constraint A*u <= b,
+            % where A is the inequality matrix, b is the inequality vector
+            % and u is the control input.
+            % The constraint is not persistent, that is, it must be *always*
+            % defined *before* the control signal is computed in order to be
+            % taken into consideration.
+            obj.inequality_constraint_matrix = A;
+            obj.inequality_constraint_vector = b;
+        end  
     end
 end
