@@ -10,13 +10,13 @@ After downloading the file dqrobotics-YY-MM.mltbx, where YY-MM stands for the ye
 
 To test if the toolbox was installed correctly, just go to the prompt and type 
 
-```ans = .
+```ans
 >> DQ
 ans = 
         0     
 ```
 
-If you receive an error instead, it means that the toolbox was not properly installed and should open an issue [here]([https://github.com/dqrobotics/matlab/issues](https://github.com/dqrobotics/matlab/issues).
+If you receive an error instead, it means that the toolbox was not properly installed and should open an issue [here][https://github.com/dqrobotics/matlab/issues](https://github.com/dqrobotics/matlab/issues).
 
 ### Development branch
 
@@ -43,5 +43,3 @@ There are several examples inside the folder `$HOME/Toolboxes/dqrobotics-YY-MM/e
 All classes and methods are well documented. To access their documentation, just type `help CLASS_NAME`. For instance, `help DQ` will show all methods available in the class DQ with their corresponding description. To show more information about a particular method or property, it suffices to type `help CLASS_NAME/method`; for instance, `help DQ/plot`  will show the help for the plot  function of the DQ class.
 
 Although the library is self-contained and it suffices to know only basic dual quaternion algebra and robot modeling and control techniques to use it, there is a great amount of theory behind the controllers and modeling techniques implemented in DQ Robotics. Therefore, several methods and classes point to relevant references in the literature and users that want to better understand the implementation may find those references very useful.
-
-
