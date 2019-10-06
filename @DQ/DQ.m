@@ -294,74 +294,7 @@ classdef DQ
         %% Deprecated functions. They are here in order to ensure compatibility with old scripts.
         %  However, they are likely to disappear in the next versions. Use
         %  them at your own risk!        
-        function val = n(s,elem)
-            %DEPRECATED. Please use P instead.
-            warning('Function n deprecated. Please use P(x) instead');
-            if nargin == 2
-                if elem > 4 || elem < 1
-                    error('Index out of bonds');
-                end
-                val = s.q(elem);
-            else
-                val = s.q(1:4);
-            end
-        end
         
-        function val = d(s,elem)
-            % Return the dual part of the dual quaternion
-            warning('Function d deprecated. Please use D(x) instead');
-            if nargin == 2
-                if elem > 4 || elem < 1
-                    error('Index out of bonds');
-                end
-                val = s.q(elem+4);
-            else
-                val = s.q(5:8);
-            end
-        end
-        
-        
-        function val = t(s,elem)
-            %DEPRECATED
-            % Return the translation corresponding to the unit dual
-            % quaternion, assuming a translation followed by rotation
-            % movement.
-            warning('Function t deprecated. Please use instead translation(x)');
-            aux = 2*DQ(s.d)*DQ(s.n)';
-            if nargin == 2
-                if elem > 4 || elem < 1
-                    error('Index out of bonds');
-                end
-                val = aux.n(elem);
-            else
-                val = aux.n;
-            end
-        end
-        
-        function val = vec(s,num)
-            %DEPRECATED
-            % dq.vec(index) %Return the cartesian vector corresponding to the
-            % non-dual (index=1) or dual part (index=2)
-            warning('Function vec deprecated');
-            if num == 1
-                val = s.q(2:4);
-            elseif num == 2
-                val = s.q(6:8);
-            else
-                error('Accepted values: 1 for the non-dual part and 2 for the dual part');
-            end
-        end
-        
-        
-        function res = theta(obj)
-            %DEPRECATED
-            % Function theta(x) deprecated. Please use instead rotation_angle(x)
-            warning('Function theta(x) deprecated. Please use instead rotation_angle(x)');
-            res = rotation_angle(obj);
-           
-        end
-        
-       
         function res = G(h)
             %Given a unit dual quaternion x, a pure dual quaternion xi = w + DQ.E*v, 
             %where w is the angular velocity and v is the linear velocity, and considering x_dot as the time
@@ -381,15 +314,6 @@ classdef DQ
             res = [omega_l omega_r;
                    psi_l psi_r];            
            
-        end
-       
-        
-        function res = tplus(obj) 
-           %DEPRECATED
-           % Function tplus(x) deprecated. Please use instead T(x)
-           warning('Function tplus(x) deprecated. Please use instead T(x)');
-          
-            res = T(obj);
         end
     end
 end

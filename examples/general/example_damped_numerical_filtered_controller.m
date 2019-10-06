@@ -1,4 +1,4 @@
-function DampedNumericalFilteredController()
+function example_damped_numerical_filtered_controller()
     format SHORTE;
 
     %% Chiaverini's Controller Implementation
@@ -16,7 +16,7 @@ function DampedNumericalFilteredController()
     epsilon     = 0.001; %Singular region size
     kp = diag([0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8]); %Proportional Gain
     % Robot Initial Positions
-    thetas = [0;pi2;0;0;0;0;0];
+    q = [0;pi2;0;0;0;0;0];
     % Desired End Effector Final Pose
     xd = DQ([1,0,0,0,0,0,0,0.652495]);
 
@@ -25,18 +25,24 @@ function DampedNumericalFilteredController()
                  0.3,   0,   0.328, 0,   0.2765, 0,  0.40049;
                  0,     0,   0,     0,   0,      0,  0;
                 -pi2,   pi2,-pi2,   pi2,-pi2,    pi2,0];
-    schunk = DQ_kinematics(schunk_dh, 'standard');
-    dofs = schunk.links;
+    schunk = DQ_SerialManipulator(schunk_dh, 'standard');
+    dofs = schunk.get_dim_configuration_space();
 
     % Auxiliar variables
     identity = eye(8,8);
+    
+    
+    %% start visualization
+    plot(schunk,q);
+    hold on;
+    plot(xd);
 
     x_error = vec8(DQ(inf));
     %% Loops for a given amount of steps
     while (norm(x_error) > convergence_tolerance)
 
-        x = schunk.fkm(thetas);
-        J = schunk.jacobian(thetas);
+        x = schunk.fkm(q);
+        J = schunk.pose_jacobian(q);
 
         %% Damping Calculation
 
@@ -53,14 +59,17 @@ function DampedNumericalFilteredController()
         J_inv = (J')/(J*(J') + (beta*beta)*identity + (lambda*lambda)*u_m*(u_m'));
 
         %% Error Calculation
-        % Base dislocation invariant error
-        %x_error = vec8(1 - x'*xd);
-        % Euclidian Distance
+        % Base displacement invariant error
+        % x_error = vec8(1 - x'*xd);
+        % Euclidean Distance
         x_error = vec8(xd - x);    
 
         delta_thetas = J_inv*kp*x_error;
-        thetas = thetas + delta_thetas;
-
+        q = q + delta_thetas;
+        
+        % visualization
+        plot(schunk,q);
+        drawnow;        
     end
 end
 

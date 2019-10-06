@@ -128,7 +128,7 @@ classdef DQ_CooperativeDualTaskSpace
             xr=obj.relative_pose(q);
             
             jacob_r2 = 0.5*haminus4(xr.P'*(xr.P)^0.5)*jacobr(1:4,:);
-            jacobp_r = DQ_kinematics.translation_jacobian(jacobr,xr);
+            jacobp_r = DQ_Kinematics.translation_jacobian(jacobr,xr);
             
             jacob_xr_2 = [jacob_r2;  0.25*(haminus4(xr.P^0.5)*jacobp_r + ...
                                      hamiplus4(translation(xr))*jacob_r2)];

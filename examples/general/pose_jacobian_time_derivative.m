@@ -3,7 +3,7 @@
 
 function pose_jacobian_time_derivative()
     % Create a new DQ_kinematics object with KUKA LWR parameters
-    kuka = DQ_KUKA;
+    kuka = KukaLwr4Robot.kinematics();
 
     % Integration step for the numerical calculations
     T = 1e-3;
