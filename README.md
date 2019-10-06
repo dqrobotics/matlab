@@ -16,7 +16,7 @@ ans =
         0     
 ```
 
-If you receive an error instead, it means that the toolbox was not properly installed and should open an issue [here][https://github.com/dqrobotics/matlab/issues](https://github.com/dqrobotics/matlab/issues).
+If you receive an error instead, it means that the toolbox was not properly installed and should open an issue [here](https://github.com/dqrobotics/matlab/issues).
 
 ### Development branch
 
