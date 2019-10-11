@@ -342,7 +342,6 @@ classdef DQ_VrepInterface < handle
             %%  >> vi.set_joint_target_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
             
             if nargin == 3
-                obj.vrep.simxPauseCommunication(obj.clientID,1)
                 for joint_index=1:length(handles)
                     if isa(handles,'cell')
                         obj.vrep.simxSetJointTargetPosition(obj.clientID,obj.handle_from_string_or_handle(handles{joint_index}),thetas(joint_index),obj.OP_ONESHOT);
@@ -351,13 +350,10 @@ classdef DQ_VrepInterface < handle
                     end
                     
                 end
-                obj.vrep.simxPauseCommunication(obj.clientID,0)
             else
-                obj.vrep.simxPauseCommunication(obj.clientID,1)
                 for joint_index=1:length(handles)
                     obj.vrep.simxSetJointTargetPosition(obj.clientID,obj.handle_from_string_or_handle(handles{joint_index}),thetas(joint_index),opmode);
                 end
-                obj.vrep.simxPauseCommunication(obj.clientID,0)
             end
         end
         
