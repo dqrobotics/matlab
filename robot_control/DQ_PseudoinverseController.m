@@ -46,12 +46,18 @@ classdef DQ_PseudoinverseController < DQ_KinematicController
                 task_variable = controller.get_task_variable(q);
                 % get the Jacobian according to the control objective
                 J = controller.get_jacobian(q);
-
+                
                 % calculate the Euclidean error
                 task_error = task_variable - task_reference;
                 % compute the control signal
-                u = pinv(J)*(-controller.gain*task_error + ...
-                    feedforward);
+                if(controller.damping == 0.0)
+                    u = pinv(J)*(-controller.gain*task_error + ...
+                        feedforward);
+                else
+                    u = inv(J'*J+controller.damping^2* ...
+                        eye(length(q)))*J'*...
+                        (-controller.gain*task_error + feedforward);
+                end
                 
                 % verify if the closed-loop system has reached a stable
                 % region and update the appropriate flags accordingly.
