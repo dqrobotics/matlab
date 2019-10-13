@@ -1,4 +1,4 @@
-% CLASS VrepInterface - Communicate with V-REP using dual quaternions.
+% CLASS DQ_VrepInterface - Communicate with V-REP using dual quaternions.
 %
 % Installation:
 %   1) Enable V-REP's remote API on the Server Side:
@@ -19,7 +19,7 @@
 %   simulation:
 %       1) Open V-REP with the default scene
 %       2) Run
-%           >> vi = VrepInterface();
+%           >> vi = DQ_VrepInterface();
 %           >> vi.connect('127.0.0.1',19997);
 %           >> vi.start_simulation();
 %           >> pause(1);
@@ -30,7 +30,7 @@
 % helpful to fully understand the documentation.
 % http://www.coppeliarobotics.com/helpFiles/en/legacyRemoteApiOverview.htm
 %
-%   VrepInterface Methods:
+%   DQ_VrepInterface Methods:
 %       connect - Connects to a V-REP Remote API Server
 %       disconnect - Disconnects from currently connected server
 %       disconnect_all - Flushes all Remote API connections
@@ -49,7 +49,7 @@
 %       robot
 %       get_joint_positions - Get the joint positions of a robot
 %
-%   VrepInterface Methods (For advanced users)
+%   DQ_VrepInterface Methods (For advanced users)
 %       get_handle - Get the handle of a V-REP object
 %       get_handles - Get the handles for multiple V-REP objects
 %
@@ -76,14 +76,14 @@
 % Contributors to this file:
 %     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 
-classdef VrepInterface < handle
+classdef DQ_VrepInterface < handle
     
     properties (Access = private)
         % the V-REP remote API instance used by this interface
         vrep;
         % the client ID of this remote API connection
         clientID;
-        % a map between V-REP object names and VrepInterfaceMapElements
+        % a map between V-REP object names and DQ_VrepInterfaceMapElements
         handles_map;
     end
     
@@ -107,7 +107,7 @@ classdef VrepInterface < handle
                     handle = obj.handles_map(name).handle;
                 else
                     handle = obj.get_handle(name);
-                    obj.handles_map(name) = VrepInterfaceMapElement(handle);
+                    obj.handles_map(name) = DQ_VrepInterfaceMapElement(handle);
                 end
                 
             else
@@ -123,11 +123,11 @@ classdef VrepInterface < handle
     
     methods
         
-        function obj = VrepInterface()
+        function obj = DQ_VrepInterface()
             obj.vrep=remApi('remoteApi');
             obj.handles_map = containers.Map;
             obj.clientID = -1;
-            disp(['This version of DQ Robotics VrepInterface is compatible'...
+            disp(['This version of DQ Robotics DQ_VrepInterface is compatible'...
                   ' with VREP 3.5.0']);
         end
         
@@ -190,7 +190,7 @@ classdef VrepInterface < handle
             %%  >> t = vi.get_object_translation('DefaultCamera');
             
             % First approach to the auto-management using
-            % VrepInterfaceMapElements. If the user does not specify the
+            % DQ_VrepInterfaceMapElements. If the user does not specify the
             % opmode, it is chosen first as STREAMING and then as BUFFER,
             % as specified by the remote API documentation
             if nargin <= 2
@@ -236,7 +236,7 @@ classdef VrepInterface < handle
             
             
             % First approach to the auto-management using
-            % VrepInterfaceMapElements. If the user does not specify the
+            % DQ_VrepInterfaceMapElements. If the user does not specify the
             % opmode, it is chosen first as STREAMING and then as BUFFER,
             % as specified by the remote API documentation
             if nargin <= 2
@@ -342,7 +342,6 @@ classdef VrepInterface < handle
             %%  >> vi.set_joint_target_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
             
             if nargin == 3
-                obj.vrep.simxPauseCommunication(obj.clientID,1)
                 for joint_index=1:length(handles)
                     if isa(handles,'cell')
                         obj.vrep.simxSetJointTargetPosition(obj.clientID,obj.handle_from_string_or_handle(handles{joint_index}),thetas(joint_index),obj.OP_ONESHOT);
@@ -351,13 +350,10 @@ classdef VrepInterface < handle
                     end
                     
                 end
-                obj.vrep.simxPauseCommunication(obj.clientID,0)
             else
-                obj.vrep.simxPauseCommunication(obj.clientID,1)
                 for joint_index=1:length(handles)
                     obj.vrep.simxSetJointTargetPosition(obj.clientID,obj.handle_from_string_or_handle(handles{joint_index}),thetas(joint_index),opmode);
                 end
-                obj.vrep.simxPauseCommunication(obj.clientID,0)
             end
         end
         
@@ -370,7 +366,7 @@ classdef VrepInterface < handle
             thetas = zeros(length(handles),1);
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
-                % VrepInterfaceMapElements. If the user does not specify the
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
                 % opmode, it is chosen first as STREAMING and then as BUFFER,
                 % as specified by the remote API documentation
                 if nargin <= 2

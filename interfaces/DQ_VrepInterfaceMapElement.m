@@ -20,7 +20,7 @@
 % Contributors to this file:
 %     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 
-classdef VrepInterfaceMapElement
+classdef DQ_VrepInterfaceMapElement
     properties
         % For VREP's remote API, the first call to any "get" function should be OP_STREAMING and the following calls should be
         % OP_BUFFER, so we need to track the states of each of them using
@@ -30,7 +30,7 @@ classdef VrepInterfaceMapElement
     end
     methods
         %% Constructor
-        function obj = VrepInterfaceMapElement(handle)
+        function obj = DQ_VrepInterfaceMapElement(handle)
             obj.set_states_map = containers.Map;
             obj.handle = handle;
         end
