@@ -1,32 +1,41 @@
 % Abstract superclass used to define task-space kinematic controllers.
 %
 % DQ_KinematicController Properties:
+%   attached_primitive - Controlled primitive attached to the end-effector.
 %   control_objective - Control objective given by ControlObjective enum.
 %   gain - Default gain is zero to force the user to choose a gain.
 %   is_stable - True if reached a stable region, false otherwise.
 %   last_control_signal - Last value computed for the control signal.
 %   last_error_signal - Last value computed for the error signal.
+%   stability_counter - Counter that is incremented for each iteration wherein the error variation is below the stability threshold.
+%   stability_counter_max - The system is considered to have reached the stable region only after the stability_counter has its maximum value, namely stability_counter_max.
 %   stability_threshold - Threshold to determine if a stable region has been reached.
 %   robot - DQ_Kinematics object related to the robot to be controlled.
+%   target_primitive - Target primitive to where the end-effector must converge.
 %
 % DQ_KinematicController Methods:
-%    compute_setpoint_control_signal - (ABSTRACT) Compute the control input to regulate to a setpoint.
-%    compute_tracking_control_signal - (ABSTRACT) Compute the control input to track a trajectory
-%    get_control_objective - Return the control objective.
-%    get_damping - Return the current damping used to prevent kinematic singularities.
-%    get_last_error_signal - Return the last error signal.
-%    get_jacobian - Return the correct Jacobian based on the control objective.
-%    get_task_variable - Return the task variable based on the control objective.
-%    is_set - Verify if the controller is set and ready to be used.
-%    is_stable - Return true if the system has reached a stable region, false otherwise.
-%    set_control_objective - Set the control objective using predefined goals in ControlObjective.
-%    set_damping - Set the damping to prevent instabilities near singular configurations.
-%    set_gain - Set the controller gain.
-%    set_primitive_to_effector - Attach primitive to the end-effector.
-%    set_stability_threshold - Set the threshold that determines if a stable region has been reached.
-%    verify_stability - Verify if the closed-loop region has reached a stable region.
+%   compute_setpoint_control_signal - (ABSTRACT) Compute the control input to regulate to a setpoint.
+%   compute_tracking_control_signal - (ABSTRACT) Compute the control input to track a trajectory
+%   get_control_objective - Return the control objective.
+%   get_damping - Return the current damping used to prevent kinematic singularities.
+%   get_last_error_signal - Return the last error signal.
+%   get_jacobian - Return the correct Jacobian based on the control objective.
+%   get_task_variable - Return the task variable based on the control objective.
+%   is_set - Verify if the controller is set and ready to be used.
+%   is_stable - Return true if the system has reached a stable region, false otherwise.
+%   reset_stability_counter - Reset the stability counter to zero.
+%   set_max_stability_counter - Set the maximum value for the stability counter (default value is 10).
+%   set_control_objective - Set the control objective using predefined goals in ControlObjective.
+%   set_damping - Set the damping to prevent instabilities near singular configurations.
+%   set_gain - Set the controller gain.
+%   set_primitive_to_effector - Attach primitive to the end-effector.
+%   set_stability_threshold - Set the threshold that determines if a stable region has been reached.
+%   set_target_primitive -  Set the primitive to where the robot must converge.
+%   verify_stability - Verify if the closed-loop region has reached a stable region.
 %
-%   See also DQ_PseudoinverseController,
+% See also
+%   DQ_KinematicConstrainedController,
+%   DQ_PseudoinverseController,
 %   DQ_TaskspaceQuadraticProgrammingController.
 
 
@@ -85,6 +94,17 @@ classdef DQ_KinematicController < handle
         % zero, the controller will run forever for all controllers that
         % ensure asymptotic stability.
         stability_threshold = 0;
+        
+        stability_counter = 0;
+        
+        stability_counter_max = 10;
+        
+        
+        % When the goal is to make the end-effector converge to a target
+        % primitive---namely a plane, a line, etc.---, the current target 
+        % primitive coordinates must be explicitly defined in the variable
+        % target_primitive
+        target_primitive = DQ;
     end
     
     methods (Abstract) 
@@ -113,7 +133,17 @@ classdef DQ_KinematicController < handle
             obj.last_control_signal = zeros(robot.get_dim_configuration_space(),1); 
         end
         
+        function reset_stability_counter(obj)
+        % Reset the stability counter to zero
+            obj.stability_counter = 0;
+        end
         
+        function set_max_stability_counter(obj, max)
+        % Set the maximum value for the stability counter (default value is 10)
+            obj.stability_counter_max = max;
+        end
+            
+            
         function set_primitive_to_effector(obj, primitive)
         % Attach primitive to the end-effector
         %
@@ -141,11 +171,10 @@ classdef DQ_KinematicController < handle
         function J = get_jacobian(controller, q)
             % Return the correct Jacobian based on the control objective
             %
-            % GET_JACOBIAN(q, primitive) returns the Jacobian related to the
-            % ControlObjective value stored in control_objective. 'q' is the
-            % vector of joint configurations and 'primitive' is an optional
-            % argument that is used only in case the control_objective has one
-            % of the following values: {Line, Plane};
+            % GET_JACOBIAN(q) returns the Jacobian
+            % related to the ControlObjective value stored in
+            % control_objective. The argument 'q' is the vector of joint
+            % configurations.
             
             J_pose = controller.robot.pose_jacobian(q);
             x_pose = controller.robot.fkm(q);
@@ -154,6 +183,19 @@ classdef DQ_KinematicController < handle
             switch controller.control_objective
                 case ControlObjective.Distance
                     J = controller.robot.distance_jacobian(J_pose, x_pose);
+                    
+                case ControlObjective.DistanceToPlane
+                    if controller.target_primitive
+                        plane = controller.target_primitive;
+                    else
+                        error(['Please set the target plane with the '...
+                            'method set_target_primitive()']);
+                    end
+                    J_trans = controller.robot.translation_jacobian(J_pose, ...
+                        x_pose);
+                    p = translation(x_pose);
+                    J = controller.robot.point_to_plane_distance_jacobian(...
+                        J_trans, p, plane);
                     
                 case ControlObjective.Line
                     if controller.attached_primitive
@@ -208,6 +250,18 @@ classdef DQ_KinematicController < handle
                     p = vec3(translation(x_pose));
                     task_variable = p'*p;
                     
+                case ControlObjective.DistanceToPlane
+                    if controller.target_primitive
+                        plane = controller.target_primitive;
+                    else
+                        error(['Set the target plane with the method '...
+                            'set_target_primitive()']);
+                    end
+                    
+                    p = translation(x_pose);                    
+                    task_variable = DQ_Geometry.point_to_plane_distance(p, ...
+                        plane);
+                    
                 case ControlObjective.Line
                     task_variable = vec8(Ad(x_pose,primitive));
                     
@@ -257,7 +311,8 @@ classdef DQ_KinematicController < handle
                 % Initialize the error signals according to the control
                 % objective
                 switch control_objective
-                    case ControlObjective.Distance
+                    case {ControlObjective.Distance, ...
+                            ControlObjective.DistanceToPlane}
                         controller.last_error_signal = zeros(1);
                         
                     case {ControlObjective.Line, ...
@@ -291,15 +346,29 @@ classdef DQ_KinematicController < handle
             controller.stability_threshold = threshold;
         end
         
+        function set_target_primitive(controller, primitive)
+            % Set the primitive to where the robot must converge.
+            %
+            % set_target_primitive(primitive), where 'primitive' is the
+            % primitive dual quaternion coordinates (i.e., dual quaternion
+            % representing a plane, a line, etc.)
+            controller.target_primitive = primitive;
+        end
+        
         function verify_stability(controller, task_error)
             % Verify if the closed-loop system has reached a stable region.
             %
             % If the task error changes below a threshold, then we consider
             % that the system has reached a stable region.
-            % TODO: Choose different criteria
             
             if norm(controller.last_error_signal - task_error) < ...
                     controller.stability_threshold
+                controller.stability_counter = controller.stability_counter + 1;               
+            else 
+                controller.stability_counter = 0;
+            end
+            
+            if controller.stability_counter >= controller.stability_counter_max
                 controller.is_stable_ = true;
             end
         end

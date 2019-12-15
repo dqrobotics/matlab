@@ -35,6 +35,7 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 classdef ControlObjective
     enumeration 
-        Distance, Line, None, Plane, Pose, Rotation, Translation
+        Distance, DistanceToPlane, Line, None, Plane, Pose, Rotation,...
+            Translation
     end
 end
