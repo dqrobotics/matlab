@@ -24,7 +24,7 @@
 %   is_set - Verify if the controller is set and ready to be used.
 %   is_stable - Return true if the system has reached a stable region, false otherwise.
 %   reset_stability_counter - Reset the stability counter to zero.
-%   set_max_stability_counter - Set the maximum value for the stability counter (default value is 10).
+%   set_stability_counter_max - Set the maximum value for the stability counter (default value is 10).
 %   set_control_objective - Set the control objective using predefined goals in ControlObjective.
 %   set_damping - Set the damping to prevent instabilities near singular configurations.
 %   set_gain - Set the controller gain.
@@ -138,7 +138,7 @@ classdef DQ_KinematicController < handle
             obj.stability_counter = 0;
         end
         
-        function set_max_stability_counter(obj, max)
+        function set_stability_counter_max(obj, max)
         % Set the maximum value for the stability counter (default value is 10)
             obj.stability_counter_max = max;
         end
@@ -185,7 +185,7 @@ classdef DQ_KinematicController < handle
                     J = controller.robot.distance_jacobian(J_pose, x_pose);
                     
                 case ControlObjective.DistanceToPlane
-                    if controller.target_primitive
+                    if is_plane(controller.target_primitive)
                         plane = controller.target_primitive;
                     else
                         error(['Please set the target plane with the '...
@@ -251,7 +251,7 @@ classdef DQ_KinematicController < handle
                     task_variable = p'*p;
                     
                 case ControlObjective.DistanceToPlane
-                    if controller.target_primitive
+                    if is_plane(controller.target_primitive)
                         plane = controller.target_primitive;
                     else
                         error(['Set the target plane with the method '...
@@ -364,7 +364,17 @@ classdef DQ_KinematicController < handle
             if norm(controller.last_error_signal - task_error) < ...
                     controller.stability_threshold
                 controller.stability_counter = controller.stability_counter + 1;               
-            else 
+            else
+                % Even if the closed-loop system trajectories have already
+                % reached a positive invariant set (i.e., a stable region),
+                % it can be the case that the desired task set point
+                % changes. In that case, the positive invariant set
+                % changes, which implies that the the closed-loop system
+                % trajectories have to reach this new positive invariant
+                % set, that is, the new "stable region." Therefore, we need
+                % to change the variable system_reached_stable_region to
+                % false.
+                controller.is_stable_ = false;
                 controller.stability_counter = 0;
             end
             
