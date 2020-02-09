@@ -363,7 +363,9 @@ classdef DQ_KinematicController < handle
             
             if norm(controller.last_error_signal - task_error) < ...
                     controller.stability_threshold
-                controller.stability_counter = controller.stability_counter + 1;               
+                if controller.stability_counter < controller.stability_counter_max
+                    controller.stability_counter = controller.stability_counter + 1;  
+                end
             else
                 % Even if the closed-loop system trajectories have already
                 % reached a positive invariant set (i.e., a stable region),
