@@ -2,6 +2,7 @@
 %
 % The following objectives are currently implemented:
 %   Distance,
+%   DistanceToPlane,
 %   Line,
 %   None,
 %   Plane,
