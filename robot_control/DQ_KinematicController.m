@@ -4,13 +4,13 @@
 %   attached_primitive - Controlled primitive attached to the end-effector.
 %   control_objective - Control objective given by ControlObjective enum.
 %   gain - Default gain is zero to force the user to choose a gain.
-%   is_stable - True if reached a stable region, false otherwise.
 %   last_control_signal - Last value computed for the control signal.
 %   last_error_signal - Last value computed for the error signal.
 %   stability_counter - Counter that is incremented for each iteration wherein the error variation is below the stability threshold.
 %   stability_counter_max - The system is considered to have reached the stable region only after the stability_counter has its maximum value, namely stability_counter_max.
 %   stability_threshold - Threshold to determine if a stable region has been reached.
 %   robot - DQ_Kinematics object related to the robot to be controlled.
+%   system_reached_stable_region_ - True if reached a stable region, false otherwise.
 %   target_primitive - Target primitive to where the end-effector must converge.
 %
 % DQ_KinematicController Methods:
@@ -22,7 +22,6 @@
 %   get_jacobian - Return the correct Jacobian based on the control objective.
 %   get_task_variable - Return the task variable based on the control objective.
 %   is_set - Verify if the controller is set and ready to be used.
-%   is_stable - Return true if the system has reached a stable region, false otherwise.
 %   reset_stability_counter - Reset the stability counter to zero.
 %   set_stability_counter_max - Set the maximum value for the stability counter (default value is 10).
 %   set_control_objective - Set the control objective using predefined goals in ControlObjective.
@@ -31,6 +30,7 @@
 %   set_primitive_to_effector - Attach primitive to the end-effector.
 %   set_stability_threshold - Set the threshold that determines if a stable region has been reached.
 %   set_target_primitive -  Set the primitive to where the robot must converge.
+%   system_reached_stable_region - Return true if the system has reached a stable region, false otherwise.
 %   verify_stability - Verify if the closed-loop region has reached a stable region.
 %
 % See also
@@ -79,7 +79,7 @@ classdef DQ_KinematicController < handle
         gain = 0.0; 
         
         % True if reached a stable region, false otherwise.
-        is_stable_ = false; 
+        system_reached_stable_region_ = false; 
         
         % Last value computed for the control signal.
         last_control_signal; 
@@ -296,15 +296,15 @@ classdef DQ_KinematicController < handle
             end
         end
         
-        function ret = is_stable(controller)
+        function ret = system_reached_stable_region(controller)
         % Return true if the system has reached a stable region, false otherwise.    
-            ret = controller.is_stable_;
+            ret = controller.system_reached_stable_region_;
         end
                 
         function set_control_objective(controller,control_objective)
         % Set the control objective using predefined goals in ControlObjective
             if isa(control_objective, 'ControlObjective')
-                controller.is_stable_ = false;
+                controller.system_reached_stable_region_ = false;
                 
                 controller.control_objective = control_objective;
                 
@@ -376,12 +376,12 @@ classdef DQ_KinematicController < handle
                 % set, that is, the new "stable region." Therefore, we need
                 % to change the variable system_reached_stable_region to
                 % false.
-                controller.is_stable_ = false;
+                controller.system_reached_stable_region_ = false;
                 controller.stability_counter = 0;
             end
             
             if controller.stability_counter >= controller.stability_counter_max
-                controller.is_stable_ = true;
+                controller.system_reached_stable_region_ = true;
             end
         end
     end

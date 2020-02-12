@@ -105,7 +105,7 @@ function constrained_controller_example(use_constraint)
     pause(1);
     
     % This is actually the important part on how to use the controller.
-    while ~controller.is_stable()
+    while ~controller.system_reached_stable_region()
         
         x_pose = kuka.fkm(q);
         p = translation(x_pose);  
