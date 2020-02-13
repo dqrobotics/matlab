@@ -297,7 +297,18 @@ classdef DQ_KinematicController < handle
         end
         
         function ret = system_reached_stable_region(controller)
-        % Return true if the system has reached a stable region, false otherwise.    
+        % Return true if the closed-loop system trajectories have converged to a 
+        % positive invariant set (i.e., to a set from where they will not
+        % leave anymore). In the case of set-point control, for instance,
+        % it means that the task error will not decrease anymore.
+            ret = controller.system_reached_stable_region_;
+        end
+        
+        function ret = is_stable(controller)
+        % Deprecated function that will be removed in version 20.04. It has
+        % been replaced by system_reached_stable_region().
+            warning(['DEPRECATED FUNCTION. It will be removed in version'...
+                ' 20.04. Please use system_reached_stable_region() instead']);
             ret = controller.system_reached_stable_region_;
         end
                 
