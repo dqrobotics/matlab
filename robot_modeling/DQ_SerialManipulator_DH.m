@@ -68,20 +68,28 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
         function obj = DQ_SerialManipulator_DH(A,convention)
             % These are initialized in the constructor of
             % DQ_SerialManipulator
+            %obj.convention = convention;
             %obj.n_links = size(A,2);
             %obj.theta = A(1,:);
             %obj.d = A(2,:);
             %obj.a = A(3,:);
             %obj.alpha = A(4,:);
+            %obj.dummy = A(5,:);
+            
             obj = obj@DQ_SerialManipulator(A,convention);
             if nargin == 0
-                error('Input: matrix whose columns contain the Extended DH parameters')
+                error('Input: matrix whose columns contain the DH parameters')
             end
             
             if(size(A,1) ~= 5)
-                error('Input: Invalid extended DH matrix. It should have 5 rows.')
+                error('Input: Invalid DH matrix. It should have 5 rows.')
             end
             
+            % Remove dummy joints 
+            obj.dummy = zeros(1,obj.n_links);
+            obj.n_dummy = 0;
+            
+            % Add type
             obj.type = A(5,:);
             
         end

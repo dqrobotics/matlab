@@ -73,7 +73,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
     end
     
     methods
-        function obj = DQ_SerialManipulator(A,type)
+        function obj = DQ_SerialManipulator(A,convention)
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end
@@ -104,7 +104,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             if nargin==1
                 obj.convention='standard';
             else
-                obj.convention=type;
+                obj.convention=convention;
             end
             
             %For visualisation
