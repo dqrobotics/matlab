@@ -219,8 +219,7 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 to_ith_link = obj.n_links;
             end
             
-            n = obj.n_links;
-            J = zeros(8,n);
+            J = zeros(8,to_ith_link);
             
             for i = 1:to_ith_link
                 xi = DQ(1);
