@@ -189,14 +189,14 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             
             % If joint is rotational
             if obj.type(ith) == obj.JOINT_ROTATIONAL
-                h1 = 0.5*(-sin((theta_+q)/2.0)+DQ.k*cos((theta_+q)/2.0));
+                h1 = 0.5*( -sin( (theta_+q) /2.0) + DQ.k*cos( (theta_+q) /2.0) );
                 h2 = 1 + DQ.E*0.5*d_*DQ.k;
                 % If joint is prismatic
             else
                 h1 = cos(theta_/2.0)+DQ.k*sin(theta_/2.0);
                 h2 = DQ.E*0.5*DQ.k;
             end
-            h3 = 1 + DQ.E*0.5*a_*DQ.k;
+            h3 = 1 + DQ.E*0.5*a_*DQ.i;
             h4 = cos(alpha_/2.0)+DQ.i*sin(alpha_/2.0);
             
             dq_dot = h1*h2*h3*h4;
