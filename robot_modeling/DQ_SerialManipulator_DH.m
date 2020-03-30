@@ -54,7 +54,6 @@
 classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
     properties
         type
-        parameters_stored
     end
     
     properties (Constant)
@@ -93,11 +92,7 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             % Add type
             obj.type = A(5,:);
             
-            % Flag that the parameters have changed
-            obj.parameters_stored = cell(obj.n_links,5);
-            for i=1:obj.n_links
-                obj.parameters_stored{i,1}=true;
-            end
+            
         end
         
         function x = raw_fkm(obj,q,to_ith_link)
@@ -156,46 +151,52 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
-            if obj.parameters_stored{ith,1}
-                
-                if obj.type(ith) == obj.JOINT_ROTATIONAL
-                    % If joint is rotational
-                    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
-                    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;    
-                else
-                    % If joint is prismatic
-                    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-                    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
-                end
-                h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-                h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-                
-                obj.parameters_stored{ith,1} = false;
-                obj.parameters_stored{ith,2} = h1;
-                obj.parameters_stored{ith,3} = h2;
-                obj.parameters_stored{ith,4} = h3;
-                obj.parameters_stored{ith,5} = h4;
-                
-                dq = h1*h2*h3*h4;
+            %The unoptimized standard dh2dq calculation is commented below
+            %if obj.type(ith) == obj.JOINT_ROTATIONAL
+            %    % If joint is rotational
+            %    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
+            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
+            %else
+            %    % If joint is prismatic
+            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
+            %    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
+            %end
+            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
+            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
+            %dq = h1*h2*h3*h4;
+            
+            % The optimized standard dh2dq calculation
+            % Store half angles and displacements
+            half_theta = obj.theta(ith)/2.0;
+            d = obj.d(ith);
+            a = obj.a(ith);
+            half_alpha = obj.alpha(ith)/2.0;
+            
+            % Add the effect of the joint value
+            if obj.type(ith) == obj.JOINT_ROTATIONAL
+                % If joint is rotational
+                half_theta = half_theta + (q/2.0);
             else
-                if obj.type(ith) == obj.JOINT_ROTATIONAL
-                    % If joint is rotational
-                    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
-                    dq = h1*...
-                        obj.parameters_stored{ith,3}*...
-                        obj.parameters_stored{ith,4}*...
-                        obj.parameters_stored{ith,5};
-                    
-                else
-                    % If joint is prismatic
-                    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
-                    dq = obj.parameters_stored{ith,2}*...
-                        h2*...
-                        obj.parameters_stored{ith,4}*...
-                        obj.parameters_stored{ith,5};
-                end
+                % If joint is prismatic
+                d = d + q;
             end
             
+            % Pre-calculate cosines and sines
+            sine_of_half_theta = sin(half_theta);
+            cosine_of_half_theta = cos(half_theta);
+            sine_of_half_alpha = sin(half_alpha);
+            cosine_of_half_alpha = cos(half_alpha);
+            
+            % Return the optimized standard dh2dq calculation
+            dq = DQ(0);
+            dq.q(1) =  cosine_of_half_alpha*cosine_of_half_theta;
+            dq.q(2) =  sine_of_half_alpha*cosine_of_half_theta;
+            dq.q(3) =  sine_of_half_alpha*sine_of_half_theta;
+            dq.q(4) =  cosine_of_half_alpha*sine_of_half_theta;
+            dq.q(5) = -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0;
+            dq.q(6) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0;
+            dq.q(7) =  (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0;
+            dq.q(8) =  (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0;
         end
         
         function dq_dot = dh2dq_dot(obj,q,ith)
@@ -210,39 +211,62 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
-            if obj.parameters_stored{ith,1}
-                if obj.type(ith) == obj.JOINT_ROTATIONAL
-                    % If joint is rotational
-                    h1 = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
-                    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
-                else
-                    % If joint is prismatic
-                    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-                    h2 = DQ.E*0.5*DQ.k;
-                end
-                h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-                h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-                
-                dq_dot = h1*h2*h3*h4;
-            else
-                
-                if obj.type(ith) == obj.JOINT_ROTATIONAL
-                    % If joint is rotational
-                    h1_dot = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
-                    dq_dot = h1_dot*...
-                            obj.parameters_stored{ith,3}*...
-                            obj.parameters_stored{ith,4}*...
-                            obj.parameters_stored{ith,5};
-                else
-                    % If joint is prismatic
-                    h2_dot = DQ.E*0.5*DQ.k;
-                    dq_dot = obj.parameters_stored{ith,2}*...
-                            h2_dot*...
-                            obj.parameters_stored{ith,4}*...
-                            obj.parameters_stored{ith,5};
-                end
+            %The unoptimized standard dh2dq_dot calculation is commented below
+            %if obj.type(ith) == obj.JOINT_ROTATIONAL
+            %    % If joint is rotational
+            %    h1 = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
+            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
+            %else
+            %    % If joint is prismatic
+            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
+            %    h2 = DQ.E*0.5*DQ.k;
+            %end
+            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
+            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
+            %dq_dot = h1*h2*h3*h4;
+            
+            % The optimized standard dh2dq_dot calculation
+            % Store half angles and displacements
+            half_theta = obj.theta(ith)/2.0;
+            d          = obj.d(ith);
+            a          = obj.a(ith);
+            half_alpha = obj.alpha(ith)/2.0;
+            
+            % Add the effect of the joint value
+            if obj.type(ith) == obj.JOINT_ROTATIONAL
+                % If joint is rotational
+                half_theta = half_theta + (q/2.0);
             end
             
+            % Pre-calculate cosines and sines
+            sine_of_half_theta   = sin(half_theta);
+            cosine_of_half_theta = cos(half_theta);
+            sine_of_half_alpha   = sin(half_alpha);
+            cosine_of_half_alpha = cos(half_alpha);
+            
+            % Return the optimized dh2dq_dot calculation
+            dq_dot = DQ(0);
+            if obj.type(ith) == obj.JOINT_ROTATIONAL
+                % If joint is rotational
+                dq_dot.q(1) = -(cosine_of_half_alpha*sine_of_half_theta    )/2.0;
+                dq_dot.q(2) = -(sine_of_half_alpha*sine_of_half_theta      )/2.0;
+                dq_dot.q(3) =  (sine_of_half_alpha*cosine_of_half_theta    )/2.0;
+                dq_dot.q(4) =  (cosine_of_half_alpha*cosine_of_half_theta  )/2.0;
+                dq_dot.q(5) =  (a*sine_of_half_alpha*sine_of_half_theta    )/4.0 - (d*cosine_of_half_alpha*cosine_of_half_theta)/4.0;
+                dq_dot.q(6) = -(a*cosine_of_half_alpha*sine_of_half_theta  )/4.0 - (d*sine_of_half_alpha*cosine_of_half_theta  )/4.0;
+                dq_dot.q(7) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/4.0 - (d*sine_of_half_alpha*sine_of_half_theta    )/4.0;
+                dq_dot.q(8) = -(a*sine_of_half_alpha*cosine_of_half_theta  )/4.0 - (d*cosine_of_half_alpha*sine_of_half_theta  )/4.0;
+            else
+                % If joint is prismatic
+                dq_dot.q(1) =  cosine_of_half_alpha*cosine_of_half_theta;
+                dq_dot.q(2) =  sine_of_half_alpha*cosine_of_half_theta;
+                dq_dot.q(3) =  sine_of_half_alpha*sine_of_half_theta;
+                dq_dot.q(4) =  cosine_of_half_alpha*sine_of_half_theta;
+                dq_dot.q(5) = -(cosine_of_half_alpha*sine_of_half_theta    )/2.0 - (a*sine_of_half_alpha*cosine_of_half_theta)/2.0;
+                dq_dot.q(6) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (sine_of_half_alpha*sine_of_half_theta    )/2.0;
+                dq_dot.q(7) =  (sine_of_half_alpha*cosine_of_half_theta    )/2.0 + (a*cosine_of_half_alpha*sine_of_half_theta)/2.0;
+                dq_dot.q(8) =  (cosine_of_half_alpha*cosine_of_half_theta  )/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0;
+            end            
         end
         
         function J = raw_pose_jacobian(obj,q,to_ith_link)
@@ -264,18 +288,29 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             
             J = zeros(8,to_ith_link);
             
-            for i = 1:to_ith_link
-                xi = DQ(1);
-                for j = 1:to_ith_link
-                    if i==j
-                        xi = xi*obj.dh2dq_dot(q(j),j);
-                    else
-                        xi = xi*obj.dh2dq(q(j),j);
-                    end
-                end
-                J(:,i) = vec8(xi);
-            end
+            %The unoptimized raw_jacobian calculation is commented below
+            %for i = 1:to_ith_link
+            %   xi = DQ(1);
+            %    for j = 1:i
+            %        if i==j
+            %            xi = xi*obj.dh2dq_dot(q(j),j);
+            %        else
+            %            xi = xi*obj.dh2dq(q(j),j);
+            %        end
+            %    end
+            %    J(:,i) = vec8(xi);
+            %end
             
+            %The optimized raw_jacobian calculation
+            x_forward  = DQ(1);
+            x_backward = obj.raw_fkm(q,to_ith_link);
+            for i = 1:to_ith_link
+                x_i_to_i_plus_one = obj.dh2dq(q(i),i);
+                x_backward = conj(x_i_to_i_plus_one)*x_backward;
+                x_ith_dot  = x_forward*obj.dh2dq_dot(q(i),i)*x_backward;
+                x_forward  = x_forward*x_i_to_i_plus_one;
+                J(:,i) = vec8(x_ith_dot);
+            end            
         end
         
     end
