@@ -188,15 +188,16 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             cosine_of_half_alpha = cos(half_alpha);
             
             % Return the optimized standard dh2dq calculation
-            dq = DQ(0);
-            dq.q(1) =  cosine_of_half_alpha*cosine_of_half_theta;
-            dq.q(2) =  sine_of_half_alpha*cosine_of_half_theta;
-            dq.q(3) =  sine_of_half_alpha*sine_of_half_theta;
-            dq.q(4) =  cosine_of_half_alpha*sine_of_half_theta;
-            dq.q(5) = -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0;
-            dq.q(6) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0;
-            dq.q(7) =  (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0;
-            dq.q(8) =  (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0;
+            dq = DQ([
+             cosine_of_half_alpha*cosine_of_half_theta
+             sine_of_half_alpha*cosine_of_half_theta
+             sine_of_half_alpha*sine_of_half_theta
+             cosine_of_half_alpha*sine_of_half_theta
+            -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
+             (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
+             (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
+             (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
+            ]);
         end
         
         function dq_dot = dh2dq_dot(obj,q,ith)
@@ -245,27 +246,30 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             cosine_of_half_alpha = cos(half_alpha);
             
             % Return the optimized dh2dq_dot calculation
-            dq_dot = DQ(0);
             if obj.type(ith) == obj.JOINT_ROTATIONAL
                 % If joint is rotational
-                dq_dot.q(1) = -(cosine_of_half_alpha*sine_of_half_theta    )/2.0;
-                dq_dot.q(2) = -(sine_of_half_alpha*sine_of_half_theta      )/2.0;
-                dq_dot.q(3) =  (sine_of_half_alpha*cosine_of_half_theta    )/2.0;
-                dq_dot.q(4) =  (cosine_of_half_alpha*cosine_of_half_theta  )/2.0;
-                dq_dot.q(5) =  (a*sine_of_half_alpha*sine_of_half_theta    )/4.0 - (d*cosine_of_half_alpha*cosine_of_half_theta)/4.0;
-                dq_dot.q(6) = -(a*cosine_of_half_alpha*sine_of_half_theta  )/4.0 - (d*sine_of_half_alpha*cosine_of_half_theta  )/4.0;
-                dq_dot.q(7) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/4.0 - (d*sine_of_half_alpha*sine_of_half_theta    )/4.0;
-                dq_dot.q(8) = -(a*sine_of_half_alpha*cosine_of_half_theta  )/4.0 - (d*cosine_of_half_alpha*sine_of_half_theta  )/4.0;
+                dq_dot = DQ([
+                -(cosine_of_half_alpha*sine_of_half_theta    )/2.0
+                -(sine_of_half_alpha*sine_of_half_theta      )/2.0
+                 (sine_of_half_alpha*cosine_of_half_theta    )/2.0
+                 (cosine_of_half_alpha*cosine_of_half_theta  )/2.0
+                 (a*sine_of_half_alpha*sine_of_half_theta    )/4.0 - (d*cosine_of_half_alpha*cosine_of_half_theta)/4.0
+                -(a*cosine_of_half_alpha*sine_of_half_theta  )/4.0 - (d*sine_of_half_alpha*cosine_of_half_theta  )/4.0
+                 (a*cosine_of_half_alpha*cosine_of_half_theta)/4.0 - (d*sine_of_half_alpha*sine_of_half_theta    )/4.0
+                 -(a*sine_of_half_alpha*cosine_of_half_theta  )/4.0 - (d*cosine_of_half_alpha*sine_of_half_theta  )/4.0
+                 ]);
             else
                 % If joint is prismatic
-                dq_dot.q(1) =  cosine_of_half_alpha*cosine_of_half_theta;
-                dq_dot.q(2) =  sine_of_half_alpha*cosine_of_half_theta;
-                dq_dot.q(3) =  sine_of_half_alpha*sine_of_half_theta;
-                dq_dot.q(4) =  cosine_of_half_alpha*sine_of_half_theta;
-                dq_dot.q(5) = -(cosine_of_half_alpha*sine_of_half_theta    )/2.0 - (a*sine_of_half_alpha*cosine_of_half_theta)/2.0;
-                dq_dot.q(6) =  (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (sine_of_half_alpha*sine_of_half_theta    )/2.0;
-                dq_dot.q(7) =  (sine_of_half_alpha*cosine_of_half_theta    )/2.0 + (a*cosine_of_half_alpha*sine_of_half_theta)/2.0;
-                dq_dot.q(8) =  (cosine_of_half_alpha*cosine_of_half_theta  )/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0;
+                dq_dot = DQ([
+                 cosine_of_half_alpha*cosine_of_half_theta
+                 sine_of_half_alpha*cosine_of_half_theta
+                 sine_of_half_alpha*sine_of_half_theta
+                 cosine_of_half_alpha*sine_of_half_theta
+                -(cosine_of_half_alpha*sine_of_half_theta    )/2.0 - (a*sine_of_half_alpha*cosine_of_half_theta)/2.0
+                 (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (sine_of_half_alpha*sine_of_half_theta    )/2.0
+                 (sine_of_half_alpha*cosine_of_half_theta    )/2.0 + (a*cosine_of_half_alpha*sine_of_half_theta)/2.0
+                 (cosine_of_half_alpha*cosine_of_half_theta  )/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
+                ]);
             end            
         end
         
