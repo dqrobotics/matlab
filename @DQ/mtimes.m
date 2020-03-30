@@ -25,10 +25,10 @@
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
 function res = mtimes(a,b)
-    if ~isa(a,'DQ');
+    if ~isa(a,'DQ')
         a = DQ(a);
     end
-    if ~isa(b,'DQ');
+    if ~isa(b,'DQ')
         b = DQ(b);
     end
     primary = QuaternionMultiplication(a.q(1:4),b.q(1:4));

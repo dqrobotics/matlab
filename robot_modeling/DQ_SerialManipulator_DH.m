@@ -54,6 +54,7 @@
 classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
     properties
         type
+        parameters_stored
     end
     
     properties (Constant)
@@ -85,13 +86,18 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
             
-            % Remove dummy joints 
+            % Remove dummy joints
             obj.dummy = zeros(1,obj.n_links);
             obj.n_dummy = 0;
             
             % Add type
             obj.type = A(5,:);
             
+            % Flag that the parameters have changed
+            obj.parameters_stored = cell(obj.n_links,5);
+            for i=1:obj.n_links
+                obj.parameters_stored{i,1}=true;
+            end
         end
         
         function x = raw_fkm(obj,q,to_ith_link)
@@ -150,24 +156,46 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
-            theta_ = obj.theta(ith);
-            d_ = obj.d(ith);
-            a_ = obj.a(ith);
-            alpha_ = obj.alpha(ith);
-            
-            % If joint is rotational
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
-                h1 = cos((theta_+q)/2.0)+DQ.k*sin((theta_+q)/2.0);
-                h2 = 1 + DQ.E*0.5*d_*DQ.k;
-                % If joint is prismatic
+            if obj.parameters_stored{ith,1}
+                
+                if obj.type(ith) == obj.JOINT_ROTATIONAL
+                    % If joint is rotational
+                    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
+                    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;    
+                else
+                    % If joint is prismatic
+                    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
+                    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
+                end
+                h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
+                h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
+                
+                obj.parameters_stored{ith,1} = false;
+                obj.parameters_stored{ith,2} = h1;
+                obj.parameters_stored{ith,3} = h2;
+                obj.parameters_stored{ith,4} = h3;
+                obj.parameters_stored{ith,5} = h4;
+                
+                dq = h1*h2*h3*h4;
             else
-                h1 = cos(theta_/2.0)+DQ.k*sin(theta_/2.0);
-                h2 = 1 + DQ.E*0.5*(d_+q)*DQ.k;
+                if obj.type(ith) == obj.JOINT_ROTATIONAL
+                    % If joint is rotational
+                    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
+                    dq = h1*...
+                        obj.parameters_stored{ith,3}*...
+                        obj.parameters_stored{ith,4}*...
+                        obj.parameters_stored{ith,5};
+                    
+                else
+                    % If joint is prismatic
+                    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
+                    dq = obj.parameters_stored{ith,2}*...
+                        h2*...
+                        obj.parameters_stored{ith,4}*...
+                        obj.parameters_stored{ith,5};
+                end
             end
-            h3 = 1 + DQ.E*0.5*a_*DQ.i;
-            h4 = cos(alpha_/2.0)+DQ.i*sin(alpha_/2.0);
             
-            dq = h1*h2*h3*h4;
         end
         
         function dq_dot = dh2dq_dot(obj,q,ith)
@@ -182,24 +210,39 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
-            theta_ = obj.theta(ith);
-            d_ = obj.d(ith);
-            a_ = obj.a(ith);
-            alpha_ = obj.alpha(ith);
-            
-            % If joint is rotational
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
-                h1 = 0.5*( -sin( (theta_+q) /2.0) + DQ.k*cos( (theta_+q) /2.0) );
-                h2 = 1 + DQ.E*0.5*d_*DQ.k;
-                % If joint is prismatic
+            if obj.parameters_stored{ith,1}
+                if obj.type(ith) == obj.JOINT_ROTATIONAL
+                    % If joint is rotational
+                    h1 = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
+                    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
+                else
+                    % If joint is prismatic
+                    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
+                    h2 = DQ.E*0.5*DQ.k;
+                end
+                h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
+                h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
+                
+                dq_dot = h1*h2*h3*h4;
             else
-                h1 = cos(theta_/2.0)+DQ.k*sin(theta_/2.0);
-                h2 = DQ.E*0.5*DQ.k;
+                
+                if obj.type(ith) == obj.JOINT_ROTATIONAL
+                    % If joint is rotational
+                    h1_dot = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
+                    dq_dot = h1_dot*...
+                            obj.parameters_stored{ith,3}*...
+                            obj.parameters_stored{ith,4}*...
+                            obj.parameters_stored{ith,5};
+                else
+                    % If joint is prismatic
+                    h2_dot = DQ.E*0.5*DQ.k;
+                    dq_dot = obj.parameters_stored{ith,2}*...
+                            h2_dot*...
+                            obj.parameters_stored{ith,4}*...
+                            obj.parameters_stored{ith,5};
+                end
             end
-            h3 = 1 + DQ.E*0.5*a_*DQ.i;
-            h4 = cos(alpha_/2.0)+DQ.i*sin(alpha_/2.0);
             
-            dq_dot = h1*h2*h3*h4;
         end
         
         function J = raw_pose_jacobian(obj,q,to_ith_link)
