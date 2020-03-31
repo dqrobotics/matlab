@@ -261,15 +261,15 @@ classdef DQ_SerialManipulator_DH < DQ_SerialManipulator
             else
                 % If joint is prismatic
                 dq_dot = DQ([
-                 cosine_of_half_alpha*cosine_of_half_theta
-                 sine_of_half_alpha*cosine_of_half_theta
-                 sine_of_half_alpha*sine_of_half_theta
-                 cosine_of_half_alpha*sine_of_half_theta
-                -(cosine_of_half_alpha*sine_of_half_theta    )/2.0 - (a*sine_of_half_alpha*cosine_of_half_theta)/2.0
-                 (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (sine_of_half_alpha*sine_of_half_theta    )/2.0
-                 (sine_of_half_alpha*cosine_of_half_theta    )/2.0 + (a*cosine_of_half_alpha*sine_of_half_theta)/2.0
-                 (cosine_of_half_alpha*cosine_of_half_theta  )/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                ]);
+                    0;
+                    0;
+                    0;
+                    0;
+                    -(cosine_of_half_alpha*sine_of_half_theta)/2.0;
+                    -(sine_of_half_alpha*sine_of_half_theta)/2.0;
+                    (sine_of_half_alpha*cosine_of_half_theta)/2.0;
+                    (cosine_of_half_alpha*cosine_of_half_theta)/2.0;
+                    ]);
             end            
         end
         
