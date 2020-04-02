@@ -29,14 +29,14 @@ classdef BarrettWamArmRobot
             wam_DH_d = [0, 0, 0.55, 0, 0.3, 0, 0.0609];
             wam_DH_a = [0, 0, 0.045, -0.045, 0, 0, 0];
             wam_DH_alpha =  pi*[-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0];
-            wam_DH_type  = repmat(DQ_SerialManipulator_DH.JOINT_ROTATIONAL,1,7);
+            wam_DH_type  = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,7);
             wam_DH_matrix = [wam_DH_theta;
                               wam_DH_d;
                               wam_DH_a;
                               wam_DH_alpha;
                               wam_DH_type];
 
-            wam = DQ_SerialManipulator_DH(wam_DH_matrix,'standard');
+            wam = DQ_SerialManipulatorDH(wam_DH_matrix,'standard');
         end
     end
 end

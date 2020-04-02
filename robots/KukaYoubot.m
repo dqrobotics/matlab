@@ -40,14 +40,14 @@ classdef KukaYoubot
             arm_DH_d =   [  0.147,      0,       0,        0,    0.218];
             arm_DH_a =   [      0,  0.155,   0.135,        0,        0];
             arm_DH_alpha =   [pi2,      0,       0,      pi2,        0];
-            arm_DH_type  = repmat(DQ_SerialManipulator_DH.JOINT_ROTATIONAL,1,5);
+            arm_DH_type  = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,5);
             arm_DH_matrix = [arm_DH_theta;
                              arm_DH_d;
                              arm_DH_a;
                              arm_DH_alpha;
                              arm_DH_type];
                     
-            arm =  DQ_SerialManipulator_DH(arm_DH_matrix,'standard');
+            arm =  DQ_SerialManipulatorDH(arm_DH_matrix,'standard');
             base = DQ_HolonomicBase();
 
             include_namespace_dq

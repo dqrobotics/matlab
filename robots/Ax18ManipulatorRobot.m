@@ -28,7 +28,7 @@ classdef Ax18ManipulatorRobot
             ax18_DH_d       = [0.167   0       0     0.1225          0];  % d
             ax18_DH_a       = [0      0.159    0.02225    0      0.170];  % a
             ax18_DH_alpha   = [-pi/2   0      -pi/2   -pi/2          0];  % alpha
-            ax18_DH_type    = repmat(DQ_SerialManipulator_DH.JOINT_ROTATIONAL,1,5);
+            ax18_DH_type    = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,5);
             
             ax18_DH_matrix = [  ax18_DH_theta;
                 ax18_DH_d;
@@ -37,7 +37,7 @@ classdef Ax18ManipulatorRobot
                 ax18_DH_type;
                 ]; % D&H parameters matrix for the arm model
             
-            ax = DQ_SerialManipulator_DH(ax18_DH_matrix,'standard'); % Defines robot model using dual quaternions
+            ax = DQ_SerialManipulatorDH(ax18_DH_matrix,'standard'); % Defines robot model using dual quaternions
         end
     end    
 end
