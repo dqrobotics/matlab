@@ -1,34 +1,43 @@
-% DQ_WholeBody Robots composed of multiple kinematic chains
+% DQ_SerialWholeBody - Robots composed of multiple kinematic chains
 %
-% Usage: robot = DQ_WholeBody(first_chain_element), where
+% Usage: robot = DQ_SerialWholeBody(first_chain_element), where
 % first_chain_element is an object of DQ_Kinematics or one of its
 % subclasses.
 %
-% Alternatively, robot = DQ_WholeBody(first_chain_element,'reversed'),
+% Alternatively, robot = DQ_SerialWholeBody(first_chain_element,'reversed'),
 % where the optional argument 'reversed' indicates that the kinematic chain
 % is reversed.
 %
-% DQ_WholeBody Properties:
+% DQ_SerialWholeBody Properties:
 %       chain - Contains all elements in the serial kinematic chain.
 %       reversed - Vector with the same dimension of chain to indicate if the
 %                corresponding kinematic chain is reversed.
 %       dim_configuration_space - Dimension of the whole-body configuration
 %                               space
 %
-% DQ_WholeBody Methods:
+% DQ_SerialWholeBody Methods:
 %       add - Adds a new element to the end of the serially coupled
 %             kinematic chain.
 %       add_reversed - Adds a new element, but in reverse order, to the end
 %                      of the serially coupled kinematic chain.
 %       fkm - Returns the forward kinematic model of the whole-body chain.
-%       get_chain - Returns the complete kinematic chain.
+%       fkm_by_chain - Returns the FKM using one index to specify the
+%                      subchain and other to specify the link inside that 
+%                      chain. 
+%       get_chain - Returns the complete kinematic chain. 
 %       get_dim_configuration_space - Returns the dimension of the whole-body
 %                                     configuration space.
 %       plot - Draws the whole kinematic chain.
 %       pose_jacobian - Returns the whole-body pose Jacobian.
-%
+%       pose_jacobian_by_chain - Returns the pose Jacobian using one index 
+%                                to specify the subchain and other to 
+%                                specify the link inside that chain. 
 %       raw_fkm - Analogous to FKM, but without considering base and
 %                 end-effector changes.
+%       raw_fkm_by_chain - Analogous to RAW_FKM, but without considering 
+%                          base and end-effector changes.
+%       retrieve_chain_from_link - Returns the corresponding subchain's 
+%                                  index and the link's index in that subchain.
 %       sequential - Reorganize a sequential configuration vector in the
 %                    ordering required by each kinematic chain (i.e.,
 %                    the vector blocks corresponding to reversed chains are
@@ -38,7 +47,7 @@
 %                      transformation to the last link.
 %
 % For a complete list of methods, including the one from the super classes,
-% type 'doc DQ_WholeBody'
+% type 'doc DQ_SerialWholeBody'
 %
 % See also DQ_kinematics, DQ_MobileBase
 
@@ -520,7 +529,16 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
         
         function [index,index_in_chain] = retrieve_chain_from_link(obj,ith)
             % Given the ith link, returns the corresponding subchain's index and the link's index in that subchain.
-            
+            %
+            % Usage: [index,index_in_chain] = retrieve_chain_from_link(obj,ith), 
+            % where 'obj' is a DQ_SerialWholeBody object, 'ith' is the ith
+            % link in the combined chain; 'index' corresponds to the
+            % subchain in which the 'ith' link is, and index_in_chain is
+            % the index of that link in that subchain. 
+            %
+            % For example, if a serial robot is composed of two subchains, the
+            % first with 5 links and the second with 7 links, if ith = 8,
+            % then index = 2 and index_in_chain = 3.
             if ith > obj.get_dim_configuration_space()
                 error('Index exceeds the number of generalized coordinates');
             end

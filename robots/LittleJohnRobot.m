@@ -35,7 +35,7 @@ classdef LittleJohnRobot
 
             base.set_frame_displacement(x);
 
-            robot = DQ_WholeBody(base);
+            robot = DQ_SerialWholeBody(base);
             robot.add(arm);
         end
     end
