@@ -367,18 +367,18 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
             end
             
             if partial_chain == true                
-                x_0_to_n = obj.fkm(q,n,jth);
+                x_0_to_n = obj.fkm_by_chain(q,n,jth);
             else
-                x_0_to_n = obj.fkm(q,n);
+                x_0_to_n = obj.fkm_by_chain(q,n);
             end
             
             j = 1;
             
             for i = 0:n-1
                 if partial_chain == true && i == n-1
-                    x_0_to_iplus1 = obj.fkm(q,i+1,jth);
+                    x_0_to_iplus1 = obj.fkm_by_chain(q,i+1,jth);
                 else                    
-                    x_0_to_iplus1 = obj.fkm(q,i+1);
+                    x_0_to_iplus1 = obj.fkm_by_chain(q,i+1);
                 end
                 x_iplus1_to_n = x_0_to_iplus1'*x_0_to_n;
                 
@@ -400,12 +400,12 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
                            
                             reverse_pose_jacobian_jth =  A + B;
                         
-                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                            L{i+1} = hamiplus8(obj.fkm_by_chain(q,i)) * ...
                                         haminus8(x_iplus1_to_n) * ...
                                             reverse_pose_jacobian_jth;
                                     
                         else
-                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                            L{i+1} = hamiplus8(obj.fkm_by_chain(q,i)) * ...
                                 haminus8(x_iplus1_to_n) * DQ.C8 * ...
                                     obj.chain{i+1}.pose_jacobian(q_iplus1);
                         end
@@ -415,7 +415,7 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
                                 haminus8(x_iplus1_to_n) * ...
                                     obj.chain{i+1}.pose_jacobian(q_iplus1,jth);
                         else
-                            L{i+1} = hamiplus8(obj.fkm(q,i)) * ...
+                            L{i+1} = hamiplus8(obj.fkm_by_chain(q,i)) * ...
                                         haminus8(x_iplus1_to_n) * ...
                                         obj.chain{i+1}.pose_jacobian(q_iplus1);
                         end
