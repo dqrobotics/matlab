@@ -1,4 +1,6 @@
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% Basic definitions for the iRoomba Create Robot
+
+% (C) Copyright 2011-2020 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 

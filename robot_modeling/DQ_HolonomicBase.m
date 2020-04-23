@@ -68,11 +68,21 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             pose = real_part + E_*dual_part;
         end
         
-        function pose = fkm(obj, q)
+        function pose = fkm(obj, q, ~)
         % FKM(q) returns the pose of a mobile base given the 
         % configuration q = [x,y,phi]'. It takes into consideration
         % the base frame displacement (e.g., base height).
-            pose = obj.raw_fkm(q)*obj.frame_displacement;
+        
+            if nargin > 3
+                error('Invalid number of arguments');
+            else
+                % calculates the mobile robot frame. If an index is passed
+                % as an argument, just ignore it because there is only one
+                % element in the chain. However, we have to tackle this
+                % case to ensure compatibility with other DQ_Kinematics
+                % objects.
+                pose = obj.raw_fkm(q)*obj.frame_displacement;
+            end
         end
             
         function J = raw_pose_jacobian(~,q)
@@ -109,13 +119,23 @@ classdef DQ_HolonomicBase < DQ_MobileBase
                  0, 0, 0];
         end
         
-        function J = pose_jacobian(obj,q)
+        function J = pose_jacobian(obj,q, ~)
         % POSE_JACOBIAN(q) returns, given the configuration 
         % q = [x,y,phi]', the mobile-base pose Jacobian J that satisfies 
         % x_dot = J*q, where x_dot is the time derivative of the unit dual 
         % quaternion that represents the mobile-base pose. It takes into
         % consideration the base frame displacement (e.g., base height).
-            J = haminus8(obj.frame_displacement)*obj.raw_pose_jacobian(q);
+        
+            if nargin > 3
+                error('Invalid number of arguments');
+            else
+                % calculates the mobile robot pose Jacobian. If an index is
+                % passed as an argument, just ignore it because there is
+                % only one element in the chain. However, we have to tackle
+                % this case to ensure compatibility with other
+                % DQ_Kinematics objects.
+                 J = haminus8(obj.frame_displacement)*obj.raw_pose_jacobian(q);
+            end
         end
         
         function set_base_diameter(obj,diameter)

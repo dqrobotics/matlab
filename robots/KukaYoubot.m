@@ -56,7 +56,7 @@ classdef KukaYoubot
 
             base.set_frame_displacement(x_bm);
 
-            robot = DQ_WholeBody(base);
+            robot = DQ_SerialWholeBody(base);
             robot.add(arm);
         end
     end

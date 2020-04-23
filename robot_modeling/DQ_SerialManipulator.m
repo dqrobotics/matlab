@@ -24,7 +24,7 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_Kinematics.
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2020 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -53,10 +53,6 @@
 classdef DQ_SerialManipulator < DQ_Kinematics
     properties        
         theta,d,a,alpha;
-        % Dummy and n_dummy are deprecated and will be removed in the near
-        % future
-        dummy;
-        n_dummy;
         convention;        
         effector;
         
@@ -76,16 +72,6 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         function obj = DQ_SerialManipulator(A,convention)
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
-            end
-            
-            obj.n_dummy = 0;
-            if size(A,1) == 5
-                %There are dummy joints
-                obj.dummy = A(5,:);
-                obj.n_dummy = sum(obj.dummy == 1);
-                
-            else
-                obj.dummy = zeros(1,size(A,2));
             end
             
             obj.n_links = size(A,2);
@@ -140,21 +126,14 @@ classdef DQ_SerialManipulator < DQ_Kinematics
                 n = obj.n_links;
             end
             
-            if length(q) ~= (obj.n_links - obj.n_dummy)
+            if length(q) ~= obj.n_links
                 error('Incorrect number of joint variables');
             end
             
             x = DQ(1);
             
-            j = 0;
             for i=1:n
-                if obj.dummy(i) == 1
-                    % The offset is taken into account inside the method dh2dq
-                    x = x*dh2dq(obj,0,i);
-                    j = j + 1;
-                else
-                    x = x*dh2dq(obj,q(i-j),i);
-                end
+                x = x*dh2dq(obj,q(i),i);
             end
         end
         
@@ -260,8 +239,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             end
             
             x = DQ(1);
-            J = zeros(8,n-obj.n_dummy);
-            jth=0;
+            J = zeros(8,n);
             
             for i = 0:n-1
                 % Use the standard DH convention
@@ -274,15 +252,9 @@ classdef DQ_SerialManipulator < DQ_Kinematics
                     z = 0.5*x*w*x';
                 end
                 
-                if ~obj.dummy(i+1)
-                    x = x*obj.dh2dq(q(jth+1),i+1);
-                    j = z * x_effector;
-                    J(:,jth+1) = j.q;
-                    jth = jth+1;
-                else
-                    % Dummy joints don't contribute to the Jacobian
-                    x = x*obj.dh2dq(0,i+1);
-                end
+                x = x*obj.dh2dq(q(i+1),i+1);
+                j = z * x_effector;
+                J(:,i+1) = vec8(j);
             end
         end
         
@@ -330,9 +302,8 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             end
                                  
             x = DQ(1);            
-            J_dot = zeros(8,n-obj.n_dummy);
-            jth = 0;
-            
+            J_dot = zeros(8,n);
+
             for i = 0:n-1
                 % Use the standard DH convention
                 if strcmp(obj.convention,'standard')
@@ -345,27 +316,21 @@ classdef DQ_SerialManipulator < DQ_Kinematics
                     z = 0.5*x*w*x';
                 end
                 
-                if ~obj.dummy(i+1)                   
-                    % When i = 0 and length(theta) = 1, theta(1,i) returns
-                    % a 1 x 0 vector, differently from the expected
-                    % behavior, which is to return a 0 x 1 matrix.
-                    % Therefore, we have to deal with the case i = 0
-                    % explictly.
-                    if i ~= 0
-                        vec_zdot = 0.5*(haminus8(w*x') + ...
-                            hamiplus8(x*w)*DQ.C8) * ...
-                            obj.raw_pose_jacobian(q,i)*q_dot(1:i);
-                    else
-                        vec_zdot = zeros(8,1);
-                    end
-                    J_dot(:,jth+1) = haminus8(x_effector)*vec_zdot +...
-                        hamiplus8(z)*vec_x_effector_dot;
-                    x = x*obj.dh2dq(q(jth+1),i+1);
-                    jth = jth+1;
+                % When i = 0 and length(theta) = 1, theta(1,i) returns
+                % a 1 x 0 vector, differently from the expected
+                % behavior, which is to return a 0 x 1 matrix.
+                % Therefore, we have to deal with the case i = 0
+                % explictly.
+                if i ~= 0
+                    vec_zdot = 0.5*(haminus8(w*x') + ...
+                        hamiplus8(x*w)*DQ.C8) * ...
+                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
                 else
-                    % Dummy joints don't contribute to the Jacobian
-                    x = x*obj.dh2dq(0,i+1);                    
+                    vec_zdot = zeros(8,1);
                 end
+                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
+                    hamiplus8(z)*vec_x_effector_dot;
+                x = x*obj.dh2dq(q(i+1),i+1);
             end
         end
         
@@ -479,8 +444,7 @@ function dq_kinematics_plot(robot, q, varargin)
         opt = plot_options(robot, varargin);
     end
 
-    % Virtual (dummy) joints will be removed in the future
-    n = robot.n_links-robot.n_dummy;
+    n = robot.n_links;
 
     if length(q) ~= n
         error('Incorrect number of joints. The correct number is %d', n);
@@ -585,7 +549,7 @@ function h = create_new_robot(robot, opt)
     h.robot = line(robot.lineopt{:});
     
     % create end-effector frame
-    if opt.wrist,   
+    if opt.wrist   
         h.x = line('xdata', [0;0], ...
             'ydata', [0;0], ...
             'zdata', [0;0], ...
@@ -658,8 +622,7 @@ end
 % kinematic robot, and graphics are defined by the handle structure robot.handle, 
 % which stores the 'graphical robot' as robot.handle.robot.
 function update_robot(robot, q)
-    % Dummy (virtual) joints will be removed in the near future
-    n = robot.n_links-robot.n_dummy;
+    n = robot.n_links;
     
     % Get the handle to the graphical robot. Since each kinematic robot
     % stores just one graphical handle, if we want to plot the same robot
@@ -850,7 +813,6 @@ function [opt,others] = parse_options(default, options)
 
     while argc <= length(options)
         current_option = options{argc};
-      %  pause
         assigned = false;
 
         if ischar(current_option)
