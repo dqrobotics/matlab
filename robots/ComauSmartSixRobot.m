@@ -27,19 +27,23 @@ classdef ComauSmartSixRobot
     methods (Static)
         function comau = kinematics()
            %% Definitions for DQ_kinematics
-            comau_DH_theta=  [0, -pi/2, pi/2, 0, 0, 0, pi];
-            comau_DH_d =     [-0.45, 0, 0, -0.64707, 0, -0.095, 0];
-            comau_DH_a =     [0, 0.150, 0.590, 0.13, 0, 0, 0];
-            comau_DH_alpha = [pi, pi/2, pi, -pi/2, -pi/2, pi/2, pi];
-            comau_dummy =    [0,0,0,0,0,0,1];
+
+            comau_DH_theta=  [0, -pi/2, pi/2, 0, 0, 0];
+            comau_DH_d =     [-0.45, 0, 0, -0.64707, 0, -0.095];
+            comau_DH_a =     [0, 0.150, 0.590, 0.13, 0, 0];
+            comau_DH_alpha = [pi, pi/2, pi, -pi/2, -pi/2, pi/2];
 
             comau_DH_matrix = [comau_DH_theta;
                 comau_DH_d;
                 comau_DH_a;
-                comau_DH_alpha;
-                comau_dummy];
+                comau_DH_alpha];
 
             comau = DQ_SerialManipulator(comau_DH_matrix, 'modified');
+            
+            % There is a final transformation for the end-effector given by
+            % a rotation of pi around the local x-axis followed by a
+            % rotation of pi around the local z-axis
+            comau.set_effector(DQ.i*DQ.k);
         end
     end
 
