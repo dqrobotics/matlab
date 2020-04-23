@@ -75,8 +75,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             %obj.a = A(3,:);
             %obj.alpha = A(4,:);
             %obj.dummy = A(5,:);
+            obj = obj@DQ_SerialManipulator(A(1:4,:),convention);
             
-            obj = obj@DQ_SerialManipulator(A,convention);
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end
@@ -85,14 +85,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
             
-            % Remove dummy joints
-            obj.dummy = zeros(1,obj.n_links);
-            obj.n_dummy = 0;
-            
             % Add type
             obj.type = A(5,:);
-            
-            
         end
         
         function x = raw_fkm(obj,q,to_ith_link)
