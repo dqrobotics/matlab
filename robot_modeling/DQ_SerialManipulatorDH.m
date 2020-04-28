@@ -74,7 +74,6 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             %obj.d = A(2,:);
             %obj.a = A(3,:);
             %obj.alpha = A(4,:);
-            %obj.dummy = A(5,:);
             obj = obj@DQ_SerialManipulator(A(1:4,:),convention);
             
             if nargin == 0
@@ -184,96 +183,42 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             % Return the optimized standard dh2dq calculation
             dq = DQ([
                 cosine_of_half_alpha*cosine_of_half_theta
+                
                 sine_of_half_alpha*cosine_of_half_theta
+                
                 sine_of_half_alpha*sine_of_half_theta
+                
                 cosine_of_half_alpha*sine_of_half_theta
-                -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
-                (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
-                (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
+                
+                -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
+                - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
+                
+                (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+                - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
+                
+                (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0...
+                + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
+                
+                (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+                - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
                 ]);
         end
         
-        function dq_dot = dh2dq_dot(obj,q,ith)
-            %   For a given link's Extended DH parameters, calculate the
-            %   correspondent dual quaternion derivative of that joint's
-            %   pose transformation with respect to its joint value.
-            %   Usage: dq = dh2dq_dot(q,ith), where
-            %          q: joint value
-            %          ith: link number
-            
-            if nargin ~= 3
-                error('Wrong number of arguments. The parameters are joint value and the correspondent link')
-            end
-            
-            %The unoptimized standard dh2dq_dot calculation is commented below
-            %if obj.type(ith) == obj.JOINT_ROTATIONAL
-            %    % If joint is rotational
-            %    h1 = 0.5*( -sin( (obj.theta(ith)+q) /2.0) + DQ.k*cos( (obj.theta(ith)+q) /2.0) );
-            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
-            %else
-            %    % If joint is prismatic
-            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-            %    h2 = DQ.E*0.5*DQ.k;
-            %end
-            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-            %dq_dot = h1*h2*h3*h4;
-            
-            % The optimized standard dh2dq_dot calculation
-            % Store half angles and displacements
-            half_theta = obj.theta(ith)/2.0;
-            d          = obj.d(ith);
-            a          = obj.a(ith);
-            half_alpha = obj.alpha(ith)/2.0;
-            
-            % Add the effect of the joint value
+        function w = get_w(obj,ith)       
             if obj.type(ith) == obj.JOINT_ROTATIONAL
-                % If joint is rotational
-                half_theta = half_theta + (q/2.0);
-            end
-            
-            % Pre-calculate cosines and sines
-            sine_of_half_theta   = sin(half_theta);
-            cosine_of_half_theta = cos(half_theta);
-            sine_of_half_alpha   = sin(half_alpha);
-            cosine_of_half_alpha = cos(half_alpha);
-            
-            % Return the optimized dh2dq_dot calculation
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
-                % If joint is rotational
-                dq_dot = DQ([
-                    -(cosine_of_half_alpha*sine_of_half_theta    )/2.0
-                    -(sine_of_half_alpha*sine_of_half_theta      )/2.0
-                    (sine_of_half_alpha*cosine_of_half_theta    )/2.0
-                    (cosine_of_half_alpha*cosine_of_half_theta  )/2.0
-                    (a*sine_of_half_alpha*sine_of_half_theta    )/4.0 - (d*cosine_of_half_alpha*cosine_of_half_theta)/4.0
-                    -(a*cosine_of_half_alpha*sine_of_half_theta  )/4.0 - (d*sine_of_half_alpha*cosine_of_half_theta  )/4.0
-                    (a*cosine_of_half_alpha*cosine_of_half_theta)/4.0 - (d*sine_of_half_alpha*sine_of_half_theta    )/4.0
-                    -(a*sine_of_half_alpha*cosine_of_half_theta  )/4.0 - (d*cosine_of_half_alpha*sine_of_half_theta  )/4.0
-                    ]);
+                w = DQ.k;
             else
-                % If joint is prismatic
-                dq_dot = DQ([
-                    0
-                    0
-                    0
-                    0
-                    -(cosine_of_half_alpha*sine_of_half_theta)/2.0
-                    -(sine_of_half_alpha*sine_of_half_theta)/2.0
-                    (sine_of_half_alpha*cosine_of_half_theta)/2.0
-                    (cosine_of_half_alpha*cosine_of_half_theta)/2.0;
-                    ]);
+                w = DQ(1);
             end
         end
         
         function J = raw_pose_jacobian(obj,q,to_ith_link)
-            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies
-            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the
+            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
+            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
             % vector of joint variables.
             %
             % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
-            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where
+            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
             % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
             %
             % This function does not take into account any base or
@@ -283,31 +228,17 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if nargin < 3
                 to_ith_link = obj.n_links;
             end
+            x_effector = obj.raw_fkm(q);
             
+            x = DQ(1);
             J = zeros(8,to_ith_link);
             
-            %The unoptimized raw_jacobian calculation is commented below
-            %for i = 1:to_ith_link
-            %   xi = DQ(1);
-            %    for j = 1:i
-            %        if i==j
-            %            xi = xi*obj.dh2dq_dot(q(j),j);
-            %        else
-            %            xi = xi*obj.dh2dq(q(j),j);
-            %        end
-            %    end
-            %    J(:,i) = vec8(xi);
-            %end
-            
-            %The optimized raw_jacobian calculation
-            x_forward  = DQ(1);
-            x_backward = obj.raw_fkm(q,to_ith_link);
-            for i = 1:to_ith_link
-                x_i_to_i_plus_one = obj.dh2dq(q(i),i);
-                x_backward = conj(x_i_to_i_plus_one)*x_backward;
-                x_ith_dot  = x_forward*obj.dh2dq_dot(q(i),i)*x_backward;
-                x_forward  = x_forward*x_i_to_i_plus_one;
-                J(:,i) = vec8(x_ith_dot);
+            for i = 0:to_ith_link-1
+                w = obj.get_w(i+1);
+                z = 0.5*x*w*x';
+                x = x*obj.dh2dq(q(i+1),i+1);
+                j = z * x_effector;
+                J(:,i+1) = vec8(j);
             end
         end
         
