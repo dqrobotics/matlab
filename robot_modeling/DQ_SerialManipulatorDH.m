@@ -228,14 +228,14 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if nargin < 3
                 to_ith_link = obj.n_links;
             end
-            x_effector = obj.raw_fkm(q);
+            x_effector = obj.raw_fkm(q,to_ith_link);
             
             x = DQ(1);
             J = zeros(8,to_ith_link);
             
             for i = 0:to_ith_link-1
                 w = obj.get_w(i+1);
-                z = 0.5*x*w*x';
+                z = 0.5*Ad(x,w);
                 x = x*obj.dh2dq(q(i+1),i+1);
                 j = z * x_effector;
                 J(:,i+1) = vec8(j);
