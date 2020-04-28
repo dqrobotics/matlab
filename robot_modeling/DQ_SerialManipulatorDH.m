@@ -208,7 +208,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if obj.type(ith) == obj.JOINT_ROTATIONAL
                 w = DQ.k;
             else
-                w = DQ(1);
+                w = DQ.E*DQ.k;
             end
         end
         
