@@ -25,7 +25,9 @@ jobs:
     # Runs a single command using the runners shell
            
     - name: Running the continuous integration test with the help of python
-      run: python3 .github/workflows/DQ_test.py
+      run: |
+        python3 -m pip install --user numpy scipy dqrobotics
+        python3 .github/workflows/DQ_test.py
       
     # Runs a set of commands using the runners shell
     - name: Run a multi-line script
