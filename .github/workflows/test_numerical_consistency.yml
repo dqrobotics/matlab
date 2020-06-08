@@ -26,8 +26,8 @@ jobs:
     - name: Run a one-line script
       run: cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
         
-    - name: Test if python is available
-      run: python --version
+    - name: Test if python3 is available
+      run: python3 --version
         
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
 
