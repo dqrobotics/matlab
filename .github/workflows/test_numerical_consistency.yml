@@ -23,10 +23,8 @@ jobs:
     - uses: actions/checkout@v2
 
     # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
-        
-    - name: Test if python3 is available
+           
+    - name: Running the continuous integration test with the help of python
       run: python3 DQ_test.py
         
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
