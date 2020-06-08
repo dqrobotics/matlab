@@ -1,5 +1,5 @@
 disp ('testing');
-
+quit;
 % """(C) Copyright 2019 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
