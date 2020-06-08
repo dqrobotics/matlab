@@ -27,7 +27,7 @@ jobs:
       run: cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
         
     - name: Test if python3 is available
-      run: python3 --version
+      run: python3 DQ_test.py
         
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
 
