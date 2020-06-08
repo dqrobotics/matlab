@@ -24,10 +24,10 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Run a one-line script
-      run: |
-        cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
-        echo Lets test if octave exists
-        octave --version
+      run: cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
+        
+    - name: Test if octave is available
+      run: octave --version
         
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
 
