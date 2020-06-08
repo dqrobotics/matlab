@@ -24,7 +24,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Run a one-line script
-      run: pwd
+      run: cat /home/runner/work/matlab/matlab/.github/workflows/DQ_test.m
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
 
     # Runs a set of commands using the runners shell
