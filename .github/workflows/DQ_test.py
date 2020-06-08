@@ -26,7 +26,7 @@ import numpy
 from dqrobotics import *
 from DQ_test_facilities import get_list_of_dq_from_mat
 
-mat = scipy.io.loadmat('DQ_test.mat')
+mat = scipy.io.loadmat('DQ_test_dat.mat')
 
 dq_a_list = get_list_of_dq_from_mat('random_dq_a', mat)
 dq_b_list = get_list_of_dq_from_mat('random_dq_b', mat)
