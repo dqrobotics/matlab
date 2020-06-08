@@ -24,7 +24,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Run a one-line script
-      run: cat DQ_test.m
+      run: pwd
       #run: matlab -nodisplay -nosplash -nodesktop -r "run('DQ_test')"
 
     # Runs a set of commands using the runners shell
