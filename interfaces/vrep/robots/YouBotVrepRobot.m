@@ -1,6 +1,49 @@
+% CLASS YouBotVrepRobot - Concrete class to interface with the "KUKA YouBot"
+% robot in VREP.
+%
+% Usage:
+%       1) Drag-and-drop a "KUKA YouBot" robot to a VREP scene.
+%       2) Run
+%           >> vi = DQ_VrepInterface();
+%           >> vi.connect('127.0.0.1',19997);
+%           >> vrep_robot = YouBotVrepRobot("youBot", vi);
+%           >> vi.start_simulation();
+%           >> robot.get_q_from_vrep();
+%           >> pause(1);
+%           >> vi.stop_simulation();
+%           >> vi.disconnect();
+%       Note that the name of the robot should be EXACTLY the same as in
+%       VREP. For instance, if you drag-and-drop a second robot, its name
+%       will become "youBot#0", a third robot, "youBot#1", and so on.
+%
+%   LBR4pVrepRobot Methods:
+%       send_q_to_vrep - Sends the joint configurations to VREP
+%       get_q_from_vrep - Obtains the joint configurations from VREP
+%       kinematics - Obtains the DQ_Kinematics implementation of this robot
+
+% (C) Copyright 2020 DQ Robotics Developers
+%
+% This file is part of DQ Robotics.
+%
+%     DQ Robotics is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU Lesser General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+%
+%     DQ Robotics is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU Lesser General Public License for more details.
+%
+%     You should have received a copy of the GNU Lesser General Public License
+%     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
+%
+% DQ Robotics website: dqrobotics.sourceforge.net
+%
+% Contributors to this file:
+%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+
 classdef YouBotVrepRobot < DQ_VrepRobot
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         joint_names;
@@ -13,12 +56,17 @@ classdef YouBotVrepRobot < DQ_VrepRobot
     
     methods
         function obj = YouBotVrepRobot(robot_name,vrep_interface)
-            %UNTITLED Construct an instance of this class
-            %   Detailed explanation goes here
+            %% Constructs an instance of a YouBotVrepRobot
+            %  >> vi = VrepInterface()
+            %  >> vi.connect('127.0.0.1',19997);
+            %  >> robot = YouBotVrepRobot("youBot", vi)
             obj.robot_name = robot_name;
             obj.vrep_interface = vrep_interface;
             
-            %This might be useful to every subclass
+            % From the second copy of the robot and onward, VREP appends a
+            % #number in the robot's name. We check here if the robot is
+            % called by the correct name and assign an index that will be
+            % used to correctly infer the robot's joint labels.
             splited_name = strsplit(robot_name,'#');
             robot_label = splited_name{1};
             if ~strcmp(robot_label,'youBot')
@@ -30,7 +78,7 @@ classdef YouBotVrepRobot < DQ_VrepRobot
                 robot_index = '';
             end
             
-            %Initialize joint names and base frame
+            % Initialize joint names and base frame
             obj.joint_names = {};
             for i=1:5
                 current_joint_name = {robot_label,'ArmJoint',int2str(i-1),robot_index};
@@ -40,6 +88,10 @@ classdef YouBotVrepRobot < DQ_VrepRobot
         end
         
         function send_q_to_vrep(obj,q)
+            %% Sends the joint configurations to VREP
+            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
+            %  >> q = zeros(8,1);
+            %  >> vrep_robot.send_q_to_vrep(q)
             x = q(1);
             y = q(2);
             phi = q(3);
@@ -53,15 +105,22 @@ classdef YouBotVrepRobot < DQ_VrepRobot
         end
         
         function q = get_q_from_vrep(obj)
+            %% Obtains the joint configurations from VREP
+            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
+            %  >> q = vrep_robot.get_q_from_vrep(q)
             base_x = obj.vrep_interface.get_object_pose(obj.base_frame_name) * obj.adjust;
             base_t = vec3(translation(base_x));
-            base_phi = rotation_angle(rotation(base_x));            
+            base_phi = rotation_angle(rotation(base_x));
             base_arm_q = obj.vrep_interface.get_joint_positions(obj.joint_names);
             
             q = [base_t(1); base_t(2); base_phi; base_arm_q];
         end
         
         function kin = kinematics(obj)
+            %% Obtains the DQ_WholeBody instance that represents this LBR4p robot.
+            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
+            %  >> robot_kinematics = vrep_robot.kinematics()
+            
             include_namespace_dq
             % The DH parameters and other geometric parameters are based on
             % Kuka's documentation:

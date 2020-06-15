@@ -52,7 +52,7 @@ classdef LBR4pVrepRobot < DQ_VrepRobot
     
     methods
         function obj = LBR4pVrepRobot(robot_name,vrep_interface)
-            %% Constructs an instance of this class
+            %% Constructs an instance of a LBR4pVrepRobot
             %  >> vi = VrepInterface()
             %  >> vi.connect('127.0.0.1',19997);
             %  >> robot = LBR4pVrepRobot("LBR4p", vi)
