@@ -16,7 +16,7 @@
 %       VREP. For instance, if you drag-and-drop a second robot, its name
 %       will become "youBot#0", a third robot, "youBot#1", and so on.
 %
-%   LBR4pVrepRobot Methods:
+%   YouBotVrepRobot Methods:
 %       send_q_to_vrep - Sends the joint configurations to VREP
 %       get_q_from_vrep - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
@@ -117,7 +117,7 @@ classdef YouBotVrepRobot < DQ_VrepRobot
         end
         
         function kin = kinematics(obj)
-            %% Obtains the DQ_WholeBody instance that represents this LBR4p robot.
+            %% Obtains the DQ_WholeBody instance that represents this youBot robot.
             %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
             %  >> robot_kinematics = vrep_robot.kinematics()
             
