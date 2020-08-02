@@ -107,7 +107,7 @@ classdef DQ_HolonomicBase < DQ_MobileBase
             j43 = j61;
             
             j63 = 0.25*(-x*s + y*c);
-            j73 = 0.25*(x*c - y*s);
+            j73 = 0.25*(-x*c - y*s);
             
             J = [0, 0, j13;
                  0, 0, 0;
