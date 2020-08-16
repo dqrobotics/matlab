@@ -50,8 +50,8 @@ error = epsilon+1;
 lambda = 0.5;
 
 % Create Publisher
-[pub, msg] = rospublisher('/ik_joint_states', 'sensor_msgs/JointState');
-msg.Name = [{'joint1'},{'joint2'},{'joint3'},{'joint4'},{'joint5'},{'joint6'}, {'gripper_finger1_joint'}];
+% [pub, msg] = rospublisher('/ik_joint_states', 'sensor_msgs/JointState');
+% msg.Name = [{'joint1'},{'joint2'},{'joint3'},{'joint4'},{'joint5'},{'joint6'}, {'gripper_finger1_joint'}];
 
 
 pause(1);
@@ -70,44 +70,44 @@ while norm(error) > epsilon
         
      
     theta = theta + K*jacob_pinv*error;
-    
-    theta1 = theta(1,:);
-    theta2 = theta(2,:);
-    theta3 = theta(3,:);
-    theta4 = theta(4,:);
-    theta5 = theta(5,:);
-    theta6 = theta(6,:);
-    
-    msg.Position = [theta1,theta2,theta3,theta4,theta5,theta6, 1.0];
-    send(pub,msg);
-    
-    pause(0.1)
-    display('Execute')
-    
-    sub = rossubscriber('/posestamped');
-    my_sub= receive(sub,10);
-    
-    new_position = [my_sub.Pose.Position.X,my_sub.Pose.Position.Y,my_sub.Pose.Position.Z];
-    
-    if (new_position ~= position)
-        xd = set_xd(new_position)
-    end
-    
-    
+%     
+%     theta1 = theta(1,:);
+%     theta2 = theta(2,:);
+%     theta3 = theta(3,:);
+%     theta4 = theta(4,:);
+%     theta5 = theta(5,:);
+%     theta6 = theta(6,:);
+%     
+%     msg.Position = [theta1,theta2,theta3,theta4,theta5,theta6, 1.0];
+%     send(pub,msg);
+%     
+%     pause(0.1)
+%     display('Execute')
+%     
+%     sub = rossubscriber('/posestamped');
+%     my_sub= receive(sub,10);
+%     
+%     new_position = [my_sub.Pose.Position.X,my_sub.Pose.Position.Y,my_sub.Pose.Position.Z];
+%     
+%     if (new_position ~= position)
+%         xd = set_xd(new_position)
+%     end
     
     
     
     
     
     
-%     norm(error)
-%     plot(denso_kine, theta');
-%     plot(xm,'scale',0.2);
-%     hold on
-%     axis equal;
-%     axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
-%     view(-0.5 ,0);
-%     drawnow;
+    
+    
+    norm(error)
+    plot(denso_kine, theta');
+    plot(xm,'scale',0.2);
+    hold on
+    axis equal;
+    axis([-0.8,1.2,-0.8,0.8,-0.2,1.5]);
+    view(-0.5 ,0);
+    drawnow;
 
 end
 
