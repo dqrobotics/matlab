@@ -1,4 +1,4 @@
-% Basic definitions for the iRoomba Create Robot
+% Basic definitions for a free-flying robot with a radius of 0.25 m.
 
 % (C) Copyright 2011-2020 DQ Robotics Developers
 % 

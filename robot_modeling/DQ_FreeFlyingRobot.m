@@ -44,6 +44,12 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
         radius = 0.25; % The default sphere radius is 0.25 m
     end
     
+    properties (Access = private)
+        dim_configuration_space;
+        shape_template;
+        handle;
+    end
+    
     methods
         function obj = DQ_FreeFlyingRobot()
             % This robot configuration is given by the unit dual quaternion
@@ -67,7 +73,17 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
             end
         end
             
-       
+        function dim = get_dim_configuration_space(obj)
+            dim = obj.dim_configuration_space;
+        end
+        
+        function plot(robot, q)
+            if isempty(robot.handle)
+                robot.handle = robot.create_new_robot();
+            end
+            
+            update_robot(robot,q);
+        end
         
         function J = pose_jacobian(~,x, ~)
         % POSE_JACOBIAN(x) returns, given the unit dual quaternion x that
@@ -98,7 +114,7 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
     end
     
     methods (Access = protected)
-        function h = create_new_robot(~, opt)
+        function h = create_new_robot(robot, opt)
             % h = CREATE_NEW_ROBOT(robot, opt) uses data from robot object and
             % options to create a graphical robot. It returns a structure of handles
             % to graphical objects.            
@@ -111,8 +127,31 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
             % h.xt      text for the base x-axis
             % h.yt      text for the base y-axis
             % h.zt      text for the base z-axis
-         
-            h.scale = opt.scale;
+            
+         %   if nargin > 2
+              %  h.scale = opt.scale;
+                 % create frame
+                 %   if opt.frame
+                    h.x = line('xdata', [0;0], ...
+                        'ydata', [0;0], ...
+                        'zdata', [0;0], ...
+                        'color', 'red');
+                    h.y = line('xdata', [0;0], ...
+                        'ydata', [0;0], ...
+                        'zdata', [0;0], ...
+                        'color', 'green');
+                    h.z = line('xdata', [0;0], ...
+                        'ydata', [0;0], ...
+                        'zdata', [0;0], ...
+                        'color', 'blue');
+                    h.xt = text(0, 0, 'x', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+                    h.yt = text(0, 0, 'y', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+                    h.zt = text(0, 0, 'z', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
+            %    end
+           % else
+                h.scale = 2;
+          %  end
+            
             if ~ishold
                 % if current figure has hold on, then draw robot here
                 % otherwise, create a new figure
@@ -124,33 +163,16 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
             set(gca, 'SortMethod', 'depth');
             grid on
                         
-            [X,Y,Z] = sphere(6);
             
-            % Draw a sphere representing the robot
-            h.robot_shape = surface(X,Y,Z);
+            % Store all surface points needed to draw a sphere later on.
+            [robot.shape_template.X,robot.shape_template.Y,...
+                robot.shape_template.Z] = sphere(6);
             
-            
-            % create frame
-            if opt.frame
-                h.x = line('xdata', [0;0], ...
-                    'ydata', [0;0], ...
-                    'zdata', [0;0], ...
-                    'color', 'red');
-                h.y = line('xdata', [0;0], ...
-                    'ydata', [0;0], ...
-                    'zdata', [0;0], ...
-                    'color', 'green');
-                h.z = line('xdata', [0;0], ...
-                    'ydata', [0;0], ...
-                    'zdata', [0;0], ...
-                    'color', 'blue');
-                h.xt = text(0, 0, 'x', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-                h.yt = text(0, 0, 'y', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-                h.zt = text(0, 0, 'z', 'FontWeight', 'bold', 'HorizontalAlignment', 'Center');
-                
-            end
-        end
-        
+            % Draw the actual sphere to initialize the plot system.
+            h.robot_shape = surface(robot.shape_template.X, ...
+                robot.shape_template.Y,robot.shape_template.Z);
+        end        
+       
         function update_robot(robot, q)
             % Get the handle to the graphical robot. Since each kinematic
             % robot stores just one graphical handle, if we want to plot
@@ -159,7 +181,9 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
             % declared, but plotted in different windows/views, the
             % kinematic robot will store the handle of the last view only.
             h = robot.handle;
-            mag = h.scale*robot.radius;
+          %  mag = h.scale*robot.radius;
+          
+            mag = robot.radius;
             % base = vec3(translation(robot.base));
            
             % Get the origin of the frame. Recall that, for a free-flying
@@ -170,9 +194,9 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
             z = p(3);
 
             % Update the free-flying robot's coordinates
-            set(h, 'XData',get(h.robot_shape, 'XData')*mag + x);
-            set(h, 'YData',get(h.robot_shape, 'YData')*mag + y);
-            set(h, 'ZData',get(h.robot_shape, 'ZData')*mag + z);
+            set(h.robot_shape, 'XData',robot.shape_template.X * mag + x);
+            set(h.robot_shape, 'YData',robot.shape_template.Y * mag + y);
+            set(h.robot_shape, 'ZData',robot.shape_template.Z * mag + z);
 
             % display the wrist axes and labels   
             % compute the wrist axes, based on final link transformation plus the
@@ -195,9 +219,9 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
                 H = hamiplus4(pose.P)*haminus4(pose.P');
 
                 % We can simplify the calculations as follows
-                xv = p + H(2:4,2)*mag; % p = [0; mag; 0; 0]
-                yv = p + H(2:4,3)*mag; % p = [0; 0; mag; 0]
-                zv = p + H(2:4,4)*mag; % p = [0; 0; 0; mag]        
+                xv = p + H(2:4,2)*mag*h.scale; % p = [0; mag; 0; 0]
+                yv = p + H(2:4,3)*mag*h.scale; % p = [0; 0; mag; 0]
+                zv = p + H(2:4,4)*mag*h.scale; % p = [0; 0; 0; mag]        
 
                 % update the wrist axes       
                 set(h.x,'xdata',[p(1) xv(1)], 'ydata', [p(2) xv(2)], ...
