@@ -36,7 +36,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ieee.org
+%     Bruno Vilhena Adorno - adorno@ieee.org
 
 classdef DQ_FreeFlyingRobot < DQ_Kinematics
     

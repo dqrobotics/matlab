@@ -20,7 +20,7 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vilhena Adorno - adorno@ieee.org
 
 classdef FreeFlyingRobot
     methods (Static)
