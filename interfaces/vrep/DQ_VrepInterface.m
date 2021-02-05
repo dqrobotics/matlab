@@ -35,12 +35,12 @@
 %       disconnect - Disconnects from currently connected server
 %       disconnect_all - Flushes all Remote API connections
 %       start_simulation - Start V-REP simulation
-%       start_simulation_synchronous - Start V-REP simulation on
-%       synchronous mode
 %       stop_simulation - Stop V-REP simulation
-%       stop_simulation_synchronous - Stop V-REP simulation on synchronous
-%       mode
-%       trigger - Trigger V-REP simulation on synchronous mode
+%       set_synchronous - Set V-REP synchronous simulation mode
+%       trigger_next_simulation_step - Trigger next simulation step on
+%       synchronous mode
+%       wait_for_simulation_step_to_end - Get the time needed for a command
+%       to be sent to V-REP, executed, and sent back
 %       get_force_sensor_readings - Get the readings of a force sensor in
 %       V-REP
 %       get_object_translation - Get object translation as a pure
@@ -58,8 +58,6 @@
 %       get_joint_positions - Get the joint positions of a robot
 %       get_joint_torques - Get the joint torques of a robot
 %       set_joint_torques - Set the joint torques of a robot
-%       get_ping_time - Get the time needed for a command to be sent to
-%       V-REP, executed, and sent back
 %
 %   DQ_VrepInterface Methods (For advanced users)
 %       call_script_function - Calls a CoppeliaSim script function
@@ -199,16 +197,14 @@ classdef DQ_VrepInterface < handle
             obj.vrep.simxFinish(-1);
         end
         
-        %% Start Simulation
-        function start_simulation(obj)
-            %% Starts the V-REP simulation
-            obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
+        %% Set Synchronous Mode
+        function set_synchronous(obj,flag)
+            %% Enables/Disables Synchronous Mode
+            obj.vrep.simxSynchronous(obj.clientID,flag);
         end
         
-        %% Start Simulation on Synchronous Mode
-        function start_simulation_synchronous(obj)
-            %% Enables Synchronous Mode
-            obj.vrep.simxSynchronous(obj.clientID,true);
+        %% Start Simulation
+        function start_simulation(obj)
             %% Starts the V-REP simulation
             obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
         end
@@ -219,18 +215,16 @@ classdef DQ_VrepInterface < handle
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
         end
         
-        %% Stop Simulation on Synchronous Mode
-        function stop_simulation_synchronous(obj)
-            %% Stops the Synchronous Mode
-            obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
-            %% Stops the V-REP simulation
-            obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
-        end
-        
         %% Trigger Simulation
-        function trigger(obj)
+        function trigger_next_simulation_step(obj)
             %% Triggers the V-REP simulation. For simulations on Synchronous Mode in V-REP
             obj.vrep.simxSynchronousTrigger(obj.clientID);
+        end
+        
+        %% Wait for Simulation Step to End
+        function [ping_time,return_code]=wait_for_simulation_step_to_end(obj)
+            %% Get the time needed for a command to be sent to V-REP, executed, and sent back
+            [return_code, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
         end
         
         %% Get Force Sensor Readings
@@ -640,19 +634,19 @@ classdef DQ_VrepInterface < handle
                         element = obj.element_from_string(handles);
                     end
                     if(~element.state_from_function_signature('get_joint_torques'))
-                        [~,tmp] = obj.vrep.simxJointGetForce(obj.clientID, element.handle, obj.OP_STREAMING);
+                        [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_STREAMING);
                         return_code = 1;
                         while(return_code == 1)
-                            [return_code,tmp] = obj.vrep.simxJointGetForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                            [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
                         end
                     else
-                        [return_code,tmp] = obj.vrep.simxJointGetForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                        [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
                     end
                 else
-                    [return_code,tmp] = obj.vrep.simxJointGetForce(obj.clientID, ...
+                    [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, ...
                         obj.handle_from_string_or_handle(handles{joint_index}), opmode);
                 end
-                joint_torques(joint_index) = double(tmp);
+                joint_torques(joint_index) = double(-tmp);
             end
         end
         
@@ -678,12 +672,6 @@ classdef DQ_VrepInterface < handle
                         opmode);
                 end
             end
-        end
-        
-        %% Get Ping Time
-        function [ping_time,return_code]=get_ping_time(obj)
-            %% Get the time needed for a command to be sent to V-REP, executed, and sent back
-            [return_code, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
         end
         
     end
