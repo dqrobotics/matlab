@@ -67,6 +67,7 @@ x = robot.kinematics().fkm(q);
 error = vec8(xd-x);
 
 %% Main Loop
+joint_names = {'Jaco_joint1','Jaco_joint2','Jaco_joint3','Jaco_joint4','Jaco_joint5','Jaco_joint6'};
 iteration = 1;
 while(stability_counter < stability_counter_max)
     % Control
@@ -83,6 +84,11 @@ while(stability_counter < stability_counter_max)
     robot.send_q_to_vrep(q');
     vi.trigger_next_simulation_step(); % force sensor returns noise values if called before the first trigger
     vi.wait_for_simulation_step_to_end();
+    
+    % Read joint velocities
+    qd_read = robot.get_q_dot_from_vrep();
+    formatSpec = 'Joint velocities read from V-REP: %f\n';
+    fprintf(formatSpec,qd_read);
 
     % Storage of torque
     storage_norm_error(:,iteration) = norm(error); %#ok

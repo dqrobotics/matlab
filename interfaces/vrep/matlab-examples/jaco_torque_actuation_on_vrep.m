@@ -42,12 +42,11 @@ disp('Simulation started!')
 
 %% Robot Definition (DQ Robotics)
 robot = JacoVrepRobot("Jaco", vi);
-% robot = LBR4pVrepRobot("LBR4p", vi);
 
 %% Main Loop
 iteration = 1;
-last_iteration = 20;
-while(iteration < last_iteration)
+final_iteration = 20;
+while(iteration < final_iteration)
     % V-REP communication
     tau = -2*pi*rand(6,1); % random joint torques
     robot.send_tau_to_vrep(tau);

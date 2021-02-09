@@ -98,10 +98,10 @@ classdef JacoVrepRobot < DQ_VrepRobot
             q = obj.vrep_interface.get_joint_positions(obj.joint_names);
         end
         
-        function qd = get_qd_from_vrep(obj)
+        function qd = get_q_dot_from_vrep(obj)
             %% Obtains the joint configurations from VREP
             %  >> vrep_robot = JacoVrepRobot("Jaco", vi)
-            %  >> qd = vrep_robot.get_qd_from_vrep()
+            %  >> qd = vrep_robot.get_q_dot_from_vrep()
             qd = obj.vrep_interface.get_joint_velocities(obj.joint_names);
         end
         

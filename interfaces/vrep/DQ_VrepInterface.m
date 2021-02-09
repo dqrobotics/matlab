@@ -116,6 +116,7 @@ classdef DQ_VrepInterface < handle
         
         % Constant that denotes the V-VREP's remote API array parameters
         AP_JOINTVEL = remApi('remoteApi').sim_jointfloatparam_velocity;
+%         AP_ANGVELZ =  remApi('remoteApi').sim_shapefloatparam_init_velocity_g;
     end
     
     methods (Access = private)
@@ -512,6 +513,30 @@ classdef DQ_VrepInterface < handle
                 joint_velocities(joint_index) = tmp;
             end
         end
+        
+%         %% Get Joint Velocities
+%         function set_joint_velocities(obj,joint_names,joint_velocities,opmode)
+%             %% Set the joint velocities of a robot in V-REP.
+%             %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+%             %%  >> vi.set_joint_velocities(joint_names);
+%             
+%             if nargin == 3
+%                 % The recommended mode is OP_ONESHOT
+%                 for joint_index=1:length(joint_names)
+%                     obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+%                         joint_velocities(joint_index), obj.OP_ONESHOT);
+% %                     obj.vrep.simxSetObjectFloatParameter(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+% %                         obj.AP_ANGVELZ, joint_velocities(joint_index), obj.OP_ONESHOT);
+%                 end
+%             else
+%                 for joint_index=1:length(joint_names)
+%                     obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+%                         joint_velocities(joint_index), opmode);
+% %                     obj.vrep.simxSetObjectFloatParameter(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+% %                         obj.AP_ANGVELZ, joint_velocities(joint_index), opmode);
+%                 end
+%             end
+%         end
         
         %% Set Joint Positions
         function set_joint_positions(obj,handles,thetas,opmode)
