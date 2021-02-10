@@ -36,6 +36,13 @@
 %       disconnect_all - Flushes all Remote API connections
 %       start_simulation - Start V-REP simulation
 %       stop_simulation - Stop V-REP simulation
+%       set_synchronous - Set V-REP synchronous simulation mode
+%       trigger_next_simulation_step - Trigger next simulation step on
+%       synchronous mode
+%       wait_for_simulation_step_to_end - Get the time needed for a command
+%       to be sent to V-REP, executed, and sent back
+%       get_force_sensor_readings - Get the readings of a force sensor in
+%       V-REP
 %       get_object_translation - Get object translation as a pure
 %       quaternion
 %       set_object_translation - Set object translation with a pure
@@ -44,12 +51,16 @@
 %       set_object_rotation - Set object rotation with a unit quaternion
 %       get_object_pose - Get object pose as a unit dual quaternion
 %       set_object_pose - Set object pose with a unit dual quaternion
+%       get_joint_velocities - Get the joint velocities of a robot
 %       set_joint_positions - Set the joint positions of a robot
 %       set_joint_target_positions - Set the joint target positions of a
 %       robot
 %       get_joint_positions - Get the joint positions of a robot
+%       get_joint_torques - Get the joint torques of a robot
+%       set_joint_torques - Set the joint torques of a robot
 %
 %   DQ_VrepInterface Methods (For advanced users)
+%       call_script_function - Calls a CoppeliaSim script function
 %       get_handle - Get the handle of a V-REP object
 %       get_handles - Get the handles for multiple V-REP objects
 %
@@ -88,6 +99,12 @@ classdef DQ_VrepInterface < handle
     end
     
     properties (Constant)
+        % Constant that denotes the V-VREP's remote API child script type
+        ST_CHILD = remApi('remoteApi').sim_scripttype_childscript;
+        
+        % Constant that denotes the V-VREP's remote API command return codes
+        CRC_OK = remApi('remoteApi').simx_return_ok;
+        
         % Constant that denotes the V-VREP's remote API blocking operation mode
         OP_BLOCKING  = remApi('remoteApi').simx_opmode_blocking;
         % Constant that denotes the V-VREP's remote API streaming operation mode
@@ -96,6 +113,10 @@ classdef DQ_VrepInterface < handle
         OP_ONESHOT   = remApi('remoteApi').simx_opmode_oneshot;
         % Constant that denotes the V-VREP's remote API buffer operation mode
         OP_BUFFER    = remApi('remoteApi').simx_opmode_buffer;
+        
+        % Constant that denotes the V-VREP's remote API array parameters
+        AP_JOINTVEL = remApi('remoteApi').sim_jointfloatparam_velocity;
+%         AP_ANGVELZ =  remApi('remoteApi').sim_shapefloatparam_init_velocity_g;
     end
     
     methods (Access = private)
@@ -131,6 +152,30 @@ classdef DQ_VrepInterface < handle
                 ' with VREP 3.5.0']);
         end
         
+        %% Call Script Function
+        function [return_code,output_ints,output_floats,output_trings,retBuffer]=call_script_function(obj,obj_name,script_type,function_name,...
+                                                                                    input_ints,input_floats,input_strings,input_buffer,opmode)
+            %% Call a CoppeliaSim script function. For Lua scripts in VREP.
+            %%  >> obj_handle = vi.get_handles({'Object_name_in_VREP'});
+            %%  >> [return_code,~,mass_as_float,~,~] = call_script_function('remote_api_command_server',vrep.sim_scripttype_childscript,...
+            %%                                            'get_mass',obj_handle,[],[],[])
+            %%  >> if (return_code == vrep.simx_return_ok)
+            %%  >>    mass = mass_as_float;
+            %%  >> end
+            
+            % First approach to the auto-management using
+            % DQ_VrepInterfaceMapElements. If the user does not specify the
+            % opmode, it is chosen as OP_BLOCKING as specified by the
+            % remote API documentation
+            if nargin == 8
+                [return_code,output_ints,output_floats,output_trings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, obj.OP_BLOCKING);
+            else
+                [return_code,output_ints,output_floats,output_trings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, opmode);
+            end
+        end
+        
         function connect(obj,ip,port)
             %% Connects to a V-REP remote API server on a given ip and port
             obj.clientID = obj.vrep.simxStart(ip,port,true,true,5000,5);
@@ -153,6 +198,12 @@ classdef DQ_VrepInterface < handle
             obj.vrep.simxFinish(-1);
         end
         
+        %% Set Synchronous Mode
+        function set_synchronous(obj,flag)
+            %% Enables/Disables Synchronous Mode
+            obj.vrep.simxSynchronous(obj.clientID,flag);
+        end
+        
         %% Start Simulation
         function start_simulation(obj)
             %% Starts the V-REP simulation
@@ -163,6 +214,47 @@ classdef DQ_VrepInterface < handle
         function stop_simulation(obj)
             %% Stops the V-REP simulation
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
+        end
+        
+        %% Trigger Simulation
+        function trigger_next_simulation_step(obj)
+            %% Triggers the V-REP simulation. For simulations on Synchronous Mode in V-REP
+            obj.vrep.simxSynchronousTrigger(obj.clientID);
+        end
+        
+        %% Wait for Simulation Step to End
+        function [ping_time,return_code]=wait_for_simulation_step_to_end(obj)
+            %% Get the time needed for a command to be sent to V-REP, executed, and sent back
+            [return_code, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
+        end
+        
+        %% Get Force Sensor Readings
+        function [force_vec, torque_vec, return_code, state_sensor]=get_force_sensor_readings(obj,handle,opmode)
+            %% Get the readings of a force sensor in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> force_sensor_name = 'Sensor_name_in_VREP';
+            %%  >> [force_vec, torque_vec] = vi.get_force_sensor_readings(force_sensor_handle);
+            
+            % First approach to the auto-management using
+            % DQ_VrepInterfaceMapElements. If the user does not specify the
+            % opmode, it is chosen first as STREAMING and then as BUFFER,
+            % as specified by the remote API documentation
+            element = obj.element_from_string(handle);
+            force_sensor_handle = obj.handle_from_string_or_handle(handle);
+            if nargin <= 2
+                if(~element.state_from_function_signature('get_force_sensor_readings'))
+                    [~, ~, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,element.handle,obj.OP_STREAMING);
+                    return_code = 1;
+                    while(return_code == 1)
+                        [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
+                    end
+                else
+                    [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
+                end
+            else
+                [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,opmode);
+            end
+            force_vec = double(tmp_f);
+            torque_vec = double(tmp_t);
         end
         
         %% Get Handles
@@ -387,6 +479,65 @@ classdef DQ_VrepInterface < handle
             end
         end
         
+        %% Get Joint Velocities
+        function [joint_velocities,return_code]=get_joint_velocities(obj,handles,opmode)
+            %% Get the joint velocities of a robot in V-REP.
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.get_joint_velocities(joint_names);
+            
+            joint_velocities = zeros(length(handles),1);
+            for joint_index=1:length(handles)
+                % First approach to the auto-management using
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
+                % opmode, it is chosen first as STREAMING and then as BUFFER,
+                % as specified by the remote API documentation
+                if nargin <= 2
+                    if isa(handles,'cell')
+                        element = obj.element_from_string(handles{joint_index});
+                    else
+                        element = obj.element_from_string(handles);
+                    end
+                    if(~element.state_from_function_signature('get_joint_velocities'))
+                        [~, tmp] = obj.vrep.simxGetObjectFloatParameter(obj.clientID, element.handle, obj.AP_JOINTVEL, obj.OP_STREAMING);
+                        return_code = 1;
+                        while(return_code == 1)
+                            [return_code, tmp] = obj.vrep.simxGetObjectFloatParameter(obj.clientID, element.handle, obj.AP_JOINTVEL, obj.OP_BUFFER);
+                        end
+                    else
+                        [return_code, tmp] = obj.vrep.simxGetObjectFloatParameter(obj.clientID, element.handle, obj.AP_JOINTVEL, obj.OP_BUFFER);
+                    end
+                else
+                    [return_code, tmp] = obj.vrep.simxGetObjectFloatParameter(obj.clientID, ...
+                        obj.handle_from_string_or_handle(handles{joint_index}), obj.AP_JOINTVEL, opmode);
+                end
+                joint_velocities(joint_index) = tmp;
+            end
+        end
+        
+%         %% Get Joint Velocities
+%         function set_joint_velocities(obj,joint_names,joint_velocities,opmode)
+%             %% Set the joint velocities of a robot in V-REP.
+%             %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+%             %%  >> vi.set_joint_velocities(joint_names);
+%             
+%             if nargin == 3
+%                 % The recommended mode is OP_ONESHOT
+%                 for joint_index=1:length(joint_names)
+%                     obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+%                         joint_velocities(joint_index), obj.OP_ONESHOT);
+% %                     obj.vrep.simxSetObjectFloatParameter(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+% %                         obj.AP_ANGVELZ, joint_velocities(joint_index), obj.OP_ONESHOT);
+%                 end
+%             else
+%                 for joint_index=1:length(joint_names)
+%                     obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+%                         joint_velocities(joint_index), opmode);
+% %                     obj.vrep.simxSetObjectFloatParameter(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+% %                         obj.AP_ANGVELZ, joint_velocities(joint_index), opmode);
+%                 end
+%             end
+%         end
+        
         %% Set Joint Positions
         function set_joint_positions(obj,handles,thetas,opmode)
             %% Set the joint positions of a robot in V-REP. For joints that are in 'Passive Mode' in V-REP
@@ -489,9 +640,65 @@ classdef DQ_VrepInterface < handle
             end
         end
         
+        %% Get Joint Torques
+        function [joint_torques,return_code]=get_joint_torques(obj,handles,opmode)
+            %% Get the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.get_joint_torques(joint_names);
+            
+            joint_torques = zeros(length(handles),1);
+            for joint_index=1:length(handles)
+                % First approach to the auto-management using
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
+                % opmode, it is chosen first as STREAMING and then as BUFFER,
+                % as specified by the remote API documentation
+                if nargin <= 2
+                    if isa(handles,'cell')
+                        element = obj.element_from_string(handles{joint_index});
+                    else
+                        element = obj.element_from_string(handles);
+                    end
+                    if(~element.state_from_function_signature('get_joint_torques'))
+                        [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_STREAMING);
+                        return_code = 1;
+                        while(return_code == 1)
+                            [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                        end
+                    else
+                        [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                    end
+                else
+                    [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, ...
+                        obj.handle_from_string_or_handle(handles{joint_index}), opmode);
+                end
+                joint_torques(joint_index) = double(-tmp);
+            end
+        end
+        
+        %% Set Joint Torques
+        function set_joint_torques(obj,joint_names,torques,opmode)
+            %% Set the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.set_joint_torques(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+            
+            if nargin == 3
+                % The recommended mode is OP_ONESHOT
+                for joint_index=1:length(joint_names)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                        sign(torques(joint_index))*10e10, obj.OP_ONESHOT);
+                    obj.vrep.simxSetJointForce(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                        abs(torques(joint_index)), obj.OP_ONESHOT);
+                end
+            else
+                for joint_index=1:length(joint_names)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}),...
+                        sign(torques(joint_index))*10e10, opmode);
+                    obj.vrep.simxSetJointForce(obj.clientID,obj.handle_from_string_or_handle(joint_names{joint_index}),abs(torques(joint_index)),...
+                        opmode);
+                end
+            end
+        end
+        
     end
     
 end
-
-
-
