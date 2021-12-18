@@ -189,6 +189,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
         
+        function types = get_types(obj)
+            % GET_TYPES() returns the five row of the Matrix A, which
+            % correspond to the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
+            % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
+            types = obj.type; 
+        end
+        
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
             % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
             % time derivative.
