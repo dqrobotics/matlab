@@ -53,7 +53,8 @@
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
-        type,theta,d,a,alpha;
+        type;
+        %theta,d,a,alpha;
     end
     
     properties (Constant)
@@ -187,6 +188,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             else
                 w = DQ.E*DQ.k;
             end
+        end
+        
+        function as = get_as(obj)
+            % GET_AS() returns the third row of the Matrix A, which
+            % correspond to the distances between the axes z(i-1) and z(i)
+            % along the axis x(i) in the DH convention.
+            as = obj.a;
         end
         
         function alphas = get_alphas(obj)
