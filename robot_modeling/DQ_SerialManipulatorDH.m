@@ -88,30 +88,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             obj.type = A(5,:);
         end
         
-        function x = raw_fkm(obj,q,to_ith_link)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %   'to_ith_link' defines until which link the raw_fkm will be
-            %   calculated.
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            if nargin == 3
-                n = to_ith_link;
-            else
-                n = obj.n_links;
-            end
-            
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*dh2dq(obj,q(i),i);
-            end
-        end
+        
         
         function x = fkm(obj,q,to_ith_link)
             %   FKM(q) calculates the forward kinematic model and
@@ -209,6 +186,42 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 w = DQ.k;
             else
                 w = DQ.E*DQ.k;
+            end
+        end
+        
+        function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
+            % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
+            % time derivative.
+            % 
+            % POSE_JACOBIAN_DERIVATIVE(q,q_dot,ith) returns the first
+            % ith columns of the Jacobian time derivative.
+            % This function does not take into account any base or
+            % end-effector displacements.
+            J_dot = obj.pose_jacobian_derivative(obj,q,q_dot, ith);
+        end
+        
+        function x = raw_fkm(obj,q,to_ith_link)
+            %   RAW_FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   last joint (the displacements due to the base and the effector
+            %   are not taken into account).
+            %
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines until which link the raw_fkm will be
+            %   calculated.
+            %
+            %   This is an auxiliary function to be used mainly with the
+            %   Jacobian function.
+            if nargin == 3
+                n = to_ith_link;
+            else
+                n = obj.n_links;
+            end
+            
+            x = DQ(1);
+            
+            for i=1:n
+                x = x*dh2dq(obj,q(i),i);
             end
         end
         
