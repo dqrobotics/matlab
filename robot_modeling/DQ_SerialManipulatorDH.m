@@ -53,7 +53,7 @@
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
-        type
+        type,theta,d,a,alpha;
     end
     
     properties (Constant)
@@ -189,8 +189,14 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
         
+        function alphas = get_alphas(obj)
+            % GET_ALPHAS() returns the fourth row of the Matrix A, which
+            % correspond to the alpha parameters of the DH convention.
+            alphas =  obj.alpha;            
+        end
+        
         function types = get_types(obj)
-            % GET_TYPES() returns the five row of the Matrix A, which
+            % GET_TYPES() returns the fifth row of the Matrix A, which
             % correspond to the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
             types = obj.type; 
