@@ -190,10 +190,19 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
         
+        function ds = get_ds(obj)
+            % GET_DS() returns the second row of the Matrix A, which
+            % correspond to the distances from the origin F(i-1) to the
+            % intersection of the axes x(i) with z(i-1) along the z(i-1)
+            % axis. These parameters are denoted as 'd'.
+            ds = obj.d;
+        end
+        
         function as = get_as(obj)
             % GET_AS() returns the third row of the Matrix A, which
             % correspond to the distances between the axes z(i-1) and z(i)
-            % along the axis x(i) in the DH convention.
+            % along the axis x(i) in the DH convention. These parameters are
+            % denoted as 'a'.
             as = obj.a;
         end
         
