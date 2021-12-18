@@ -190,11 +190,18 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
         
+        function th = get_thetas(obj)
+            %GET_THETAS() returns the first row of the Matrix A, which
+            %correspond to the angles from axes x(i-1) to x(i) measured in
+            %a plane normal to z(i-1) in the DH convention.
+            th = obj.theta;
+        end
+        
         function ds = get_ds(obj)
             % GET_DS() returns the second row of the Matrix A, which
             % correspond to the distances from the origin F(i-1) to the
             % intersection of the axes x(i) with z(i-1) along the z(i-1)
-            % axis. These parameters are denoted as 'd'.
+            % axis in the DH convention. These parameters are denoted as 'd'.
             ds = obj.d;
         end
         
