@@ -80,7 +80,7 @@ classdef DQ_Kinematics < handle
         % Robot configuration vector
         q
         %  Dimension of the robot configuration space
-        dim_configuration_space;
+        dim_configuration_space_;
         %  The lower bound of the robot configuration;
         lower_q_limit_;
         %  The upper bound of the robot configuration;
