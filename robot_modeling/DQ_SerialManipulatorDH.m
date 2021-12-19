@@ -236,7 +236,45 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             % ith columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
-            J_dot = obj.pose_jacobian_derivative(obj,q,q_dot, ith);
+            
+            if nargin == 4
+                n = ith;
+                x_effector = obj.raw_fkm(q,ith);
+                J = obj.raw_pose_jacobian(q,ith);
+                vec_x_effector_dot = J*q_dot(1:ith);
+            else
+                n = obj.dim_configuration_space_;
+                x_effector = obj.raw_fkm(q);
+                J = obj.raw_pose_jacobian(q);
+                vec_x_effector_dot = J*q_dot;
+            end
+                                 
+            x = DQ(1);            
+            J_dot = zeros(8,n);
+
+            for i = 0:n-1
+                % Use the standard DH convention
+                
+                w = DQ.k;
+                %z = DQ(obj.get_z(x.q));
+                z = 0.5*x*w*conj(x);
+                
+                % When i = 0 and length(theta) = 1, theta(1,i) returns
+                % a 1 x 0 vector, differently from the expected
+                % behavior, which is to return a 0 x 1 matrix.
+                % Therefore, we have to deal with the case i = 0
+                % explictly.
+                if i ~= 0
+                    vec_zdot = 0.5*(haminus8(w*x') + ...
+                        hamiplus8(x*w)*DQ.C8) * ...
+                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
+                else
+                    vec_zdot = zeros(8,1);
+                end
+                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
+                    hamiplus8(z)*vec_x_effector_dot;
+                x = x*obj.dh2dq(q(i+1),i+1);
+            end
         end
         
         function x = raw_fkm(obj,q,to_ith_link)
