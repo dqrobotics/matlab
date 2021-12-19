@@ -6,6 +6,10 @@
 %   reference_frame - Reference frame (not always coincident with base_frame).
 %   q - Robot configuration vector.
 %   dim_configuration_space - Dimension of the robot configuration space.
+%   lower_q_limit_ - The lower bound of the robot configuration;
+%   upper_q_limit_ - The upper bound of the robot configuration;
+%   lower_q_dot_limit_ - The lower bound of the robot configuration velocity;
+%   upper_q_dot_limit_ - The upper bound of the robot configuration velocity;
 %
 % DQ_Kinematics Methods (Abstract):
 %       get_dim_configuration_space - Returns the dimension of the configuration space.
@@ -77,6 +81,14 @@ classdef DQ_Kinematics < handle
         q
         %  Dimension of the robot configuration space
         dim_configuration_space;
+        %  The lower bound of the robot configuration;
+        lower_q_limit_;
+        %  The upper bound of the robot configuration;
+        upper_q_limit_;
+        %  The lower bound of the robot configuration velocity;
+        lower_q_dot_limit_;
+        %  The upper bound of the robot configuration velocity;
+        upper_q_dot_limit_;
     end
     
     methods
