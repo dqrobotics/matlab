@@ -5,6 +5,7 @@
 %   name - Unique name that is generated randomly.
 %   reference_frame - Reference frame (not always coincident with base_frame).
 %   q - Robot configuration vector.
+%   dim_configuration_space - Dimension of the robot configuration space.
 %
 % DQ_Kinematics Methods (Abstract):
 %       get_dim_configuration_space - Returns the dimension of the configuration space.
@@ -73,7 +74,9 @@ classdef DQ_Kinematics < handle
         % Frame used to determine the robot physical location
         base_frame;
         % Robot configuration vector
-        q        
+        q
+        %  Dimension of the robot configuration space
+        dim_configuration_space;
     end
     
     methods
