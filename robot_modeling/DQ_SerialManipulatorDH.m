@@ -51,10 +51,10 @@
 % Contributors to this file:
 %     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
 
-classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
+classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
     properties
         type;
-        %theta,d,a,alpha;
+        theta,d,a,alpha;
     end
     
     properties (Constant)
@@ -71,15 +71,17 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             % DQ_SerialManipulator
             %obj.convention = convention;
             %obj.n_links = size(A,2);
-            %obj.theta = A(1,:);
-            %obj.d = A(2,:);
-            %obj.a = A(3,:);
-            %obj.alpha = A(4,:);
-            obj = obj@DQ_SerialManipulator(A(1:4,:),convention);
+              
+            obj = obj@DQ_SerialManipulator_(size(A,2));
+            obj.theta = A(1,:);
+            obj.d = A(2,:);
+            obj.a = A(3,:);
+            obj.alpha = A(4,:);
             
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
-            end
+            end            
+            
             
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
@@ -252,7 +254,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if nargin == 3
                 n = to_ith_link;
             else
-                n = obj.n_links;
+                n = obj.dim_configuration_space_;
             end
             
             x = DQ(1);
