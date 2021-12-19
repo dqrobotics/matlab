@@ -140,6 +140,28 @@ classdef DQ_Kinematics < handle
       
     end
     
+    methods (Access = protected)
+        % Protected method to check if the index to a link is valid.
+        function check_to_ith_link(obj, to_ith_link)
+            n_links = get_dim_configuration_space(obj);
+            if to_ith_link >= n_links || to_ith_link < 0
+                error('Tried to access link index %d', to_ith_link,...
+                ' which is unnavailable.');
+            end
+            
+        end
+        
+        function check_q_vec(obj, q_vec)
+            % Protected method to check if the size of the vector
+            % of joint values q_vec is valid.
+            n_links = get_dim_configuration_space(obj);
+            if length(q_vec) ~= n_links
+                error('Input vector must have size %d', n_links)
+            end
+        end
+        
+    end
+    
     methods (Abstract)
         
         % GET_DIM_CONFIGURATION_SPACE returns the dimension of the configuration
