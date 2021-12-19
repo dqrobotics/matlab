@@ -13,7 +13,7 @@
 % The first row of 'A' contains the joint offsets. More specifically,
 % theta_i is the offset for the i-th joint.
 %
-% DQ_SerialManipulator Methods (Concrete):
+% DQ_SerialManipulator Methods (Abstract):
 %       get_dim_configuration_space - Return the dimension of the configuration space.
 %       fkm - Compute the forward kinematics while taking into account base and end-effector's rigid transformations.
 %       plot - Plots the serial manipulator.
@@ -45,12 +45,13 @@
 %
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
+%     Juan Jose Quiroz Omana - juanjqogm@gmail.com
 
 % TODO: Remove the virtual joints. Instead of helping, they cause a lot of
 % confusion, specially among those trying to learn the library. The
 % affected methods are: FKM and Jacobian.
 
-classdef DQ_SerialManipulator < DQ_Kinematics
+classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
         theta,d,a,alpha;
         convention;        
