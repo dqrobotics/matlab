@@ -278,7 +278,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             % internally in DQ_kinematics
             
             if nargin < 3
-                to_ith_link = obj.n_links;
+                to_ith_link = obj.dim_configuration_space_;
             end
             x_effector = obj.raw_fkm(q,to_ith_link);
             
