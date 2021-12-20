@@ -54,7 +54,7 @@
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
     properties
         type;
-        theta,d,a,alpha;
+        %theta,d,a,alpha;
     end
     
     properties (Access = protected)
@@ -79,10 +79,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
               
             obj = obj@DQ_SerialManipulator_(size(A,2));
             obj.dh_matrix_ = A;
-            obj.theta = A(1,:); 
-            obj.d = A(2,:);
-            obj.a = A(3,:);
-            obj.alpha = A(4,:);
+            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
+            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
+            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
+            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
             
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
@@ -146,10 +146,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             
             % The optimized standard dh2dq calculation
             % Store half angles and displacements
-            half_theta = obj.theta(ith)/2.0;
-            d = obj.d(ith);
-            a = obj.a(ith);
-            half_alpha = obj.alpha(ith)/2.0;
+            half_theta = obj.dh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
+            d = obj.dh_matrix_(2,ith); %obj.d(ith);
+            a = obj.dh_matrix_(3,ith); %obj.a(ith);
+            half_alpha = obj.dh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
             
             % Add the effect of the joint value
             if obj.type(ith) == obj.JOINT_ROTATIONAL
@@ -202,7 +202,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             %GET_THETAS() returns the first row of the Matrix A, which
             %correspond to the angles from axes x(i-1) to x(i) measured in
             %a plane normal to z(i-1) in the DH convention.
-            th = obj.theta;
+            th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
         function ds = get_ds(obj)
@@ -210,7 +210,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             % correspond to the distances from the origin F(i-1) to the
             % intersection of the axes x(i) with z(i-1) along the z(i-1)
             % axis in the DH convention. These parameters are denoted as 'd'.
-            ds = obj.d;
+            ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
         function as = get_as(obj)
@@ -218,13 +218,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             % correspond to the distances between the axes z(i-1) and z(i)
             % along the axis x(i) in the DH convention. These parameters are
             % denoted as 'a'.
-            as = obj.a;
+            as = obj.dh_matrix_(3,:); %obj.a;
         end
         
         function alphas = get_alphas(obj)
             % GET_ALPHAS() returns the fourth row of the Matrix A, which
             % correspond to the alpha parameters of the DH convention.
-            alphas =  obj.alpha;            
+            alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
         function types = get_types(obj)
