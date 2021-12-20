@@ -21,7 +21,22 @@
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
+
+%
+% DQ_SerialManipulator Methods (Concrete):
+%       get_effector - Get the end-effector rigid transformation with respect to the last frame in the kinematic chain.
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
+%       get_lower_q_limit - Returns the lower bound of the robot configuration.
+%       set_lower_q_limit - Sets the lower bound of the robot configuration.
+%       get_lower_q_dot_limit () - Returns the lower bound of the robot configuration velocity.
+%       set_lower_q_dot_limit () - Seturns the lower bound of the robot configuration velocity.
+%       get_upper_q_limit - Returns the upper bound of the robot configuration.
+%       set_upper_q_limit - Sets the upper bound of the robot configuration.
+%       get_upper_q_dot_limit () - Returns the upper bound of the robot configuration velocity.
+%       set_upper_q_dot_limit () - Seturns the upper bound of the robot configuration velocity.
+
+
+
 % See also DQ_Kinematics.
 
 % (C) Copyright 2011-2020 DQ Robotics Developers
