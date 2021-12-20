@@ -51,7 +51,7 @@
 % Contributors to this file:
 %     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
 
-classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
+classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     %properties
         %type;
         %theta,d,a,alpha;
@@ -77,7 +77,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             %obj.convention = convention;
             %obj.n_links = size(A,2);
               
-            obj = obj@DQ_SerialManipulator_(size(A,2));
+            obj = obj@DQ_SerialManipulator(size(A,2));
             obj.dh_matrix_ = A;
             %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
             %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
