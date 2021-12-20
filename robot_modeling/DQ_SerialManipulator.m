@@ -69,6 +69,35 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         %n_links;
     end
     
+    methods (Abstract)
+         % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
+         % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
+         % vector of joint variables.
+         %
+         % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
+         % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
+         % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
+         %
+         % This function does not take into account any base or
+         % end-effector displacements and should be used mostly
+         % internally in DQ_kinematics
+         J = raw_pose_jacobian(obj, q,to_ith_link);
+         
+       
+         %   RAW_FKM(q) calculates the forward kinematic model and
+         %   returns the dual quaternion corresponding to the
+         %   last joint (the displacements due to the base and the effector
+         %   are not taken into account).
+         %
+         %   'q' is the vector of joint variables
+         %   'to_ith_link' defines until which link the raw_fkm will be
+         %   calculated.
+         %
+         %   This is an auxiliary function to be used mainly with the
+         %   Jacobian function.   
+         pose = raw_fkm(obj,q, to_ith_link); 
+    end
+    
     methods
         function obj = DQ_SerialManipulator(dim_configuration_space)
             if nargin == 0
