@@ -219,7 +219,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 3
                 x = obj.reference_frame*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
-                x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
+                x = obj.reference_frame*obj.raw_fkm(q)*obj.curr_effector_;
             end
         end      
              
@@ -240,7 +240,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*...
+                J = hamiplus8(obj.reference_frame)*haminus8(obj.curr_effector_)*...
                     obj.raw_pose_jacobian(q);
             end
         end        
@@ -606,7 +606,7 @@ function update_robot(robot, q)
     if isfield(h, 'x')
         % get the end-effector pose (considering the final transformation given
         % by set_end_effector()
-        t = robot.base_frame*robot.raw_fkm(q)*robot.effector;
+        t = robot.base_frame*robot.raw_fkm(q)*robot.curr_effector_;
         t1 = vec3(translation(t));        
         
         % The following transformations use the Hamilton operators to
