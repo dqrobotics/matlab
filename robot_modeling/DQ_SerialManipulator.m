@@ -66,7 +66,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
-        n_links;
+        %n_links;
     end
     
     methods
@@ -75,15 +75,15 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 error('Input: dimension of the configuration space')
             end
             
-            obj.n_links = size(A,2);
-            obj.theta = A(1,:);
-            obj.d = A(2,:);
-            obj.a = A(3,:);
-            obj.alpha = A(4,:);
+            %obj.n_links = size(A,2);
+            %obj.theta = A(1,:);
+            %obj.d = A(2,:);
+            %obj.a = A(3,:);
+            %obj.alpha = A(4,:);
             
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
-            obj.effector = DQ(1); %Default effector's pose
+            obj.curr_effector_ = DQ(1); %Default effector's pose
             
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
