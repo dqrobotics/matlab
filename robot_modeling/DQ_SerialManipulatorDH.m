@@ -52,10 +52,10 @@
 %     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
-    properties
-        type;
+    %properties
+        %type;
         %theta,d,a,alpha;
-    end
+    %end
     
     properties (Access = protected)
         dh_matrix_;
@@ -231,7 +231,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             % GET_TYPES() returns the fifth row of the Matrix A, which
             % correspond to the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
-            types = obj.type; 
+            types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
