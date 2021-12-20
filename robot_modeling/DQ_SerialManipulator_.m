@@ -95,23 +95,9 @@ classdef (Abstract) DQ_SerialManipulator_ < DQ_Kinematics
          %
          %   This is an auxiliary function to be used mainly with the
          %   Jacobian function.   
-         pose = raw_fkm(obj,q, to_ith_link);    
+         pose = raw_fkm(obj,q, to_ith_link);            
          
-         %   FKM(q) calculates the forward kinematic model and
-         %   returns the dual quaternion corresponding to the
-         %   end-effector pose. This function takes into account the
-         %   displacement due to the base's and effector's poses.
-         %
-         %   'q' is the vector of joint variables
-         %   'to_ith_link' defines up to which link the fkm will be
-         %   calculated. If to_ith_link corresponds to the last link,
-         %   the method DOES NOT take into account the transformation
-         %   given by set_effector. If you want to take into account
-         %   that transformation, use FKM(q) instead.
-         pose = fkm(obj,to_ith_link);  % Override from DQ_Kinematics 
-         
-         
-        
+                
          
          
          
@@ -220,6 +206,26 @@ classdef (Abstract) DQ_SerialManipulator_ < DQ_Kinematics
             % SET_UPPER_Q_DOT_LIMIT(new_upper_q_dot_limit) sets the 
             %lower bound of the robot configuration velocity;
             obj.upper_q_dot_limit_ = new_upper_q_dot_limit;
+        end
+        
+        function x = fkm(obj,q,to_ith_link)
+            %   FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   end-effector pose. This function takes into account the
+            %   displacement due to the base's and effector's poses.
+            %
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines up to which link the fkm will be
+            %   calculated. If to_ith_link corresponds to the last link,
+            %   the method DOES NOT take into account the transformation
+            %   given by set_effector. If you want to take into account
+            %   that transformation, use FKM(q) instead.
+            
+            if nargin == 3
+                x = obj.reference_frame*obj.raw_fkm(q, to_ith_link); %Takes into account the base displacement
+            else
+                x = obj.reference_frame*obj.raw_fkm(q)*obj.curr_effector_;
+            end
         end
         
         function J = pose_jacobian(obj, q, ith)
@@ -679,7 +685,10 @@ function o = plot_options(robot, optin)
         for i=1:robot.dim_configuration_space_
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
-            reach = reach + abs(robot.a(i)) + abs(robot.d(i));
+            %reach = reach + abs(robot.a(i)) + abs(robot.d(i));
+            robot_a = robot.dh_matrix_(3,i);
+            robot_d = robot.dh_matrix_(2,i);
+            reach = reach + abs(robot_a) + abs(robot_d);
         end
         o.workspace = [-reach reach -reach reach -reach reach];      
     else
