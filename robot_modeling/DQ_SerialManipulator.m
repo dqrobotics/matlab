@@ -85,6 +85,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             obj.base_frame = DQ(1);
             obj.curr_effector_ = DQ(1); %Default effector's pose
             
+            % Define the joint limits
+            obj.lower_q_limit_ = -Inf(dim_configuration_space,1);
+            obj.upper_q_limit_ =  Inf(dim_configuration_space,1);
+            obj.lower_q_dot_limit_ = -Inf(dim_configuration_space,1);
+            obj.upper_q_dot_limit_ =  Inf(dim_configuration_space,1);
+            
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
