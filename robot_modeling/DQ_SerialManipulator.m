@@ -55,7 +55,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
         theta,d,a,alpha;
         convention;        
-        effector;
+        curr_effector_;
         
         % Properties for the plot function        
         plotopt
