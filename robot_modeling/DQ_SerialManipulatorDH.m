@@ -19,14 +19,16 @@
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
-%       get_dim_configuration_space - Return the dimension of the configuration space.
-%       fkm - Compute the forward kinematics while taking into account base and end-effector's rigid transformations.
-%       plot - Plots the serial manipulator.
-%       pose_jacobian - Compute the pose Jacobian while taking into account base's and end-effector's rigid transformations.
+%       get_thetas - Returns the first row of the DH Matrix ('theta' parameter). 
+%       get_ds - Returns the second row of the DH Matrix ('d' parameter).
+%       get_as - Returns the third row of the DH Matrix ('a' parameter).
+%       get_alphas - Returns the fourth row of the DH Matrix ('alpha' parameter).
+%       get_types - Returns the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONALor DQ_SerialManipulatorDH.JOINT_PRISMATIC
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
-%       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
-%       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
+%       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
+%
+%
 % See also DQ_SerialManipulator.
 
 % (C) Copyright 2020 DQ Robotics Developers
