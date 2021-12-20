@@ -70,9 +70,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     end
     
     methods
-        function obj = DQ_SerialManipulator(A,convention)
+        function obj = DQ_SerialManipulator(dim_configuration_space)
             if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
+                error('Input: dimension of the configuration space')
             end
             
             obj.n_links = size(A,2);
