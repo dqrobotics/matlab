@@ -224,48 +224,8 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             end
         end       
                
-
-        
-        function J = raw_pose_jacobian(obj,q,ith)
-            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
-            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
-            % vector of joint variables.
-            %
-            % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
-            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
-            % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
-            %
-            % This function does not take into account any base or
-            % end-effector displacements and should be used mostly
-            % internally in DQ_kinematics
-            
-            if nargin == 3
-                n = ith;
-                x_effector = obj.raw_fkm(q,ith);
-            else
-                n = obj.n_links;
-                x_effector = obj.raw_fkm(q);
-            end
-            
-            x = DQ(1);
-            J = zeros(8,n);
-            
-            for i = 0:n-1
-                % Use the standard DH convention
-                if strcmp(obj.convention,'standard')
-                    z = DQ(obj.get_z(x.q));
-                else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
-                        0,-obj.a(i+1)*cos(obj.alpha(i+1)), ...
-                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
-                    z = 0.5*x*w*x';
-                end
-                
-                x = x*obj.dh2dq(q(i+1),i+1);
-                j = z * x_effector;
-                J(:,i+1) = vec8(j);
-            end
-        end
+       
+      
         
         function J = pose_jacobian(obj, q, ith)
             % POSE_JACOBIAN(q) returns the Jacobian that satisfies
