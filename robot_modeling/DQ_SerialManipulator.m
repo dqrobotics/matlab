@@ -222,20 +222,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             else
                 x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
             end
-        end
-        
-        
-        
-        function p = get_z(~,h)
-            p(1) = 0;
-            p(2) = h(2)*h(4) + h(1)*h(3);
-            p(3) = h(3)*h(4) - h(1)* h(2);
-            p(4) = (h(4)^2-h(3)^2-h(2)^2+h(1)^2)/2;
-            p(5) = 0;
-            p(6) = h(2)*h(8)+h(6)*h(4)+h(1)*h(7)+h(5)*h(3);
-            p(7) = h(3)*h(8)+h(7)*h(4)-h(1)*h(6)-h(5)*h(2);
-            p(8) = h(4)*h(8)-h(3)*h(7)-h(2)*h(6)+h(1)*h(5);
-        end
+        end       
+               
+
         
         function J = raw_pose_jacobian(obj,q,ith)
             % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
