@@ -57,6 +57,11 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
         theta,d,a,alpha;
     end
     
+    properties (Access = protected)
+        dh_matrix_;
+       
+    end
+    
     properties (Constant)
         % Joints that can be actuated
         % Rotational joint
