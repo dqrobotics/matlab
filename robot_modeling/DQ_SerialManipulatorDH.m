@@ -94,7 +94,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             end
             
             % Add type
-            obj.type = A(5,:);
+            %obj.type = A(5,:);
         end
         
         
@@ -150,9 +150,11 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             d = obj.dh_matrix_(2,ith); %obj.d(ith);
             a = obj.dh_matrix_(3,ith); %obj.a(ith);
             half_alpha = obj.dh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
+            joint_type = obj.dh_matrix_(5,ith);
             
             % Add the effect of the joint value
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
+            %if obj.type(ith) == obj.JOINT_ROTATIONAL
+            if joint_type == obj.JOINT_ROTATIONAL   
                 % If joint is rotational
                 half_theta = half_theta + (q/2.0);
             else
@@ -190,8 +192,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
                 ]);
         end
         
-        function w = get_w(obj,ith)       
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
+        function w = get_w(obj,ith) 
+            joint_type = obj.dh_matrix_(5,ith);
+            if joint_type == obj.JOINT_ROTATIONAL
                 w = DQ.k;
             else
                 w = DQ.E*DQ.k;
