@@ -143,10 +143,15 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             ret = obj.dim_configuration_space_;
         end
         
-        function set_effector(obj,effector)
+        function ret = get_effector(obj)
+            % GET_EFFECTOR(effector) gets the pose of the effector 
+            ret = obj.curr_effector_;
+        end
+        
+        function ret = set_effector(obj,new_effector)
             % SET_EFFECTOR(effector) sets the pose of the effector
-            
-            obj.effector = DQ(effector);
+            obj.curr_effector_ = DQ(new_effector);
+            ret = obj.curr_effector_;
         end
         
         function x = raw_fkm(obj,q, ith)
