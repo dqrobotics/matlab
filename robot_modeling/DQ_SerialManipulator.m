@@ -230,7 +230,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % both base and end-effector displacements (their default
             % values are 1).
             
-            if nargin == 3 && ith < obj.n_links
+            if nargin == 3 && ith < obj.dim_configuration_space_
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
@@ -355,7 +355,7 @@ function dq_kinematics_plot(robot, q, varargin)
         opt = plot_options(robot, varargin);
     end
 
-    n = robot.n_links;
+    n = robot.dim_configuration_space_;
 
     if length(q) ~= n
         error('Incorrect number of joints. The correct number is %d', n);
@@ -483,7 +483,7 @@ function h = create_new_robot(robot, opt)
     end
 
     % Display cylinders (revolute each joint).
-    for i = 1:robot.n_links
+    for i = 1:robot.dim_configuration_space_
         if opt.joints
             %TODO: implement prismatic joints
             N = 8;
@@ -533,7 +533,7 @@ end
 % kinematic robot, and graphics are defined by the handle structure robot.handle, 
 % which stores the 'graphical robot' as robot.handle.robot.
 function update_robot(robot, q)
-    n = robot.n_links;
+    n = robot.dim_configuration_space_;
     
     % Get the handle to the graphical robot. Since each kinematic robot
     % stores just one graphical handle, if we want to plot the same robot
@@ -677,7 +677,7 @@ function o = plot_options(robot, optin)
     % simple heuristic to figure the maximum reach of the robot
     if isempty(o.workspace)
         reach = 0;
-        for i=1:robot.n_links
+        for i=1:robot.dim_configuration_space_
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
             reach = reach + abs(robot.a(i)) + abs(robot.d(i));
