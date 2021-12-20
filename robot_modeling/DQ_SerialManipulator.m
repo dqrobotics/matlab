@@ -138,7 +138,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         end
         
         function ret = get_dim_configuration_space(obj)
-            ret = obj.n_links;
+            % GET_DIM_CONFIGURATION_SPACE() returns the dimension of the
+            % configuration space
+            ret = obj.dim_configuration_space_;
         end
         
         function set_effector(obj,effector)
