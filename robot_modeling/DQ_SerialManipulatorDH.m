@@ -57,7 +57,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
         %theta,d,a,alpha;
     %end
     
-    properties (Access = protected)
+    properties %(Access = protected)
         dh_matrix_;
        
     end
