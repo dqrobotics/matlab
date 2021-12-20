@@ -154,6 +154,54 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             ret = obj.curr_effector_;
         end
         
+        function ret = get_lower_q_limit(obj)
+            % GET_LOWER_Q_LIMIT() returns the lower bound of 
+            %the robot configuration;
+            ret = obj.lower_q_limit_;
+        end
+        
+        function set_lower_q_limit(obj, new_lower_q_limit)
+            % SET_LOWER_Q_LIMIT(new_lower_q_limit) sets the lower bound of 
+            %the robot configuration;
+            obj.lower_q_limit_ = new_lower_q_limit;
+        end
+        
+        function ret = get_lower_q_dot_limit(obj)
+            % GET_LOWER_Q_DOT_LIMIT() returns the lower bound of 
+            %the robot configuration velocity;
+            ret = obj.lower_q_dot_limit_;
+        end
+        
+        function set_lower_q_dot_limit(obj, new_lower_q_dot_limit)
+            % SET_LOWER_Q_DOT_LIMIT() sets the lower bound of 
+            %the robot configuration velocity;
+            obj.lower_q_dot_limit = new_lower_q_dot_limit;
+        end
+        
+        function ret = get_upper_q_limit(obj)
+            % GET_UPPER_Q_LIMIT() returns the upper bound of 
+            %the robot configuration;
+            ret = obj.upper_q_limit_;
+        end
+        
+        function set_upper_q_limit(obj, new_upper_q_limit)
+            % SET_UPPER_Q_LIMIT(new_upper_q_dot_limit) sets the 
+            %lower bound of the robot configuration;
+            obj.upper_q_limit_ = new_upper_q_limit;
+        end
+        
+        function ret = get_upper_q_dot_limit(obj)
+            % GET_UPPER_Q_DOT_LIMIT() returns the upper bound of 
+            %the robot configuration velocity;
+            ret = obj.upper_q_dot_limit_;
+        end
+        
+        function set_upper_q_dot_limit(obj, new_upper_q_dot_limit)
+            % SET_UPPER_Q_DOT_LIMIT(new_upper_q_dot_limit) sets the 
+            %lower bound of the robot configuration velocity;
+            obj.upper_q_dot_limit_ = new_upper_q_dot_limit;
+        end
+        
         function x = raw_fkm(obj,q, ith)
             %   RAW_FKM(q) calculates the forward kinematic model and
             %   returns the dual quaternion corresponding to the
