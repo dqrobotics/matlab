@@ -87,7 +87,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end            
-            
+            if nargin == 2
+                warning('DQ_SerialManipulatorDH(A,convention) is deprecated. Please use DQ_SerialManipulatorDH(A) instead.');
+                
+            end
             
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
