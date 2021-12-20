@@ -202,33 +202,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             obj.upper_q_dot_limit_ = new_upper_q_dot_limit;
         end
         
-        function x = raw_fkm(obj,q, ith)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector 
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            
-            if nargin == 3
-                n = ith;
-            else
-                n = obj.n_links;
-            end
-            
-            if length(q) ~= obj.n_links
-                error('Incorrect number of joint variables');
-            end
-            
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*dh2dq(obj,q(i),i);
-            end
-        end
         
         function x = fkm(obj,q, ith)
             %   FKM(q) calculates the forward kinematic model and
