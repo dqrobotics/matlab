@@ -78,7 +78,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator_
             %obj.n_links = size(A,2);
               
             obj = obj@DQ_SerialManipulator_(size(A,2));
-            obj.theta = A(1,:);
+            obj.dh_matrix_ = A;
+            obj.theta = A(1,:); 
             obj.d = A(2,:);
             obj.a = A(3,:);
             obj.alpha = A(4,:);
