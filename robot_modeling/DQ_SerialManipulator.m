@@ -53,8 +53,8 @@
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
-        theta,d,a,alpha;
-        convention;        
+        %theta,d,a,alpha;
+        %convention;        
         curr_effector_;
         
         % Properties for the plot function        
@@ -96,11 +96,11 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
-            if nargin==1
-                obj.convention='standard';
-            else
-                obj.convention=convention;
-            end
+%             if nargin==1
+%                 obj.convention='standard';
+%             else
+%                 obj.convention=convention;
+%             end
             
             %For visualisation
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
