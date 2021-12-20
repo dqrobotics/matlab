@@ -91,6 +91,8 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             obj.lower_q_dot_limit_ = -Inf(dim_configuration_space,1);
             obj.upper_q_dot_limit_ =  Inf(dim_configuration_space,1);
             
+            obj.dim_configuration_space_ = dim_configuration_space;
+            
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
