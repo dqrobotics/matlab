@@ -257,7 +257,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             for i = 0:n-1
                 % Use the standard DH convention
                 
-                w = DQ.k;
+                w = DQ.k; % ?????
                 %z = DQ(obj.get_z(x.q));
                 z = 0.5*x*w*conj(x);
                 
