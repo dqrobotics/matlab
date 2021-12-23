@@ -180,9 +180,13 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         function w = get_w(obj,ith) 
             joint_type = obj.dh_matrix_(5,ith);
             if joint_type == obj.JOINT_ROTATIONAL
-                w = DQ.k;
+                %w = DQ.k;
+                w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
+                        0,-obj.a(i+1)*cos(obj.alpha(i+1)), ...
+                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
             else
-                w = DQ.E*DQ.k;
+                %w = DQ.E*DQ.k;
+                w = DQ.E*(cos(obj.a(i+1))*DQ.k - sin(obj.a(i+1))*DQ.j )
             end
         end
         
