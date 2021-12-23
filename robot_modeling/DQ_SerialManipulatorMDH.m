@@ -250,10 +250,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             J_dot = zeros(8,n);
 
             for i = 0:n-1
-                % Use the standard DH convention
-                
-                w = DQ.k; % ?????
-                %z = DQ(obj.get_z(x.q));
+                % Use the standard DH convention                
+                w = obj.get_w(i+1);               
                 z = 0.5*x*w*conj(x);
                 
                 % When i = 0 and length(theta) = 1, theta(1,i) returns
