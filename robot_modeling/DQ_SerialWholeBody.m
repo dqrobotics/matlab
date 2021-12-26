@@ -198,11 +198,11 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
             if nargin > 4
                 error('Invalid number of arguments');
             elseif nargin == 4 
-                x = obj.reference_frame * raw_fkm_by_chain(obj,q,ith,jth);
+                x = obj.reference_frame_ * raw_fkm_by_chain(obj,q,ith,jth);
             elseif nargin == 3
-                x = obj.reference_frame * raw_fkm_by_chain(obj,q,ith);
+                x = obj.reference_frame_ * raw_fkm_by_chain(obj,q,ith);
             else
-                x = obj.reference_frame * raw_fkm_by_chain(obj,q);
+                x = obj.reference_frame_ * raw_fkm_by_chain(obj,q);
             end
         end
         
