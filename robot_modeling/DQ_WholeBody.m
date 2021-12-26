@@ -164,11 +164,11 @@ classdef DQ_WholeBody < DQ_Kinematics
             if nargin > 4
                 error('Invalid number of arguments');
             elseif nargin == 4 
-                x = obj.reference_frame * raw_fkm(obj,q,ith,jth);
+                x = obj.reference_frame_ * raw_fkm(obj,q,ith,jth);
             elseif nargin == 3
-                x = obj.reference_frame * raw_fkm(obj,q,ith);
+                x = obj.reference_frame_ * raw_fkm(obj,q,ith);
             else
-                x = obj.reference_frame * raw_fkm(obj,q);
+                x = obj.reference_frame_ * raw_fkm(obj,q);
             end
         end
         
