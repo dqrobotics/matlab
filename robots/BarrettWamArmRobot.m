@@ -36,7 +36,7 @@ classdef BarrettWamArmRobot
                               wam_DH_alpha;
                               wam_DH_type];
 
-            wam = DQ_SerialManipulatorDH(wam_DH_matrix,'standard');
+            wam = DQ_SerialManipulatorDH(wam_DH_matrix);
         end
     end
 end
