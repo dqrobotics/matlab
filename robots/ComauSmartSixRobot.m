@@ -38,8 +38,8 @@ classdef ComauSmartSixRobot
                 comau_DH_a;
                 comau_DH_alpha];
 
-            comau = DQ_SerialManipulator(comau_DH_matrix, 'modified');
-            
+            comau = DQ_SerialManipulatorMDH(comau_DH_matrix);
+                        
             % There is a final transformation for the end-effector given by
             % a rotation of pi around the local x-axis followed by a
             % rotation of pi around the local z-axis
