@@ -39,7 +39,7 @@ classdef KukaLwr4Robot
                 kuka_DH_alpha;
                 kuka_DH_type];
 
-            ret = DQ_SerialManipulatorDH(kuka_DH_matrix,'standard');
+            ret = DQ_SerialManipulatorDH(kuka_DH_matrix);
         end
     end
 end
