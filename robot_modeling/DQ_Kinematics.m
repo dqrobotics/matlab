@@ -1,9 +1,9 @@
 % Abstract class that defines an interface to implement robot kinematics.
 %
 % DQ_Kinematics Properties:
-%   base_frame - Frame used to determine the robot physical location.
+%   base_frame_ - Frame used to determine the robot physical location.
 %   name - Unique name that is generated randomly.
-%   reference_frame - Reference frame (not always coincident with base_frame).
+%   reference_frame_ - Reference frame (not always coincident with base_frame).
 %   q - Robot configuration vector.
 %   dim_configuration_space - Dimension of the robot configuration space.
 %   lower_q_limit_ - The lower bound of the robot configuration;
@@ -74,9 +74,9 @@ classdef DQ_Kinematics < handle
     
     properties (SetAccess = protected)
         % Reference frame used in fkm() and pose_jacobian methods
-        reference_frame;
+        reference_frame_;
         % Frame used to determine the robot physical location
-        base_frame;
+        base_frame_;
         % Robot configuration vector
         q
         %  Dimension of the robot configuration space
@@ -96,27 +96,27 @@ classdef DQ_Kinematics < handle
             % Both reference_frame and base_frame initially coincide, but
             % this can be changed by using set_reference_frame() and 
             % set_base_frame()
-            obj.reference_frame = DQ(1); 
-            obj.base_frame = DQ(1);            
+            obj.reference_frame_ = DQ(1); 
+            obj.base_frame_ = DQ(1);            
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
         end
         
         function ret = get_base_frame(obj)
             % Get the physical location of the robot base in the workspace.
-            ret = obj.base_frame;
+            ret = obj.base_frame_;
         end
         
         function ret = get_reference_frame(obj)
             % Get the reference frame used in the calculation of the FKM and all Jacobians.
-            ret = obj.reference_frame;
+            ret = obj.reference_frame_;
         end
         
         function set_reference_frame(obj,reference_frame)
             % SET_REFERENCE_FRAME(reference_frame) sets the reference frame
             % used for the fkm() and pose_jacobian() methods
             if is_unit(reference_frame)
-                obj.reference_frame = reference_frame;
+                obj.reference_frame_ = reference_frame;
             else
                 error('The reference frame must be a unit dual quaternion.');
             end
@@ -131,7 +131,7 @@ classdef DQ_Kinematics < handle
             % and it does not necessarily coincides with the reference
             % frame.
             if is_unit(base_frame)
-                obj.base_frame = base_frame;
+                obj.base_frame_ = base_frame;
             else
                 error('The base frame must be a unit dual quaternion.');
             end
