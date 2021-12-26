@@ -125,8 +125,8 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %obj.a = A(3,:);
             %obj.alpha = A(4,:);
             
-            obj.reference_frame = DQ(1); %Default base's pose
-            obj.base_frame = DQ(1);
+            obj.reference_frame_ = DQ(1); %Default base's pose
+            obj.base_frame_ = DQ(1);
             obj.curr_effector_ = DQ(1); %Default effector's pose
             
             % Define the joint limits
@@ -232,9 +232,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %   instead.
             
             if nargin == 3
-                x = obj.reference_frame*obj.raw_fkm(q, ith); %Takes into account the base displacement
+                x = obj.reference_frame_*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
-                x = obj.reference_frame*obj.raw_fkm(q)*obj.curr_effector_;
+                x = obj.reference_frame_*obj.raw_fkm(q)*obj.curr_effector_;
             end
         end      
              
@@ -249,13 +249,13 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the base displacement
-                J = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian(...
+                J = hamiplus8(obj.reference_frame_)*obj.raw_pose_jacobian(...
                     q, ith);
             else
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.reference_frame)*haminus8(obj.curr_effector_)*...
+                J = hamiplus8(obj.reference_frame_)*haminus8(obj.curr_effector_)*...
                     obj.raw_pose_jacobian(q);
             end
         end        
@@ -447,14 +447,14 @@ function h = create_new_robot(robot, opt)
 
     % Draw a small plane representing the robot base
     if opt.base
-        plane = robot.base_frame.'*DQ.k*robot.base_frame';
+        plane = robot.base_frame_.'*DQ.k*robot.base_frame_';
         % Since the plane is infinite, the DQ.plot function draws the part
         % closest to the origin of the reference frame. We first
         % consider the plane that passes through the origin and is aligned with 
         % the one that supports the base
         base_handle = plot(plane.P,'plane',opt.mag,'color','k');
         % We then translate the 'visible' plane to the base frame
-        base_translation = vec3(translation(robot.base_frame));
+        base_translation = vec3(translation(robot.base_frame_));
         plane_vertices = get(base_handle, 'Vertices');
         for i = 1:3
             plane_vertices(:,i) = plane_vertices(:,i) + base_translation(i);
@@ -465,7 +465,7 @@ function h = create_new_robot(robot, opt)
      
     % Write the robot name.
     if opt.name        
-        b = vec3(translation(robot.base_frame));
+        b = vec3(translation(robot.base_frame_));
         h.name_handle = text(b(1), b(2) - opt.mag, b(3), [' ' robot.name],...
             'FontAngle', 'italic','FontWeight', 'bold');
     end
@@ -558,7 +558,7 @@ function update_robot(robot, q)
     % the last view only.
     h = robot.handle;
     mag = h.mag;
-    base = vec3(translation(robot.base_frame));
+    base = vec3(translation(robot.base_frame_));
     
     % Initialize the vector containing the origin of each frame along the
     % kinematic chain
@@ -573,7 +573,7 @@ function update_robot(robot, q)
     % compute the link transforms, and record the origin of each frame
     % for the graphics update.    
     for j=1:n    
-        t = vec3(translation(robot.base_frame*robot.raw_fkm(q,j)));
+        t = vec3(translation(robot.base_frame_*robot.raw_fkm(q,j)));
         x(j+1) = t(1);    
         y(j+1) = t(2);
         z(j+1) = t(3);
@@ -598,7 +598,7 @@ function update_robot(robot, q)
             for k = 1:size(xyz,2)
                 % 1 + DQ.E*(1/2)*p, where p = xyz(1:3,k);
                 cylinder_vertex = DQ([1;0;0;0;0;0.5*xyz(1:3,k)]);
-                xyz(1:3,k) = vec3(translation(robot.base_frame*fkm_j*cylinder_vertex));
+                xyz(1:3,k) = vec3(translation(robot.base_frame_*fkm_j*cylinder_vertex));
             end
             
             % Now that all cylinder vertices are transformed, update the
@@ -621,7 +621,7 @@ function update_robot(robot, q)
     if isfield(h, 'x')
         % get the end-effector pose (considering the final transformation given
         % by set_end_effector()
-        t = robot.base_frame*robot.raw_fkm(q)*robot.curr_effector_;
+        t = robot.base_frame_*robot.raw_fkm(q)*robot.curr_effector_;
         t1 = vec3(translation(t));        
         
         % The following transformations use the Hamilton operators to
