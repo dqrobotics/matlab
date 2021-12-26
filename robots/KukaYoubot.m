@@ -47,7 +47,7 @@ classdef KukaYoubot
                              arm_DH_alpha;
                              arm_DH_type];
                     
-            arm =  DQ_SerialManipulatorDH(arm_DH_matrix,'standard');
+            arm =  DQ_SerialManipulatorDH(arm_DH_matrix);
             base = DQ_HolonomicBase();
 
             include_namespace_dq
