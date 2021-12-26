@@ -37,7 +37,7 @@ classdef Ax18ManipulatorRobot
                 ax18_DH_type;
                 ]; % D&H parameters matrix for the arm model
             
-            ax = DQ_SerialManipulatorDH(ax18_DH_matrix,'standard'); % Defines robot model using dual quaternions
+            ax = DQ_SerialManipulatorDH(ax18_DH_matrix); % Defines robot model using dual quaternions
         end
     end    
 end
