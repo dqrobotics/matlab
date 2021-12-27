@@ -144,7 +144,7 @@ classdef DQ_Kinematics < handle
         function check_to_ith_link(obj, to_ith_link)
             % Protected method to check if the index to a link is valid.
             n_links = get_dim_configuration_space(obj);    
-            if to_ith_link > n_links || to_ith_link < 1
+            if to_ith_link > n_links || to_ith_link < 0
                 error('Tried to access link index %d , which is unnavailable.', to_ith_link);
             end
             
