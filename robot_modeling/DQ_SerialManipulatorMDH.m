@@ -70,37 +70,24 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         JOINT_PRISMATIC = 2;
     end
     
-    methods
-        function obj = DQ_SerialManipulatorMDH(A,convention)
-            % These are initialized in the constructor of
-            % DQ_SerialManipulator
-            %obj.convention = convention;
-            %obj.n_links = size(A,2);
-              
-            obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.dh_matrix_ = A;
-            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
-            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
-            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
-            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
-            
-            if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
-            end            
-            if nargin == 2
-                warning('DQ_SerialManipulatorMDH(A,convention) is deprecated. Please use DQ_SerialManipulatorMDH(A) instead.');
-                
+    methods (Access = protected)
+        function w = get_w(obj,ith) 
+        % This method returns the term 'w' related with the time derivative of 
+        % the unit dual quaternion pose using the Modified DH convention.
+        % See. eq (2.27) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % Human-Robot Collaboration' by Bruno Adorno.
+        % Usage: w = get_w(ith), where
+        %          ith: link number
+            joint_type = obj.dh_matrix_(5,ith);
+            alpha = obj.dh_matrix_(4,ith);
+            a = obj.dh_matrix_(3,ith);
+            if joint_type == obj.JOINT_ROTATIONAL
+                w = -DQ.j*sin(alpha)+ DQ.k*cos(alpha)...
+                    -DQ.E*a*(DQ.j*cos(alpha) + DQ.k*sin(alpha));
+            else               
+                w = DQ.E*(cos(alpha)*DQ.k - sin(alpha)*DQ.j);
             end
-            
-            if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
-            end
-            
-            % Add type
-            %obj.type = A(5,:);
-        end       
-        
-        
+        end
         
         function dq = dh2dq(obj,q,ith)
             %   For a given link's Extended MDH parameters, calculate the correspondent dual
@@ -175,19 +162,39 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
                 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
                 ]);
-        end
-        
-        function w = get_w(obj,ith) 
-            joint_type = obj.dh_matrix_(5,ith);
-            alpha = obj.dh_matrix_(4,ith);
-            a = obj.dh_matrix_(3,ith);
-            if joint_type == obj.JOINT_ROTATIONAL
-                w = -DQ.j*sin(alpha)+ DQ.k*cos(alpha)...
-                    -DQ.E*a*(DQ.j*cos(alpha) + DQ.k*sin(alpha));
-            else               
-                w = DQ.E*(cos(alpha)*DQ.k - sin(alpha)*DQ.j);
+        end        
+    end
+    
+    methods
+        function obj = DQ_SerialManipulatorMDH(A,convention)
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator
+            %obj.convention = convention;
+            %obj.n_links = size(A,2);
+              
+            obj = obj@DQ_SerialManipulator(size(A,2));
+            obj.dh_matrix_ = A;
+            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
+            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
+            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
+            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
+            
+            if nargin == 0
+                error('Input: matrix whose columns contain the DH parameters')
+            end            
+            if nargin == 2
+                warning('DQ_SerialManipulatorMDH(A,convention) is deprecated. Please use DQ_SerialManipulatorMDH(A) instead.');
+                
             end
-        end
+            
+            if(size(A,1) ~= 5)
+                error('Input: Invalid DH matrix. It should have 5 rows.')
+            end
+            
+            % Add type
+            %obj.type = A(5,:);
+        end       
+                                     
         
         function th = get_thetas(obj)
             %GET_THETAS() returns the first row of the Matrix A, which
