@@ -240,6 +240,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             % ith columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
+            obj.check_q_vec(q);
+            obj.check_q_vec(q_dot); 
             
             if nargin == 4
                 n = ith;
@@ -252,6 +254,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 J = obj.raw_pose_jacobian(q);
                 vec_x_effector_dot = J*q_dot;
             end
+            obj.check_to_ith_link(n);
                                  
             x = DQ(1);            
             J_dot = zeros(8,n);
@@ -291,12 +294,16 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             %
             %   This is an auxiliary function to be used mainly with the
             %   Jacobian function.
+            
+            obj.check_q_vec(q);
+            
             if nargin == 3
                 n = to_ith_link;
             else
                 n = obj.dim_configuration_space_;
             end
             
+            obj.check_to_ith_link(n);
             x = DQ(1);
             
             for i=1:n
@@ -316,12 +323,14 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             % This function does not take into account any base or
             % end-effector displacements and should be used mostly
             % internally in DQ_kinematics
+            obj.check_q_vec(q);
             
             if nargin < 3
                 to_ith_link = obj.dim_configuration_space_;
             end
             x_effector = obj.raw_fkm(q,to_ith_link);
             
+            obj.check_to_ith_link(to_ith_link);
             x = DQ(1);
             J = zeros(8,to_ith_link);
             
