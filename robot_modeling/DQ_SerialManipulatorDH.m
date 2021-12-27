@@ -296,12 +296,15 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             %
             %   This is an auxiliary function to be used mainly with the
             %   Jacobian function.
+            obj.check_q_vec(q);
+            
             if nargin == 3
                 n = to_ith_link;
             else
                 n = obj.dim_configuration_space_;
             end
             
+            obj.check_to_ith_link(n);
             x = DQ(1);
             
             for i=1:n
