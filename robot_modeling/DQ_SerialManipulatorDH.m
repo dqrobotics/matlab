@@ -72,37 +72,15 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         JOINT_PRISMATIC = 2;
     end
     
-    methods
-        function obj = DQ_SerialManipulatorDH(A,convention)
-            % These are initialized in the constructor of
-            % DQ_SerialManipulator
-            %obj.convention = convention;
-            %obj.n_links = size(A,2);
-              
-            obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.dh_matrix_ = A;
-            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
-            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
-            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
-            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
-            
-            if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
-            end            
-            if nargin == 2
-                warning('DQ_SerialManipulatorDH(A,convention) is deprecated. Please use DQ_SerialManipulatorDH(A) instead.');
-                
+    methods (Access = protected)
+        function w = get_w(obj,ith) 
+            joint_type = obj.dh_matrix_(5,ith);
+            if joint_type == obj.JOINT_ROTATIONAL
+                w = DQ.k;
+            else
+                w = DQ.E*DQ.k;
             end
-            
-            if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
-            end
-            
-            % Add type
-            %obj.type = A(5,:);
-        end       
-        
-        
+        end
         
         function dq = dh2dq(obj,q,ith)
             %   For a given link's Extended DH parameters, calculate the correspondent dual
@@ -175,16 +153,41 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
                 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
                 ]);
-        end
+         end        
         
-        function w = get_w(obj,ith) 
-            joint_type = obj.dh_matrix_(5,ith);
-            if joint_type == obj.JOINT_ROTATIONAL
-                w = DQ.k;
-            else
-                w = DQ.E*DQ.k;
+    end
+    
+    methods
+        function obj = DQ_SerialManipulatorDH(A,convention)
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator
+            %obj.convention = convention;
+            %obj.n_links = size(A,2);
+              
+            obj = obj@DQ_SerialManipulator(size(A,2));
+            obj.dh_matrix_ = A;
+            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
+            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
+            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
+            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
+            
+            if nargin == 0
+                error('Input: matrix whose columns contain the DH parameters')
+            end            
+            if nargin == 2
+                warning('DQ_SerialManipulatorDH(A,convention) is deprecated. Please use DQ_SerialManipulatorDH(A) instead.');
+                
             end
-        end
+            
+            if(size(A,1) ~= 5)
+                error('Input: Invalid DH matrix. It should have 5 rows.')
+            end
+            
+            % Add type
+            %obj.type = A(5,:);
+        end      
+                      
+       
         
         function th = get_thetas(obj)
             %GET_THETAS() returns the first row of the Matrix A, which
