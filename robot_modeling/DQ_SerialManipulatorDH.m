@@ -72,7 +72,11 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         JOINT_PRISMATIC = 2;
     end
     
-    methods (Access = protected)
+    methods (Access = protected)        
+        % This method returns the term 'w' related with the time derivative of 
+        % the unit dual quaternion pose using the Standard DH convention.
+        % See. eq (2.27) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % Human-Robot Collaboration' by Bruno Adorno.
         function w = get_w(obj,ith) 
             joint_type = obj.dh_matrix_(5,ith);
             if joint_type == obj.JOINT_ROTATIONAL
