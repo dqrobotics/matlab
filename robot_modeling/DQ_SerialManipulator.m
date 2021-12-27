@@ -695,10 +695,10 @@ function o = plot_options(robot, optin)
         for i=1:robot.dim_configuration_space_
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
-            %reach = reach + abs(robot.a(i)) + abs(robot.d(i));
-            robot_a = robot.dh_matrix_(3,i);
-            robot_d = robot.dh_matrix_(2,i);
-            reach = reach + abs(robot_a) + abs(robot_d);
+            %reach = reach + abs(robot.a(i)) + abs(robot.d(i));            
+            robot_a = robot.get_as();            
+            robot_d = robot.get_ds();            
+            reach = reach + abs(robot_a(i)) + abs(robot_d(i));
         end
         o.workspace = [-reach reach -reach reach -reach reach];      
     else
