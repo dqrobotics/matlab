@@ -23,5 +23,5 @@ jobs:
     - name: Run matlab-tests
       run: |
         cd matlab-tests
-        matlab -nodisplay -nosplash -nodesktop -r "run(\'./run_basic_tests\')"
+        matlab -nodisplay -nosplash -nodesktop -r "run('run_basic_tests')"
         cd ..
