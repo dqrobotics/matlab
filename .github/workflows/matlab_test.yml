@@ -1,0 +1,27 @@
+name: MATLAB Test
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['MATLAB']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Customize git
+      run: |
+        git submodule update --init --recursive
+        git fetch --prune --unshallow
+    - name: Download matlab-tests repository
+      run: |
+        git clone https://github.com/dqrobotics/matlab-tests
+    - name: Run matlab-tests
+      run: |
+        cd matlab-tests
+        matlab -nodisplay -nosplash -nodesktop -r "run(\'./run_basic_tests\')"
+        cd ..
