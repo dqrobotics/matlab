@@ -20,8 +20,9 @@ jobs:
     - name: Download matlab-tests repository
       run: |
         git clone https://github.com/dqrobotics/matlab-tests
+    - name: Set correct execution path
+      run: |
+        printf "folder=fileparts(which('startup.m'))\naddpath(genpath(folder))\naddpath matlab-tests" > startup.m
     - name: Run matlab-tests
       run: |
-        cd matlab-tests
         matlab -nodisplay -nosplash -nodesktop -r "run('run_basic_tests')"
-        cd ..
