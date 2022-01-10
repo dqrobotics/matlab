@@ -52,6 +52,7 @@
 %
 % Contributors to this file:
 %     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     Juan Jose Quiroz Omana - juanjqo@g.ecc.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     %properties
