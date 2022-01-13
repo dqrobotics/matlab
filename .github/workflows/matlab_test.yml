@@ -5,11 +5,11 @@ on: [push, pull_request]
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ['MATLAB']
     strategy:
       fail-fast: false
       matrix:
-        os: ['MATLAB']
+        testbranches: ['release','master']
 
     steps:
     - uses: actions/checkout@v2
@@ -17,12 +17,12 @@ jobs:
       run: |
         git submodule update --init --recursive
         git fetch --prune --unshallow
-    - name: Clone the matlab-tests repository
+    - name: Clone the matlab-tests repository (${{ matrix.testbranches }})
       run: |
-        git clone https://github.com/dqrobotics/matlab-tests
-    - name: Clone the matlab-examples repository
+        git clone -b ${{ matrix.testbranches }} https://github.com/dqrobotics/matlab-tests
+    - name: Clone the matlab-examples repository (${{ matrix.testbranches }})
       run: |
-        git clone https://github.com/dqrobotics/matlab-examples
+        git clone -b ${{ matrix.testbranches }} https://github.com/dqrobotics/matlab-examples
     - name: Set correct execution path
       run: |
         printf "folder=fileparts(which('startup.m'))\n
