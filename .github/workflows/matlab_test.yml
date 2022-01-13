@@ -19,10 +19,10 @@ jobs:
         git fetch --prune --unshallow
     - name: Clone the matlab-tests repository
       run: |
-        git clone -b ${{ testbranches.os }} https://github.com/dqrobotics/matlab-tests
+        git clone -b ${{ matrix.testbranches }} https://github.com/dqrobotics/matlab-tests
     - name: Clone the matlab-examples repository
       run: |
-        git clone -b ${{ testbranches.os }} https://github.com/dqrobotics/matlab-examples
+        git clone -b ${{ matrix.testbranches }} https://github.com/dqrobotics/matlab-examples
     - name: Set correct execution path
       run: |
         printf "folder=fileparts(which('startup.m'))\n
