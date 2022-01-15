@@ -33,7 +33,7 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 ## Clone the forked repository
 
-Write in your terminal:
+Type in your terminal:
 
 - `git clone https://github.com/you_user/matlab.git`
 
