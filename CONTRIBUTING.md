@@ -21,4 +21,4 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 ![modifications](https://user-images.githubusercontent.com/23158313/149603770-e7058b6c-211b-4912-8f48-9728adac2147.gif)
 
 
-![add_commit_push](https://user-images.githubusercontent.com/23158313/149603796-87b671b6-be52-4786-872f-f426f82235c9.gif)
+![add_commit_push](https://user-images.githubusercontent.com/23158313/149603960-d69a8202-a3b1-4af5-a2d8-e1197cc26a81.gif)
