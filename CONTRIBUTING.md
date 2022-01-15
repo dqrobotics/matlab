@@ -11,3 +11,7 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 # Fork the [dqrobotics/matlab](https://github.com/dqrobotics/matlab) in your Github account
 
 ![fork_master](https://user-images.githubusercontent.com/23158313/149602838-133f6c09-2e16-418e-8ab6-47fb36a91056.gif)
+
+# Add your modifications
+
+![git_clone](https://user-images.githubusercontent.com/23158313/149603381-78732b55-2794-4be9-9a12-b7062d0649b5.gif)
