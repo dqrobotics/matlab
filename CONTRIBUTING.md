@@ -33,10 +33,18 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 ## Clone the forked repository
 
+Write in your terminal:
+
+- `git clone https://github.com/you_user/matlab.git`
+
 ![git_clone](https://user-images.githubusercontent.com/23158313/149603381-78732b55-2794-4be9-9a12-b7062d0649b5.gif)
 
 
 ## Do your modifications
+
+Now, you can make changes in the code to do your contributions!
+(In this specific example, as shown in the GIF, I modified the CONTRIBUTING.md file)
+
 ![modifications](https://user-images.githubusercontent.com/23158313/149604028-915d9325-e52a-4378-ba58-17b7fe1a7a81.gif)
 
 ## Add, commit and push your changes
@@ -52,7 +60,7 @@ Now, your draft pull request will be tested by Github actions automatically.
 
 ![pull_request](https://user-images.githubusercontent.com/23158313/149604338-52f3ba35-ef25-440a-8bc8-75194c32130e.gif)
 
-If your pull request fails the tests, don't worry, you will see where your code is not working. Pick your pull request in https://github.com/dqrobotics/matlab/pulls. Then, at the end of the page, click on 'Details'.
+If your pull request fails the tests, don't worry!, you will see where your code is not working. Pick your pull request in https://github.com/dqrobotics/matlab/pulls. Then, at the end of the page, click on 'Details'.
 
 ![failed_check](https://user-images.githubusercontent.com/23158313/149604965-677f783f-64af-4120-966a-0461c85f9418.gif)
 
