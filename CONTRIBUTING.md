@@ -15,3 +15,10 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 # Add your modifications
 
 ![git_clone](https://user-images.githubusercontent.com/23158313/149603381-78732b55-2794-4be9-9a12-b7062d0649b5.gif)
+
+
+
+![modifications](https://user-images.githubusercontent.com/23158313/149603770-e7058b6c-211b-4912-8f48-9728adac2147.gif)
+
+
+![add_commit_push](https://user-images.githubusercontent.com/23158313/149603796-87b671b6-be52-4786-872f-f426f82235c9.gif)
