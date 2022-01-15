@@ -9,6 +9,11 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 # Workflow
 
+- Fork the [master branch of the dqrobotics/matlab](https://github.com/dqrobotics/matlab).
+- Propose your modifications and open a draft pull request.
+- Your modifications will be tested automatically by Github actions. Specifically, Github actions runs the tests of [matlab-tests](https://github.com/dqrobotics/matlab-tests), which executes all the examples of [matlab-examples](https://github.com/dqrobotics/matlab-examples). 
+- Once your draft pull request passes all the tests, you can switch the status to pull request. (More details [here](https://github.blog/2019-02-14-introducing-draft-pull-requests/)).
+
 ## Case 1 (Common cases)
 
 - If your modifications pass all tests, Prof. Bruno Adorno and Prof. Murilo Marinho will review all the changes and they will accept them after all necessary adjustments if any. 
@@ -16,7 +21,7 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 ## Case 2 (Very rare cases)
 - In some cases, your modifications would fail some tests because of incompatibility with the current version of [matlab-tests](https://github.com/dqrobotics/matlab-tests) and/or [matlab-examples](https://github.com/dqrobotics/matlab-examples). In thoses cases, you would propose changes in [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples) to make them compatible with your new version of the dqrobotics/matlab. 
 -  Prof. Bruno Adorno and Prof. Murilo Marinho will review the changes proposed in both [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples). They will accept the modifications in the master branch after all necessary adjustments if any. 
--  Then, they will test your dqrobotics/matlab pull request again. They will make adjustments if any until your dqrobotics/matlab pull request passes all the tests. After that, they will review deeply your modifications.
+-  Then, they will test your dqrobotics/matlab pull request again. They will make adjustments if any until your pull request of dqrobotics/matlab  passes all the tests. After that, they will review deeply your modifications.
 -  Finally, Prof. Bruno Adorno and Prof. Murilo Marinho will accept your modifications in the master branch.
 
 
