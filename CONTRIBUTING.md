@@ -22,3 +22,8 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 # Add, commit and push your changes
 ![add_commit_push](https://user-images.githubusercontent.com/23158313/149603960-d69a8202-a3b1-4af5-a2d8-e1197cc26a81.gif)
+
+# Open a pull request
+
+![pull_request](https://user-images.githubusercontent.com/23158313/149604338-52f3ba35-ef25-440a-8bc8-75194c32130e.gif)
+
