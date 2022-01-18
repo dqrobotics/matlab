@@ -5,7 +5,7 @@ We are happy about your interest in our project. Thank you for your time. DQ Rob
 This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotics.github.io/).
 
 
-...
+
 
 # Workflow :nerd_face:
 
