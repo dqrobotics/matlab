@@ -59,7 +59,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     %end
     
     properties (Access = protected)
-        dh_matrix_;
+        mdh_matrix_;
        
     end
     
@@ -79,9 +79,9 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
-            joint_type = obj.dh_matrix_(5,ith);
-            alpha = obj.dh_matrix_(4,ith);
-            a = obj.dh_matrix_(3,ith);
+            joint_type = obj.mdh_matrix_(5,ith);
+            alpha = obj.mdh_matrix_(4,ith);
+            a = obj.mdh_matrix_(3,ith);
             if joint_type == obj.JOINT_ROTATIONAL
                 w = -DQ.j*sin(alpha)+ DQ.k*cos(alpha)...
                     -DQ.E*a*(DQ.j*cos(alpha) + DQ.k*sin(alpha));
@@ -90,7 +90,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             end
         end
         
-        function dq = dh2dq(obj,q,ith)
+        function dq = mdh2dq(obj,q,ith)
             %   For a given link's Extended MDH parameters, calculate the correspondent dual
             %   quaternion
             %   Usage: dq = dh2dq(q,ith), where
@@ -117,11 +117,11 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             
             % The optimized standard dh2dq calculation
             % Store half angles and displacements
-            half_theta = obj.dh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
-            d = obj.dh_matrix_(2,ith); %obj.d(ith);
-            a = obj.dh_matrix_(3,ith); %obj.a(ith);
-            half_alpha = obj.dh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
-            joint_type = obj.dh_matrix_(5,ith);
+            half_theta = obj.mdh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
+            d = obj.mdh_matrix_(2,ith); %obj.d(ith);
+            a = obj.mdh_matrix_(3,ith); %obj.a(ith);
+            half_alpha = obj.mdh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
+            joint_type = obj.mdh_matrix_(5,ith);
             
             % Add the effect of the joint value
             %if obj.type(ith) == obj.JOINT_ROTATIONAL
@@ -174,7 +174,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             %obj.n_links = size(A,2);
               
             obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.dh_matrix_ = A;
+            obj.mdh_matrix_ = A;
             %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
             %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
             %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
@@ -201,7 +201,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             %GET_THETAS() returns the first row of the Matrix A, which
             %correspond to the angles from axes x(i-1) to x(i) measured in
             %a plane normal to z(i-1) in the DH convention.
-            th = obj.dh_matrix_(1,:); %obj.theta;
+            th = obj.mdh_matrix_(1,:); %obj.theta;
         end
         
         function ds = get_ds(obj)
@@ -209,7 +209,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             % correspond to the distances from the origin F(i-1) to the
             % intersection of the axes x(i) with z(i-1) along the z(i-1)
             % axis in the DH convention. These parameters are denoted as 'd'.
-            ds = obj.dh_matrix_(2,:); %obj.d;
+            ds = obj.mdh_matrix_(2,:); %obj.d;
         end
         
         function as = get_as(obj)
@@ -217,20 +217,20 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             % correspond to the distances between the axes z(i-1) and z(i)
             % along the axis x(i) in the DH convention. These parameters are
             % denoted as 'a'.
-            as = obj.dh_matrix_(3,:); %obj.a;
+            as = obj.mdh_matrix_(3,:); %obj.a;
         end
         
         function alphas = get_alphas(obj)
             % GET_ALPHAS() returns the fourth row of the Matrix A, which
             % correspond to the alpha parameters of the DH convention.
-            alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
+            alphas =  obj.mdh_matrix_(4,:); %obj.alpha;            
         end
         
         function types = get_types(obj)
             % GET_TYPES() returns the fifth row of the Matrix A, which
             % correspond to the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
-            types = obj.dh_matrix_(5,:); %obj.type; 
+            types = obj.mdh_matrix_(5,:); %obj.type; 
         end
         
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
@@ -279,7 +279,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 end
                 J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
                     hamiplus8(z)*vec_x_effector_dot;
-                x = x*obj.dh2dq(q(i+1),i+1);
+                x = x*obj.mdh2dq(q(i+1),i+1);
             end
         end
         
@@ -308,7 +308,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             x = DQ(1);
             
             for i=1:n
-                x = x*dh2dq(obj,q(i),i);
+                x = x*mdh2dq(obj,q(i),i);
             end
         end
         
@@ -338,7 +338,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             for i = 0:to_ith_link-1
                 w = obj.get_w(i+1);
                 z = 0.5*Ad(x,w);
-                x = x*obj.dh2dq(q(i+1),i+1);
+                x = x*obj.mdh2dq(q(i+1),i+1);
                 j = z * x_effector;
                 J(:,i+1) = vec8(j);
             end
