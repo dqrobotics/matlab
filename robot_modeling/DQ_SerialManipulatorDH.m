@@ -81,7 +81,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
-            joint_type = obj.dh_matrix_(5,ith);
+            joint_type = obj.get_types(ith);
             if joint_type == obj.JOINT_ROTATIONAL
                 w = DQ.k;
             else
@@ -116,11 +116,11 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             
             % The optimized standard dh2dq calculation
             % Store half angles and displacements
-            half_theta = obj.dh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
-            d = obj.dh_matrix_(2,ith); %obj.d(ith);
-            a = obj.dh_matrix_(3,ith); %obj.a(ith);
-            half_alpha = obj.dh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
-            joint_type = obj.dh_matrix_(5,ith);
+            half_theta = obj.get_thetas(ith)/2.0; %obj.theta(ith)/2.0; 
+            d = obj.get_ds(ith); %obj.d(ith);
+            a = obj.get_as(ith); %obj.a(ith);
+            half_alpha = obj.get_alphas(ith)/2.0; %obj.alpha(ith)/2.0;
+            joint_type = obj.get_types(ith);
             
             % Add the effect of the joint value
             %if obj.type(ith) == obj.JOINT_ROTATIONAL
@@ -196,36 +196,75 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                       
        
         
-        function th = get_thetas(obj)
-            %GET_THETAS() returns the first row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'theta' in the DH convention.
-            th = obj.dh_matrix_(1,:); %obj.theta;
+        function th = get_thetas(obj, ith)
+            % GET_THETAS(ith) returns the ith element of the first row of the
+            % Matrix dh_matrix_, which correspond to the parameter 'theta' 
+            % in the DH convention.
+            % If ith is not specified, GET_THETAS() returns the first row of the
+            % Matrix dh_matrix_.
+            if nargin == 1
+                th = obj.dh_matrix_(1,:); %obj.theta;
+            else
+                obj.check_to_ith_link(ith);
+                th = obj.dh_matrix_(1,ith);
+            end
         end
         
-        function ds = get_ds(obj)
-            % GET_DS() returns the second row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'd' in the DH convention.
-            ds = obj.dh_matrix_(2,:); %obj.d;
+        function ds = get_ds(obj, ith)
+            % GET_DS(ith) returns the ith element of the second row of the
+            % Matrix dh_matrix_, which correspond to the parameter 'd' 
+            % in the DH convention.
+            % If ith is not specified, GET_DS() returns the second row of the
+            % Matrix dh_matrix_.
+            if nargin == 1
+                ds = obj.dh_matrix_(2,:); %obj.d;
+            else
+                obj.check_to_ith_link(ith);
+                ds = obj.dh_matrix_(2,ith);
+            end
         end
         
-        function as = get_as(obj)
-            % GET_AS() returns the third row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'a' in the DH convention.
-            as = obj.dh_matrix_(3,:); %obj.a;
+        function as = get_as(obj, ith)
+            % GET_AS(ith) returns the ith element of the third row of the 
+            % Matrix dh_matrix_, which correspond to the parameter 'a' 
+            % in the DH convention.
+            % If ith is not specified, GET_AS() returns the third row of the
+            % Matrix dh_matrix_.
+            if nargin == 1
+                as = obj.dh_matrix_(3,:); %obj.a;
+            else
+                obj.check_to_ith_link(ith);
+                as = obj.dh_matrix_(3,ith); %obj.a;
+            end
         end
         
-        function alphas = get_alphas(obj)
-            % GET_ALPHAS() returns the fourth row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'alpha' in the DH convention.
-            alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
+        function alphas = get_alphas(obj, ith)
+            % GET_ALPHAS(ith) returns the ith element of the fourth row of 
+            % the Matrix dh_matrix_, which correspond to the parameter 'alpha'
+            % in the DH convention.
+            % If ith is not specified, GET_ALPHAS() returns the fourth row of the
+            % Matrix dh_matrix_.
+            if nargin == 1
+                alphas =  obj.dh_matrix_(4,:); %obj.alpha; 
+            else 
+                obj.check_to_ith_link(ith);
+                alphas =  obj.dh_matrix_(4,ith);  
+            end
         end
         
-        function types = get_types(obj)
-            % GET_TYPES() returns the fifth row of the Matrix dh_matrix_, which
-            % correspond to the type of joints of the robot: 
+        function types = get_types(obj, ith)
+            % GET_TYPES(ith) returns the ith element of the fifth row of the
+            % Matrix dh_matrix_, which correspond to the type of joints of the robot: 
             % DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
-            types = obj.dh_matrix_(5,:); %obj.type; 
+            % If ith is not specified, GET_TYPES() returns the fifth row of the
+            % Matrix dh_matrix_.
+            if nargin == 1
+                types = obj.dh_matrix_(5,:); %obj.type; 
+            else
+                obj.check_to_ith_link(ith);
+                types = obj.dh_matrix_(5,ith); 
+            end
         end
         
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
