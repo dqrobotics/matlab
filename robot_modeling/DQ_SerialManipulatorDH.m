@@ -197,37 +197,33 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
        
         
         function th = get_thetas(obj)
-            %GET_THETAS() returns the first row of the Matrix A, which
-            %correspond to the angles from axes x(i-1) to x(i) measured in
-            %a plane normal to z(i-1) in the DH convention.
+            %GET_THETAS() returns the first row of the Matrix dh_matrix_, which
+            % correspond to the parameter 'theta' in the DH convention.
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
         function ds = get_ds(obj)
-            % GET_DS() returns the second row of the Matrix A, which
-            % correspond to the distances from the origin F(i-1) to the
-            % intersection of the axes x(i) with z(i-1) along the z(i-1)
-            % axis in the DH convention. These parameters are denoted as 'd'.
+            % GET_DS() returns the second row of the Matrix dh_matrix_, which
+            % correspond to the parameter 'd' in the DH convention.
             ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
         function as = get_as(obj)
-            % GET_AS() returns the third row of the Matrix A, which
-            % correspond to the distances between the axes z(i-1) and z(i)
-            % along the axis x(i) in the DH convention. These parameters are
-            % denoted as 'a'.
+            % GET_AS() returns the third row of the Matrix dh_matrix_, which
+            % correspond to the parameter 'a' in the DH convention.
             as = obj.dh_matrix_(3,:); %obj.a;
         end
         
         function alphas = get_alphas(obj)
-            % GET_ALPHAS() returns the fourth row of the Matrix A, which
-            % correspond to the alpha parameters of the DH convention.
+            % GET_ALPHAS() returns the fourth row of the Matrix dh_matrix_, which
+            % correspond to the parameter 'alpha' in the DH convention.
             alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
         function types = get_types(obj)
-            % GET_TYPES() returns the fifth row of the Matrix A, which
-            % correspond to the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
+            % GET_TYPES() returns the fifth row of the Matrix dh_matrix_, which
+            % correspond to the type of joints of the robot: 
+            % DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
