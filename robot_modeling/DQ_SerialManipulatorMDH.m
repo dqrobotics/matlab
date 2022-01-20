@@ -167,7 +167,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     end
     
     methods
-        function obj = DQ_SerialManipulatorMDH(A,convention)
+        function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
             % DQ_SerialManipulator
             %obj.convention = convention;
@@ -181,12 +181,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
             
             if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
-            end            
-            if nargin == 2
-                warning('DQ_SerialManipulatorMDH(A,convention) is deprecated. Please use DQ_SerialManipulatorMDH(A) instead.');
-                
-            end
+                error('Input: matrix whose columns contain the MDH parameters')
+            end         
             
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
@@ -198,9 +194,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                                      
         
         function th = get_thetas(obj)
-            %GET_THETAS() returns the first row of the Matrix A, which
-            %correspond to the angles from axes x(i-1) to x(i) measured in
-            %a plane normal to z(i-1) in the DH convention.
+            %GET_THETAS() returns the first row of the Matrix mdh_matrix_, which
+            % correspond to the parameter 'theta' in the MDH convention.
             th = obj.mdh_matrix_(1,:); %obj.theta;
         end
         
