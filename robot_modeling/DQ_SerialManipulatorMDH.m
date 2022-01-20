@@ -75,9 +75,9 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
-            joint_type = obj.mdh_matrix_(5,ith);
-            alpha = obj.mdh_matrix_(4,ith);
-            a = obj.mdh_matrix_(3,ith);
+            joint_type = obj.get_types(ith); % obj.mdh_matrix_(5,ith);
+            alpha = obj.get_alphas(ith);     % obj.mdh_matrix_(4,ith);
+            a = obj.get_as(ith);             % obj.mdh_matrix_(3,ith);
             if joint_type == obj.JOINT_ROTATIONAL
                 w = -DQ.j*sin(alpha)+ DQ.k*cos(alpha)...
                     -DQ.E*a*(DQ.j*cos(alpha) + DQ.k*sin(alpha));
@@ -95,29 +95,15 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             
             if nargin ~= 3
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
-            end
-            
-            %The unoptimized standard dh2dq calculation is commented below
-            %if obj.type(ith) == obj.JOINT_ROTATIONAL
-            %    % If joint is rotational
-            %    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
-            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
-            %else
-            %    % If joint is prismatic
-            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-            %    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
-            %end
-            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-            %dq = h1*h2*h3*h4;
-            
-            % The optimized standard dh2dq calculation
+            end           
+
             % Store half angles and displacements
-            half_theta = obj.mdh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
-            d = obj.mdh_matrix_(2,ith); %obj.d(ith);
-            a = obj.mdh_matrix_(3,ith); %obj.a(ith);
-            half_alpha = obj.mdh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
-            joint_type = obj.mdh_matrix_(5,ith);
+            
+            half_theta = obj.get_thetas(ith)/2.0;  %obj.theta(ith)/2.0;
+            d = obj.get_ds(ith); %obj.d(ith);
+            a = obj.get_as(ith); %obj.a(ith);
+            half_alpha = obj.get_alphas(ith)/2.0;  %obj.alpha(ith)/2.0;
+            joint_type = obj.get_types(ith);
             
             % Add the effect of the joint value
             %if obj.type(ith) == obj.JOINT_ROTATIONAL
