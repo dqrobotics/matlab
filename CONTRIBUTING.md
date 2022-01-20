@@ -22,8 +22,11 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 ## Case 2 (Very rare cases :thinking:)
 - In some cases, your modifications would fail some tests because of incompatibility with the current version of [matlab-tests](https://github.com/dqrobotics/matlab-tests) and/or [matlab-examples](https://github.com/dqrobotics/matlab-examples). In thoses cases, you would propose changes in [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples) to make them compatible with your new version of the dqrobotics/matlab. 
--  Prof. Bruno Adorno and Prof. Murilo Marinho will review the changes proposed in both [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples). They will accept the modifications in the master branch after all necessary adjustments. 
--  Then, they will test your dqrobotics/matlab pull request making all necessary adjustments until your pull request of dqrobotics/matlab passes all the tests. After that, they will review deeply your modifications.
+-  Prof. Bruno Adorno and Prof. Murilo Marinho will review the changes proposed in both [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples). They will accept the modifications in the master branch after all necessary adjustments. At this point, it is expected that your pull request passes all the tests in the master branch but fails in the release branch.
+
+![master_and_release](https://user-images.githubusercontent.com/23158313/150379489-cabc85bb-dbe4-41be-a405-7b254a36092a.png)
+
+-  Then, they will test your dqrobotics/matlab pull request making all necessary adjustments until your pull request of dqrobotics/matlab passes all the tests. After that, they will review deeply your modifications. 
 -  Finally, Prof. Bruno Adorno and Prof. Murilo Marinho will accept your modifications in the master branch.
 
 
