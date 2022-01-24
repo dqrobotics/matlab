@@ -29,7 +29,7 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_SerialManipulator.
 
-% (C) Copyright 2022 DQ Robotics Developers
+% (C) Copyright 2020 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -53,6 +53,10 @@
 %     Juan Jose Quiroz Omana -  juanjqo@g.ecc.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
+    %properties
+        %type;
+        %theta,d,a,alpha;
+    %end
     
     properties (Access = protected)
         mdh_matrix_;
@@ -164,9 +168,18 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     
     methods
         function obj = DQ_SerialManipulatorMDH(A)
-            % Constructor of the DQ_SerialManipulatorMDH class.           
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator
+            %obj.convention = convention;
+            %obj.n_links = size(A,2);
+              
             obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.mdh_matrix_ = A;            
+            obj.mdh_matrix_ = A;
+            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
+            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
+            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
+            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
+            
             if nargin == 0
                 error('Input: matrix whose columns contain the MDH parameters')
             end         
@@ -174,78 +187,42 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
+            
+            % Add type
+            %obj.type = A(5,:);
         end       
                                      
         
-        function th = get_thetas(obj, ith)
-            % GET_THETAS(ith) returns the ith element of the first row of the
-            % Matrix mdh_matrix_, which correspond to the parameter 'theta' 
-            % in the MDH convention.
-            % If ith is not specified, GET_THETAS() returns the first row of the
-            % Matrix mdh_matrix_.
-            if nargin == 1
-                th = obj.mdh_matrix_(1,:); %obj.theta;
-            else
-                obj.check_to_ith_link(ith);
-                th = obj.mdh_matrix_(1,ith);
-            end
+        function th = get_thetas(obj)
+            %GET_THETAS() returns the first row of the Matrix mdh_matrix_, which
+            % correspond to the parameter 'theta' in the MDH convention.
+            th = obj.mdh_matrix_(1,:); %obj.theta;
         end
         
-        function ds = get_ds(obj, ith)
-            % GET_DS(ith) returns the ith element of the second row of the
-            % Matrix mdh_matrix_, which correspond to the parameter 'd' 
-            % in the MDH convention.
-            % If ith is not specified, GET_DS() returns the second row of the
-            % Matrix mdh_matrix_.
-            if nargin == 1
-                ds = obj.mdh_matrix_(2,:); %obj.d;
-            else
-                obj.check_to_ith_link(ith);
-                ds = obj.mdh_matrix_(2,ith);
-            end
+        function ds = get_ds(obj)
+            % GET_DS() returns the second row of the Matrix mdh_matrix_, which
+            % correspond to the parameter 'd' in the MDH convention.
+            ds = obj.mdh_matrix_(2,:); %obj.d;
         end
         
-        function as = get_as(obj, ith)
-            % GET_AS(ith) returns the ith element of the third row of the 
-            % Matrix mdh_matrix_, which correspond to the parameter 'a' 
-            % in the MDH convention.
-            % If ith is not specified, GET_AS() returns the third row of the
-            % Matrix mdh_matrix_.
-            if nargin == 1
-                as = obj.mdh_matrix_(3,:); %obj.a;
-            else
-                obj.check_to_ith_link(ith);
-                as = obj.mdh_matrix_(3,ith); %obj.a;
-            end
+        function as = get_as(obj)
+            % GET_AS() returns the third row of the Matrix mdh_matrix_, which
+            % correspond to the parameter 'a' in the MDH convention.
+            as = obj.mdh_matrix_(3,:); %obj.a;
         end
         
-        function alphas = get_alphas(obj, ith)
-            % GET_ALPHAS(ith) returns the ith element of the fourth row of 
-            % the Matrix mdh_matrix_, which correspond to the parameter 'alpha'
-            % in the MDH convention.
-            % If ith is not specified, GET_ALPHAS() returns the fourth row of the
-            % Matrix mdh_matrix_.
-            if nargin == 1
-                alphas =  obj.mdh_matrix_(4,:); %obj.alpha; 
-            else 
-                obj.check_to_ith_link(ith);
-                alphas =  obj.mdh_matrix_(4,ith);  
-            end
+        function alphas = get_alphas(obj)
+            % GET_ALPHAS() returns the fourth row of the Matrix mdh_matrix_, which
+            % correspond to the parameter 'alpha' in the MDH convention.
+            alphas =  obj.mdh_matrix_(4,:); %obj.alpha;            
         end
         
-        function types = get_types(obj, ith)
-            % GET_TYPES(ith) returns the ith element of the fifth row of the
-            % Matrix mdh_matrix_, which correspond to the type of joints of the robot: 
+        function types = get_types(obj)
+            % GET_TYPES() returns the fifth row of the Matrix mdh_matrix_, which
+            % correspond to the type of joints of the robot: 
             % DQ_SerialManipulatorDH.JOINT_ROTATIONAL
             % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
-            % If ith is not specified, GET_TYPES() returns the fifth row of the
-            % Matrix mdh_matrix_.
-            if nargin == 1
-                types = obj.mdh_matrix_(5,:); %obj.type; 
-            else
-                obj.check_to_ith_link(ith);
-                types = obj.mdh_matrix_(5,ith); 
-            end
+            types = obj.mdh_matrix_(5,:); %obj.type; 
         end
         
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
