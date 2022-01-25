@@ -38,9 +38,11 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 ## Clone the forked repository
 
+For instance, if your forked matlab respository is https://github.com/juanjqo/matlab, then
+
 Type in your terminal:
 
-- `git clone https://github.com/you_user/matlab.git`
+- `git clone https://github.com/juanjqo/matlab.git`
 
 ![git_clone](https://user-images.githubusercontent.com/23158313/149603381-78732b55-2794-4be9-9a12-b7062d0649b5.gif)
 
