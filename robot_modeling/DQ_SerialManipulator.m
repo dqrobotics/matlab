@@ -28,12 +28,12 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 %       get_lower_q_limit - Returns the lower bound of the robot configuration.
 %       set_lower_q_limit - Sets the lower bound of the robot configuration.
-%       get_lower_q_dot_limit () - Returns the lower bound of the robot configuration velocity.
-%       set_lower_q_dot_limit () - Seturns the lower bound of the robot configuration velocity.
+%       get_lower_q_dot_limit - Returns the lower bound of the robot configuration velocity.
+%       set_lower_q_dot_limit - Seturns the lower bound of the robot configuration velocity.
 %       get_upper_q_limit - Returns the upper bound of the robot configuration.
 %       set_upper_q_limit - Sets the upper bound of the robot configuration.
-%       get_upper_q_dot_limit () - Returns the upper bound of the robot configuration velocity.
-%       set_upper_q_dot_limit () - Seturns the upper bound of the robot configuration velocity.
+%       get_upper_q_dot_limit - Returns the upper bound of the robot configuration velocity.
+%       set_upper_q_dot_limit - Seturns the upper bound of the robot configuration velocity.
 
 
 
