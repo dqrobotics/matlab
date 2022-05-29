@@ -32,7 +32,7 @@ classdef ComauSmartSixRobot
             comau_DH_d =     [-0.45, 0, 0, -0.64707, 0, -0.095];
             comau_DH_a =     [0, 0.150, 0.590, 0.13, 0, 0];
             comau_DH_alpha = [pi, pi/2, pi, -pi/2, -pi/2, pi/2];
-            comau_DH_type = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,6);
+            comau_DH_type = repmat(DQ_SerialManipulatorDH.ROTATIONAL,1,6);
 
             comau_DH_matrix = [comau_DH_theta;
                 comau_DH_d;
