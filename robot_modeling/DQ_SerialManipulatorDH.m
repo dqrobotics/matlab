@@ -19,11 +19,11 @@
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
-%       get_thetas - Returns the first row of the DH Matrix ('theta' parameter). 
-%       get_ds - Returns the second row of the DH Matrix ('d' parameter).
-%       get_as - Returns the third row of the DH Matrix ('a' parameter).
-%       get_alphas - Returns the fourth row of the DH Matrix ('alpha' parameter).
-%       get_types - Returns the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONALor DQ_SerialManipulatorDH.JOINT_PRISMATIC
+%       get_theta_vector - Returns the vector containing the theta parameters of the DH table. 
+%       get_d_vector - Returns the vector containing the d parameters of the DH table.
+%       get_a_vector - Returns the vector containing the a parameters of the DH table.
+%       get_alpha_vector - Returns the vector containing the alpha parameters of the DH table.
+%       get_joint_types - Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
