@@ -10,7 +10,7 @@
 %         alpha1 ... alphan;
 %         type1  ... typen]
 % where type is the actuation type, either DQ_SerialManipulatorDH.REVOLUTE
-% or DQ_SerialManipulatorDH.JOINT_PRISMATIC
+% or DQ_SerialManipulatorDH.PRISMATIC
 % - The only accepted convention in this subclass is the 'standard' DH
 % convention.
 %
