@@ -647,6 +647,11 @@ end
 % o = plot_options(robot, options) returns an options structure. 
 % 'robot' is the kinematic robot and 'options' is an array cell with the plot
 % options.
+% 
+% TODO: 
+% This implementation assumes we are using the DH parametrization.
+% we need to fix it in the future.
+%
 function o = plot_options(robot, optin)
     % process a cell array of options and return a struct   
     % define all possible options and their default values
