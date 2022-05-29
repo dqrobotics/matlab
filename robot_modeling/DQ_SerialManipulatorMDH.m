@@ -19,15 +19,15 @@
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
-%       get_dim_configuration_space - Return the dimension of the configuration space.
-%       fkm - Compute the forward kinematics while taking into account base and end-effector's rigid transformations.
-%       plot - Plots the serial manipulator.
-%       pose_jacobian - Compute the pose Jacobian while taking into account base's and end-effector's rigid transformations.
+%       get_theta_vector - Returns the vector containing the theta parameters of the MDH table. 
+%       get_d_vector - Returns the vector containing the d parameters of the MDH table.
+%       get_a_vector - Returns the vector containing the a parameters of the MDH table.
+%       get_alpha_vector - Returns the vector containing the alpha parameters of the MDH table.
+%       get_joint_types - Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
-%       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
-% See also DQ_SerialManipulator.
+
 
 % (C) Copyright 2020 DQ Robotics Developers
 %
@@ -54,10 +54,7 @@
 %     Juan Jose Quiroz Omana -  juanjqo@g.ecc.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
-    %properties
-        %type;
-        %theta,d,a,alpha;
-    %end
+ 
     
     properties (Access = protected)
         mdh_matrix_;
@@ -188,41 +185,33 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
-            
-            % Add type
-            %obj.type = A(5,:);
+
         end       
                                      
         
-        function th = get_thetas(obj)
-            %GET_THETAS() returns the first row of the Matrix mdh_matrix_, which
-            % correspond to the parameter 'theta' in the MDH convention.
+                
+        function th = get_theta_vector(obj)
+            %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the MDH table.
             th = obj.mdh_matrix_(1,:); %obj.theta;
         end
         
-        function ds = get_ds(obj)
-            % GET_DS() returns the second row of the Matrix mdh_matrix_, which
-            % correspond to the parameter 'd' in the MDH convention.
+        function ds = get_d_vector(obj)
+            % GET_D_VECTOR() Returns the vector containing the d parameters of the MDH table.
             ds = obj.mdh_matrix_(2,:); %obj.d;
         end
         
-        function as = get_as(obj)
-            % GET_AS() returns the third row of the Matrix mdh_matrix_, which
-            % correspond to the parameter 'a' in the MDH convention.
+        function as = get_a_vector(obj)
+            % GET_A_VECTOR() Returns the vector containing the a parameters of the MDH table.
             as = obj.mdh_matrix_(3,:); %obj.a;
         end
         
-        function alphas = get_alphas(obj)
-            % GET_ALPHAS() returns the fourth row of the Matrix mdh_matrix_, which
-            % correspond to the parameter 'alpha' in the MDH convention.
+        function alphas = get_alpha_vector(obj)
+            % GET_ALPHA_VECTOR() Returns the vector containing the alpha parameters of the MDH table.
             alphas =  obj.mdh_matrix_(4,:); %obj.alpha;            
         end
         
-        function types = get_types(obj)
-            % GET_TYPES() returns the fifth row of the Matrix mdh_matrix_, which
-            % correspond to the type of joints of the robot: 
-            % DQ_SerialManipulatorDH.JOINT_ROTATIONAL
-            % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
+        function types = get_joint_types(obj)
+            % GET_TYPES() Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
             types = obj.mdh_matrix_(5,:); %obj.type; 
         end
         
