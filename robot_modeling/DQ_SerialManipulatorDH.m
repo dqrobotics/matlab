@@ -195,26 +195,22 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
        
         
         function th = get_thetas(obj)
-            %GET_THETAS() returns the first row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'theta' in the DH convention.
+            %GET_THETAS() Returns the vector containing the theta parameters of the DH table.
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
         function ds = get_ds(obj)
-            % GET_DS() returns the second row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'd' in the DH convention.
+            % GET_DS() Returns the vector containing the d parameters of the DH table.
             ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
         function as = get_as(obj)
-            % GET_AS() returns the third row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'a' in the DH convention.
+            % GET_AS() Returns the vector containing the a parameters of the DH table.
             as = obj.dh_matrix_(3,:); %obj.a;
         end
         
         function alphas = get_alphas(obj)
-            % GET_ALPHAS() returns the fourth row of the Matrix dh_matrix_, which
-            % correspond to the parameter 'alpha' in the DH convention.
+            % GET_ALPHAS() Returns the vector containing the alpha parameters of the DH table.
             alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
