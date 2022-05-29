@@ -73,7 +73,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         function w = get_w(obj,ith) 
         % This method returns the term 'w' related with the time derivative of 
         % the unit dual quaternion pose using the Modified DH convention.
-        % See. eq (2.27) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
