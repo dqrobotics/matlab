@@ -81,7 +81,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % mainly in the plot function.
         handle
         curr_effector_;
-        %n_links;
+        
     end
     
     methods (Abstract)
