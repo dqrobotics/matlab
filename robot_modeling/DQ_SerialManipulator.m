@@ -69,7 +69,7 @@
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties      
                 
-        curr_effector_;
+        
         
         % Properties for the plot function        
         plotopt
@@ -80,6 +80,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
+        curr_effector_;
         %n_links;
     end
     
