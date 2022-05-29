@@ -83,6 +83,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if joint_type == obj.REVOLUTE
                 w = DQ.k;
             else
+                % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
+                % by Silva, F. F. A., Quiroz-Omaña, J. J., and Adorno, B. V. (April 12, 2022).  
+                % ASME. J. Mechanisms Robotics. doi: https://doi.org/10.1115/1.4054320
                 w = DQ.E*DQ.k;
             end
         end
