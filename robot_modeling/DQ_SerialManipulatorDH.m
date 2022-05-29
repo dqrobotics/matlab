@@ -66,9 +66,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties (Constant)
         % Joints that can be actuated
         % Rotational joint
-        JOINT_ROTATIONAL = 1;
+        ROTATIONAL = 1;
         % Prismatic joint
-        JOINT_PRISMATIC = 2;
+        PRISMATIC = 2;
     end
     
     methods (Access = protected)       
@@ -80,7 +80,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Usage: w = get_w(ith), where
         %          ith: link number
             joint_type = obj.dh_matrix_(5,ith);
-            if joint_type == obj.JOINT_ROTATIONAL
+            if joint_type == obj.ROTATIONAL
                 w = DQ.k;
             else
                 w = DQ.E*DQ.k;
