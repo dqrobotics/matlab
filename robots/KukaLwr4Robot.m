@@ -32,7 +32,7 @@ classdef KukaLwr4Robot
             kuka_DH_d = [0.310, 0, 0.4, 0, 0.39, 0, 0];
             kuka_DH_a = [0, 0, 0, 0, 0, 0, 0];
             kuka_DH_alpha = [pi/2, -pi/2, -pi/2, pi/2, pi/2, -pi/2, 0];
-            kuka_DH_type = repmat(DQ_SerialManipulatorDH.ROTATIONAL,1,7);
+            kuka_DH_type = repmat(DQ_SerialManipulatorDH.REVOLUTE,1,7);
             kuka_DH_matrix = [kuka_DH_theta;
                 kuka_DH_d;
                 kuka_DH_a;
