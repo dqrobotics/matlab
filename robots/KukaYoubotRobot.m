@@ -40,7 +40,7 @@ classdef KukaYoubotRobot
             arm_DH_d =   [  0.147,      0,       0,        0,    0.218];
             arm_DH_a =   [      0,  0.155,   0.135,        0,        0];
             arm_DH_alpha =   [pi2,      0,       0,      pi2,        0];
-            arm_DH_type  = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,5);
+            arm_DH_type  = repmat(DQ_SerialManipulatorDH.ROTATIONAL,1,5);
             arm_DH_matrix = [arm_DH_theta;
                              arm_DH_d;
                              arm_DH_a;
