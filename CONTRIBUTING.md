@@ -43,7 +43,7 @@ Type in your terminal:
 
 ![git_clone](https://user-images.githubusercontent.com/23158313/149603381-78732b55-2794-4be9-9a12-b7062d0649b5.gif)
 
-## Do your modifications
+## Make your modifications
 
 Now, you can make changes in the code to do your contributions!
 (In this specific example, as shown in the GIF, I modified the CONTRIBUTING.md file)
