@@ -25,7 +25,7 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 ![master_and_release](https://user-images.githubusercontent.com/23158313/150379489-cabc85bb-dbe4-41be-a405-7b254a36092a.png)
 
 - Then, they will test your dqrobotics/matlab pull request making all necessary adjustments until your pull request of dqrobotics/matlab passes all the tests. After that, they will review deeply your modifications. 
-- Finally, Prof. Bruno Adorno and Prof. Murilo Marinho will accept your modifications in the master branch.
+- Finally, your modifications will be accepted in the master branch.
 
 # Example
 
