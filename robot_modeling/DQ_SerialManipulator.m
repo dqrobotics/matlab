@@ -118,13 +118,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 0
                 error('Input: dimension of the configuration space')
             end
-            
-            %obj.n_links = size(A,2);
-            %obj.theta = A(1,:);
-            %obj.d = A(2,:);
-            %obj.a = A(3,:);
-            %obj.alpha = A(4,:);
-            
+                        
             obj.reference_frame_ = DQ(1); %Default base's pose
             obj.base_frame_ = DQ(1);
             obj.curr_effector_ = DQ(1); %Default effector's pose
