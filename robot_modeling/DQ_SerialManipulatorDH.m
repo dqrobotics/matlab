@@ -9,13 +9,13 @@
 %            a1  ...   an;
 %         alpha1 ... alphan;
 %         type1  ... typen]
-% where type is the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
+% where type is the actuation type, either DQ_SerialManipulatorDH.REVOLUTE
 % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
 % - The only accepted convention in this subclass is the 'standard' DH
 % convention.
 %
-% If the joint is of type JOINT_ROTATIONAL, then the first row of A will
-% have the joint offsets. If the joint is of type JOINT_PRISMATIC, then the
+% If the joint is of type REVOLUTE, then the first row of A will
+% have the joint offsets. If the joint is of type PRISMATIC, then the
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
@@ -23,7 +23,7 @@
 %       get_d_vector - Returns the vector containing the d parameters of the DH table.
 %       get_a_vector - Returns the vector containing the a parameters of the DH table.
 %       get_alpha_vector - Returns the vector containing the alpha parameters of the DH table.
-%       get_joint_types - Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
+%       get_joint_types - Returns the joint type, which can be either REVOLUTE or PRISMATIC.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
@@ -65,8 +65,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     
     properties (Constant)
         % Joints that can be actuated
-        % Rotational joint
-        ROTATIONAL = 1;
+        % Revolute joint
+        REVOLUTE = 1;
         % Prismatic joint
         PRISMATIC = 2;
     end
@@ -80,7 +80,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Usage: w = get_w(ith), where
         %          ith: link number
             joint_type = obj.dh_matrix_(5,ith);
-            if joint_type == obj.ROTATIONAL
+            if joint_type == obj.REVOLUTE
                 w = DQ.k;
             else
                 w = DQ.E*DQ.k;
@@ -121,8 +121,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             joint_type = obj.dh_matrix_(5,ith);
             
             % Add the effect of the joint value            
-            if joint_type == obj.ROTATIONAL   
-                % If joint is rotational
+            if joint_type == obj.REVOLUTE  
+                % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
                 % If joint is prismatic
@@ -214,7 +214,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         end
         
         function types = get_joint_types(obj)
-            % GET_TYPES() Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
+            % GET_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
