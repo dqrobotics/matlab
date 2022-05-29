@@ -52,7 +52,7 @@ Now, you can make changes in the code to do your contributions!
 
 ## Add, commit and push your changes
 
-Please indicate in your commit's message the file that was modified using brakets. For instance, if you modified the class DQ_Serialmanipulator, then you would do the following:
+Please indicate in your commit's message the file that was modified using brackets. For instance, if you modified the class DQ_Serialmanipulator, then you would do the following:
 
 - `git commit -m "[DQ_SerialManipulator] your_message_explaining_the modification."`
 
