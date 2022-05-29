@@ -56,10 +56,7 @@
 %     Juan Jose Quiroz Omana - juanjqo@g.ecc.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
-    %properties
-        %type;
-        %theta,d,a,alpha;
-    %end
+  
     
     properties (Access = protected)
         dh_matrix_;
