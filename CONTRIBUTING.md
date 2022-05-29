@@ -15,7 +15,7 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 
 ## Case 1 (Common cases)
 
-- If your modifications pass all tests, Prof. Bruno Adorno and Prof. Murilo Marinho will review all the changes and they will accept them after all necessary adjustments if any. 
+- If your modifications pass all tests, a designated member of our team will review all the changes and they will accept them after all necessary adjustments if any. 
 
 ## Case 2 (Very rare cases)
 
