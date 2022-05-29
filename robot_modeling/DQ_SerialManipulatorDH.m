@@ -139,6 +139,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             cosine_of_half_alpha = cos(half_alpha);
             
             % Return the optimized standard dh2dq calculation
+            % Modification pending...
             dq = DQ([
                 cosine_of_half_alpha*cosine_of_half_theta
                 
