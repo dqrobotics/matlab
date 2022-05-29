@@ -49,6 +49,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
+%     Bruno Vihena Adorno - bruno.adorno@manchester.ac.uk
 %     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
 %     Juan Jose Quiroz Omana -  juanjqo@g.ecc.u-tokyo.ac.jp
 
