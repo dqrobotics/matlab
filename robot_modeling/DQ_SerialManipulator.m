@@ -67,9 +67,8 @@
 % affected methods are: FKM and Jacobian.
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
-    properties        
-        %theta,d,a,alpha;
-        %convention;        
+    properties      
+                
         curr_effector_;
         
         % Properties for the plot function        
