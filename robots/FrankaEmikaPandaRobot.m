@@ -28,7 +28,7 @@ classdef FrankaEmikaPandaRobot
             franka_DH_d = [0.333, 0, 3.16e-1, 0, 3.84e-1, 0, 0]; %1.07e-1
             franka_DH_a = [0, 0, 0, 8.25e-2, -8.25e-2, 0, 8.8e-2];
             franka_DH_alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2];
-            franka_DH_type = repmat(DQ_SerialManipulatorDH.ROTATIONAL,1,7);
+            franka_DH_type = repmat(DQ_SerialManipulatorDH.REVOLUTE,1,7);
             franka_DH_matrix = [franka_DH_theta;
                 franka_DH_d;
                 franka_DH_a;
