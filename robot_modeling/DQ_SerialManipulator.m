@@ -134,12 +134,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
-%             if nargin==1
-%                 obj.convention='standard';
-%             else
-%                 obj.convention=convention;
-%             end
-            
             %For visualisation
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
             obj.plotopt = {};
