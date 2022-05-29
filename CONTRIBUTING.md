@@ -45,7 +45,7 @@ Type in your terminal:
 
 ## Make your modifications
 
-Now, you can make changes in the code to do your contributions!
+Now, you can modify the code with your contributions.
 (In this specific example, as shown in the GIF, I modified the CONTRIBUTING.md file)
 
 ![modifications](https://user-images.githubusercontent.com/23158313/149604028-915d9325-e52a-4378-ba58-17b7fe1a7a81.gif)
