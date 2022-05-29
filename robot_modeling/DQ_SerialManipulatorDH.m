@@ -229,6 +229,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
+        % TODO:
+        % This method is not defined in the DQ_Kinematics superclass
+        % we need to fix it in the future.
         function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
             % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
             % time derivative.
