@@ -194,31 +194,28 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                       
        
         
-        function th = get_thetas(obj)
-            %GET_THETAS() Returns the vector containing the theta parameters of the DH table.
+        function th = get_theta_vector(obj)
+            %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the DH table.
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
-        function ds = get_ds(obj)
-            % GET_DS() Returns the vector containing the d parameters of the DH table.
+        function ds = get_d_vector(obj)
+            % GET_D_VECTOR() Returns the vector containing the d parameters of the DH table.
             ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
-        function as = get_as(obj)
-            % GET_AS() Returns the vector containing the a parameters of the DH table.
+        function as = get_a_vector(obj)
+            % GET_A_VECTOR() Returns the vector containing the a parameters of the DH table.
             as = obj.dh_matrix_(3,:); %obj.a;
         end
         
-        function alphas = get_alphas(obj)
-            % GET_ALPHAS() Returns the vector containing the alpha parameters of the DH table.
+        function alphas = get_alpha_vector(obj)
+            % GET_ALPHA_VECTOR() Returns the vector containing the alpha parameters of the DH table.
             alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
-        function types = get_types(obj)
-            % GET_TYPES() returns the fifth row of the Matrix dh_matrix_, which
-            % correspond to the type of joints of the robot: 
-            % DQ_SerialManipulatorDH.JOINT_ROTATIONAL
-            % or DQ_SerialManipulatorDH.JOINT_PRISMATIC
+        function types = get_joint_types(obj)
+            % GET_TYPES() Returns the joint type, which can be either ROTATIONAL or PRISMATIC.
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
