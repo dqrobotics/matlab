@@ -5,7 +5,7 @@
 %   name - Unique name that is generated randomly.
 %   reference_frame_ - Reference frame (not always coincident with base_frame).
 %   q - Robot configuration vector.
-%   dim_configuration_space - Dimension of the robot configuration space.
+%   dim_configuration_space_ - Dimension of the robot configuration space.
 %   lower_q_limit_ - The lower bound of the robot configuration;
 %   upper_q_limit_ - The upper bound of the robot configuration;
 %   lower_q_dot_limit_ - The lower bound of the robot configuration velocity;
