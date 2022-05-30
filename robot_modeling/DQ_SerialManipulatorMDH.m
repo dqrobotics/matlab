@@ -29,7 +29,7 @@
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
 
 
-% (C) Copyright 2020 DQ Robotics Developers
+% (C) Copyright 2022 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -159,32 +159,31 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
 
         end       
                                      
-        % TODO:
-        % The name of the following methods could be 
+
                 
         function th = get_theta_vector(obj)
             %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the MDH table.
-            th = obj.mdh_matrix_(1,:); %obj.theta;
+            th = obj.mdh_matrix_(1,:); 
         end
         
         function ds = get_dh_parameters_d(obj)
             % GET_DH_PARAMETERS_D() Returns the vector containing the d parameters of the MDH table.
-            ds = obj.mdh_matrix_(2,:); %obj.d;
+            ds = obj.mdh_matrix_(2,:); 
         end
         
         function as = get_dh_parameters_a(obj)
             % GET_DH_PARAMETERS_A() Returns the vector containing the a parameters of the MDH table.
-            as = obj.mdh_matrix_(3,:); %obj.a;
+            as = obj.mdh_matrix_(3,:); 
         end
         
         function alphas = get_dh_parameters_alpha(obj)
             % GET_DH_PARAMETERS_ALPHA() Returns the vector containing the alpha parameters of the MDH table.
-            alphas =  obj.mdh_matrix_(4,:); %obj.alpha;            
+            alphas =  obj.mdh_matrix_(4,:);           
         end
         
         function types = get_joint_types(obj)
-            % GET_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
-            types = obj.mdh_matrix_(5,:); %obj.type; 
+            % GET_JOINT_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
+            types = obj.mdh_matrix_(5,:);  
         end
         
         % TODO:
