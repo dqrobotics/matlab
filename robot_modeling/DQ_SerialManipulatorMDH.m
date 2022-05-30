@@ -1,8 +1,8 @@
-% Concrete class that extends the DQ_SerialManipulator using the
-% Denavit-Hartenberg parameters (DH)
+% Concrete class that extends the DQ_SerialManipulator using the Modified
+% Denavit-Hartenberg parameters (MDH)
 %
-% Usage: robot = DQ_SerialManipulatorDH(A)
-% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
+% Usage: robot = DQ_SerialManipulatorMDH(A)
+% - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
 %            d1  ...   dn;
@@ -20,9 +20,9 @@
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
 %       get_theta_vector - Returns the vector containing the theta parameters of the MDH table. 
-%       get_d_vector - Returns the vector containing the d parameters of the MDH table.
-%       get_a_vector - Returns the vector containing the a parameters of the MDH table.
-%       get_alpha_vector - Returns the vector containing the alpha parameters of the MDH table.
+%       get_dh_parameters_d - Returns the vector containing the d parameters of the MDH table.
+%       get_dh_parameters_a - Returns the vector containing the a parameters of the MDH table.
+%       get_dh_parameters_alpha - Returns the vector containing the alpha parameters of the MDH table.
 %       get_joint_types - Returns the joint type, which can be either REVOLUTE or PRISMATIC.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
@@ -187,25 +187,26 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
 
         end       
                                      
-        
+        % TODO:
+        % The name of the following methods could be 
                 
         function th = get_theta_vector(obj)
             %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the MDH table.
             th = obj.mdh_matrix_(1,:); %obj.theta;
         end
         
-        function ds = get_d_vector(obj)
-            % GET_D_VECTOR() Returns the vector containing the d parameters of the MDH table.
+        function ds = get_dh_parameters_d(obj)
+            % GET_DH_PARAMETERS_D() Returns the vector containing the d parameters of the MDH table.
             ds = obj.mdh_matrix_(2,:); %obj.d;
         end
         
-        function as = get_a_vector(obj)
-            % GET_A_VECTOR() Returns the vector containing the a parameters of the MDH table.
+        function as = get_dh_parameters_a(obj)
+            % GET_DH_PARAMETERS_A() Returns the vector containing the a parameters of the MDH table.
             as = obj.mdh_matrix_(3,:); %obj.a;
         end
         
-        function alphas = get_alpha_vector(obj)
-            % GET_ALPHA_VECTOR() Returns the vector containing the alpha parameters of the MDH table.
+        function alphas = get_dh_parameters_alpha(obj)
+            % GET_DH_PARAMETERS_ALPHA() Returns the vector containing the alpha parameters of the MDH table.
             alphas =  obj.mdh_matrix_(4,:); %obj.alpha;            
         end
         
