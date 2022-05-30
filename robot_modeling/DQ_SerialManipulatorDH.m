@@ -2,7 +2,7 @@
 % Denavit-Hartenberg parameters (DH)
 %
 % Usage: robot = DQ_SerialManipulatorDH(A)
-% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
+% - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
 %            d1  ...   dn;
