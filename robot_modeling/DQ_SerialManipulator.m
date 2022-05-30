@@ -80,7 +80,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
-        curr_effector_;
+        effector_;
         
     end
     
@@ -121,7 +121,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                         
             obj.reference_frame_ = DQ(1); %Default base's pose
             obj.base_frame_ = DQ(1);
-            obj.curr_effector_ = DQ(1); %Default effector's pose
+            obj.effector_ = DQ(1); %Default effector's pose
             
             % Define the joint limits
             obj.lower_q_limit_ = -Inf(dim_configuration_space,1);
@@ -148,13 +148,13 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         
         function ret = get_effector(obj)
             % GET_EFFECTOR(effector) gets the pose of the effector 
-            ret = obj.curr_effector_;
+            ret = obj.effector_;
         end
         
         function ret = set_effector(obj,new_effector)
             % SET_EFFECTOR(effector) sets the pose of the effector
-            obj.curr_effector_ = DQ(new_effector);
-            ret = obj.curr_effector_;
+            obj.effector_ = DQ(new_effector);
+            ret = obj.effector_;
         end
         
         function ret = get_lower_q_limit(obj)
@@ -222,7 +222,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 3
                 x = obj.reference_frame_*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
-                x = obj.reference_frame_*obj.raw_fkm(q)*obj.curr_effector_;
+                x = obj.reference_frame_*obj.raw_fkm(q)*obj.effector_;
             end
         end      
              
@@ -243,7 +243,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 % Otherwise, it the Jacobian is related to the
                 % end-effector velocity, it takes into account both base
                 % and end-effector (constant) displacements.
-                J = hamiplus8(obj.reference_frame_)*haminus8(obj.curr_effector_)*...
+                J = hamiplus8(obj.reference_frame_)*haminus8(obj.effector_)*...
                     obj.raw_pose_jacobian(q);
             end
         end        
@@ -609,7 +609,7 @@ function update_robot(robot, q)
     if isfield(h, 'x')
         % get the end-effector pose (considering the final transformation given
         % by set_end_effector()
-        t = robot.base_frame_*robot.raw_fkm(q)*robot.curr_effector_;
+        t = robot.base_frame_*robot.raw_fkm(q)*robot.get_effector();
         t1 = vec3(translation(t));        
         
         % The following transformations use the Hamilton operators to
