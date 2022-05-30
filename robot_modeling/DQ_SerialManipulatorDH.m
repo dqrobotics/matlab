@@ -19,7 +19,7 @@
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
-%       get_theta_vector - Returns the vector containing the theta parameters of the DH table. 
+%       get_dh_parameters_theta - Returns the vector containing the theta parameters of the DH table. 
 %       get_dh_parameters_d - Returns the vector containing the d parameters of the DH table.
 %       get_dh_parameters_a - Returns the vector containing the a parameters of the DH table.
 %       get_dh_parameters_alpha - Returns the vector containing the alpha parameters of the DH table.
@@ -209,8 +209,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                       
        
         
-        function th = get_theta_vector(obj)
-            %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the DH table.
+        function th = get_dh_parameters_theta(obj)
+            %GET_DH_PARAMETERS_THETA() Returns the vector containing the theta parameters of the DH table.
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
