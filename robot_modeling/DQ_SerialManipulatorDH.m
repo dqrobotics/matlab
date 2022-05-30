@@ -180,17 +180,17 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     methods
         function obj = DQ_SerialManipulatorDH(A,convention)
             % These are initialized in the constructor of
-            % DQ_SerialManipulator
-            %obj.convention = convention;
-            %obj.n_links = size(A,2);
+            % DQ_SerialManipulator, where A is given as follows
+            %    A = [theta1 ... thetan;
+            %            d1  ...   dn;
+            %            a1  ...   an;
+            %         alpha1 ... alphan;
+            %         type1  ... typen]
+            
               
             obj = obj@DQ_SerialManipulator(size(A,2));
             obj.dh_matrix_ = A;
-            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
-            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
-            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
-            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
-            
+           
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end            
@@ -202,9 +202,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
-            
-            % Add type
-            %obj.type = A(5,:);
+           
         end      
                       
        
