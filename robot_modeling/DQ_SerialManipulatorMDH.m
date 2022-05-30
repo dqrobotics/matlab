@@ -207,11 +207,12 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 vec_x_effector_dot = J*q_dot(1:ith);
             else
                 n = obj.dim_configuration_space_;
+                obj.check_to_ith_link(n);
                 x_effector = obj.raw_fkm(q);
                 J = obj.raw_pose_jacobian(q);
                 vec_x_effector_dot = J*q_dot;
             end
-            obj.check_to_ith_link(n);
+            
                                  
             x = DQ(1);            
             J_dot = zeros(8,n);
