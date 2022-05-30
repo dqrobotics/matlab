@@ -99,26 +99,11 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
-            %The unoptimized standard dh2dq calculation is commented below
-            %if obj.type(ith) == obj.JOINT_ROTATIONAL
-            %    % If joint is rotational
-            %    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
-            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
-            %else
-            %    % If joint is prismatic
-            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-            %    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
-            %end
-            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-            %dq = h1*h2*h3*h4;
             
-            % The optimized standard dh2dq calculation
-            % Store half angles and displacements
-            half_theta = obj.mdh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
-            d = obj.mdh_matrix_(2,ith); %obj.d(ith);
-            a = obj.mdh_matrix_(3,ith); %obj.a(ith);
-            half_alpha = obj.mdh_matrix_(4,ith)/2.0; %obj.alpha(ith)/2.0;
+            half_theta = obj.mdh_matrix_(1,ith)/2.0;  
+            d = obj.mdh_matrix_(2,ith); 
+            a = obj.mdh_matrix_(3,ith); 
+            half_alpha = obj.mdh_matrix_(4,ith)/2.0; 
             joint_type = obj.mdh_matrix_(5,ith);
             
             % Add the effect of the joint value
@@ -136,30 +121,17 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             sine_of_half_alpha = sin(half_alpha);
             cosine_of_half_alpha = cos(half_alpha);
             
-            % Return the optimized standard dh2dq calculation
-            
-            
-            dq = DQ([
-                cosine_of_half_alpha*cosine_of_half_theta
-                
-                sine_of_half_alpha*cosine_of_half_theta
-                
-                -sine_of_half_alpha*sine_of_half_theta %MDH
-                
-                cosine_of_half_alpha*sine_of_half_theta
-                
-                -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
-                - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
-                
-                (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-                - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                
-                -(a*cosine_of_half_alpha*sine_of_half_theta)  /2.0... %MDH
-                - (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
-                
-                (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-                - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                ]);
+            d2 = d/2;
+            a2 = a/2;
+            h(1) = cosine_of_half_alpha*cosine_of_half_theta;
+            h(2) = sine_of_half_alpha*cosine_of_half_theta;
+            h(3) = -sine_of_half_alpha*sine_of_half_theta;
+            h(4) = cosine_of_half_alpha*sine_of_half_theta;
+            h(5) = -a2*h(2) - d2*h(4);
+            h(6) =  a2*h(1) - d2*-h(3);
+            h(7) = -a2*h(4) - d2*h(2);
+            h(8) = d2*h(1)  - a2*-h(3);
+            dq = DQ(h);
         end        
     end
     
