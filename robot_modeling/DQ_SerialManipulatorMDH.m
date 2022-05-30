@@ -161,8 +161,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                                      
 
                 
-        function th = get_theta_vector(obj)
-            %GET_THETA_VECTOR() Returns the vector containing the theta parameters of the MDH table.
+        function th = get_dh_parameters_theta(obj)
+            %GET_DH_PARAMETERS_THETA() Returns the vector containing the theta parameters of the MDH table.
             th = obj.mdh_matrix_(1,:); 
         end
         
