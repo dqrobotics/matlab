@@ -20,9 +20,9 @@
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
 %       get_theta_vector - Returns the vector containing the theta parameters of the DH table. 
-%       get_d_vector - Returns the vector containing the d parameters of the DH table.
-%       get_a_vector - Returns the vector containing the a parameters of the DH table.
-%       get_alpha_vector - Returns the vector containing the alpha parameters of the DH table.
+%       get_dh_parameters_d - Returns the vector containing the d parameters of the DH table.
+%       get_dh_parameters_a - Returns the vector containing the a parameters of the DH table.
+%       get_dh_parameters_alpha - Returns the vector containing the alpha parameters of the DH table.
 %       get_joint_types - Returns the joint type, which can be either REVOLUTE or PRISMATIC.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
@@ -214,18 +214,18 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
-        function ds = get_d_vector(obj)
-            % GET_D_VECTOR() Returns the vector containing the d parameters of the DH table.
+        function ds = get_dh_parameters_d(obj)
+            % GET_DH_PARAMETERS_D() Returns the vector containing the d parameters of the DH table.
             ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
-        function as = get_a_vector(obj)
-            % GET_A_VECTOR() Returns the vector containing the a parameters of the DH table.
+        function as = get_dh_parameters_a(obj)
+            % GET_DH_PARAMETERS_A() Returns the vector containing the a parameters of the DH table.
             as = obj.dh_matrix_(3,:); %obj.a;
         end
         
-        function alphas = get_alpha_vector(obj)
-            % GET_ALPHA_VECTOR() Returns the vector containing the alpha parameters of the DH table.
+        function alphas = get_dh_parameters_alpha(obj)
+            % GET_DH_PARAMETERS_ALPHA() Returns the vector containing the alpha parameters of the DH table.
             alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
