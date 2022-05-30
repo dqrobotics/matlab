@@ -1,17 +1,8 @@
-% Concrete class that defines serial manipulators.
+% Abstract class that defines serial manipulators.
 %
-% Usage: robot = DQ_SerialManipulator(A,convention)
-% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
-%   (n is the number of links)
-%    A = [theta1 ... thetan;
-%            d1  ...   dn;
-%            a1  ...   an;
-%         alpha1 ... alphan]
-% - 'convention' is the convention used for the D-H parameters. Accepted
-%    values are 'standard' and 'modified'
-%
-% The first row of 'A' contains the joint offsets. More specifically,
-% theta_i is the offset for the i-th joint.
+% Usage: robot = DQ_SerialManipulator(dim_configuration_space)
+% - 'dim_configuration_space' is the dimension of the
+%   configuration space.
 %
 % DQ_SerialManipulator Methods (Abstract):
 %       get_dim_configuration_space - Return the dimension of the configuration space.
