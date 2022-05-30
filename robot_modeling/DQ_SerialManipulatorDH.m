@@ -139,28 +139,40 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             cosine_of_half_alpha = cos(half_alpha);
             
             % Return the optimized standard dh2dq calculation
-            % Modification pending...
-            dq = DQ([
-                cosine_of_half_alpha*cosine_of_half_theta
-                
-                sine_of_half_alpha*cosine_of_half_theta
-                
-                sine_of_half_alpha*sine_of_half_theta
-                
-                cosine_of_half_alpha*sine_of_half_theta
-                
-                -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
-                - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
-                
-                (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-                - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                
-                (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0...
-                + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
-                
-                (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-                - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
-                ]);
+
+%             dq = DQ([
+%                 cosine_of_half_alpha*cosine_of_half_theta
+%                 
+%                 sine_of_half_alpha*cosine_of_half_theta
+%                 
+%                 sine_of_half_alpha*sine_of_half_theta
+%                 
+%                 cosine_of_half_alpha*sine_of_half_theta
+%                 
+%                 -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
+%                 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
+%                 
+%                 (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+%                 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
+%                 
+%                 (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0...
+%                 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
+%                 
+%                 (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+%                 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
+%                 ]);
+
+            d2 = d/2;
+            a2 = a/2;
+            h(1) = cosine_of_half_alpha*cosine_of_half_theta;
+            h(2) = sine_of_half_alpha*cosine_of_half_theta;
+            h(3) = sine_of_half_alpha*sine_of_half_theta;
+            h(4) = cosine_of_half_alpha*sine_of_half_theta;
+            h(5) = -a2*h(2) - d2*h(4);
+            h(6) =  a2*h(1) - d2*h(3);
+            h(7) =  a2*h(4) + d2*h(2);
+            h(8) = d2*h(1)  - a2*h(3);
+            dq = DQ(h);
          end        
         
     end
