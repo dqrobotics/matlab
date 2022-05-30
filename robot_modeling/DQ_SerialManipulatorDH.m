@@ -230,7 +230,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         end
         
         function types = get_joint_types(obj)
-            % GET_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
+            % GET_JOINT_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
