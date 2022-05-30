@@ -332,10 +332,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if nargin < 3
                 to_ith_link = obj.dim_configuration_space_;
             end
-            x_effector = obj.raw_fkm(q,to_ith_link);
             
             obj.check_to_ith_link(to_ith_link);
-            
+            x_effector = obj.raw_fkm(q,to_ith_link);
+          
             x = DQ(1);
             J = zeros(8,to_ith_link);
             
