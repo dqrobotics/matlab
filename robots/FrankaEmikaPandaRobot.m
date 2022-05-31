@@ -1,4 +1,4 @@
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2022 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
