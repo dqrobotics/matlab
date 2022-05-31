@@ -20,7 +20,7 @@
 % Contributors to this file:
 %     Juan Jose Quiroz Omana - juanjqo@g.ecc.u-tokyo.ac.jp
 
-classdef JointType 
+classdef DQ_JointType 
    enumeration
       REVOLUTE 
       PRISMATIC
