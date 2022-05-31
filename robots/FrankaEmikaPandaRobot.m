@@ -15,7 +15,7 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: https://dqrobotics.github.io/
 %
 % Contributors to this file:
 %     Juan Jose Quiroz Omana - juanjqogm@gmail.com
