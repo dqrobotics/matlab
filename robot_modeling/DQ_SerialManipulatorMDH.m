@@ -64,9 +64,9 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     properties (Constant)
         % Joints that can be actuated
         % Revolute joint
-        REVOLUTE = 1;
+        JOINT_ROTATIONAL = 1;
         % Prismatic joint
-        PRISMATIC = 2;
+        JOINT_PRISMATIC = 2;
     end
     
     methods (Access = protected)
@@ -80,7 +80,8 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             joint_type = obj.mdh_matrix_(5,ith);
             alpha = obj.mdh_matrix_(4,ith);
             a = obj.mdh_matrix_(3,ith);
-            if joint_type == obj.REVOLUTE
+
+            if joint_type == DQ_JointType.REVOLUTE
                 w = -DQ.j*sin(alpha)+ DQ.k*cos(alpha)...
                     -DQ.E*a*(DQ.j*cos(alpha) + DQ.k*sin(alpha));
             else               
@@ -107,7 +108,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             joint_type = obj.mdh_matrix_(5,ith);
             
             % Add the effect of the joint value
-            if joint_type == obj.REVOLUTE   
+            if joint_type == DQ_JointType.REVOLUTE   
                 % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
@@ -139,16 +140,10 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
             % DQ_SerialManipulator
-            %obj.convention = convention;
-            %obj.n_links = size(A,2);
-              
+             
             obj = obj@DQ_SerialManipulator(size(A,2));
             obj.mdh_matrix_ = A;
-            %obj.theta = A(1,:); %obj.dh_matrix_(1,:);
-            %obj.d = A(2,:);     %obj.dh_matrix_(2,:);
-            %obj.a = A(3,:);     %obj.dh_matrix_(3,:);
-            %obj.alpha = A(4,:); %obj.dh_matrix_(4,:);
-            
+      
             if nargin == 0
                 error('Input: matrix whose columns contain the MDH parameters')
             end         
