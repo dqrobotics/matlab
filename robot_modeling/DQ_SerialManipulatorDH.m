@@ -66,9 +66,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties (Constant)
         % Joints that can be actuated
         % Revolute joint
-        REVOLUTE = 1;
+        JOINT_ROTATIONAL = 1;
         % Prismatic joint
-        PRISMATIC = 2;
+        JOINT_PRISMATIC = 2;
     end
     
     methods (Access = protected)       
