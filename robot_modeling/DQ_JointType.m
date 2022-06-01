@@ -20,9 +20,9 @@
 % Contributors to this file:
 %     Juan Jose Quiroz Omana - juanjqo@g.ecc.u-tokyo.ac.jp
 
-classdef DQ_JointType 
+classdef DQ_JointType < double
    enumeration
-      REVOLUTE 
-      PRISMATIC
+      REVOLUTE (1)
+      PRISMATIC (2)
    end
 end
