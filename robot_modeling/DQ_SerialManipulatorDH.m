@@ -80,7 +80,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Usage: w = get_w(ith), where
         %          ith: link number
             joint_type = obj.dh_matrix_(5,ith);
-            if joint_type == obj.REVOLUTE
+            if joint_type == DQ_JointType.REVOLUTE
                 w = DQ.k;
             else
                 % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
@@ -124,7 +124,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             joint_type = obj.dh_matrix_(5,ith);
             
             % Add the effect of the joint value            
-            if joint_type == obj.REVOLUTE  
+            if joint_type == DQ_JointType.REVOLUTE 
                 % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
