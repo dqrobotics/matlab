@@ -19,7 +19,7 @@
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
-%       get_theta_vector - Returns the vector containing the theta parameters of the MDH table. 
+%       get_dh_parameters_theta - Returns the vector containing the theta parameters of the MDH table. 
 %       get_dh_parameters_d - Returns the vector containing the d parameters of the MDH table.
 %       get_dh_parameters_a - Returns the vector containing the a parameters of the MDH table.
 %       get_dh_parameters_alpha - Returns the vector containing the alpha parameters of the MDH table.
@@ -277,25 +277,27 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             % end-effector displacements and should be used mostly
             % internally in DQ_kinematics
             obj.check_q_vec(q);
-            
-            if nargin < 3
-                to_ith_link = obj.dim_configuration_space_;
+
+            if nargin == 3
+                n = to_ith_link;
+            else
+                n = obj.dim_configuration_space_;
             end
 
-            obj.check_to_ith_link(to_ith_link);
-            x_effector = obj.raw_fkm(q,to_ith_link);
-           
+            obj.check_to_ith_link(n);
+            x_effector = obj.raw_fkm(q,n);
+          
             x = DQ(1);
-            J = zeros(8,to_ith_link);
-            
-            for i = 0:to_ith_link-1
-                w = obj.get_w(i+1);
+            J = zeros(8,n);
+            for i = 1:n
+                w = obj.get_w(i);
                 z = 0.5*Ad(x,w);
-                x = x*obj.mdh2dq(q(i+1),i+1);
+                x = x*obj.mdh2dq(q(i),i);
                 j = z * x_effector;
-                J(:,i+1) = vec8(j);
+                J(:,i) = vec8(j);
             end
-        end
+            
+         end
         
     end
 end
