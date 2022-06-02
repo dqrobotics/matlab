@@ -60,7 +60,6 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     
     properties (Access = protected)
         dh_matrix_;
-       
     end
     
     properties (Constant)
@@ -69,6 +68,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         JOINT_ROTATIONAL = 1;
         % Prismatic joint
         JOINT_PRISMATIC = 2;
+        parameter = struct('theta', 1, 'd',2, 'a', 3, 'alpha', 4, 'JointType', 5);
     end
     
     methods (Access = protected)       
@@ -98,7 +98,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             %          ith: link number
             
             if nargin ~= 3
-                error('Wrong number of arguments. The parameters are joint value and the correspondent link')
+                error(['Wrong number of arguments. The parameters are joint ' ...
+                    'value and the correspondent link'])
             end
          
             % Store half angles and displacements
@@ -156,7 +157,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 error('Input: matrix whose columns contain the DH parameters')
             end            
             if nargin == 2
-                warning('DQ_SerialManipulatorDH(A,convention) is deprecated. Please use DQ_SerialManipulatorDH(A) instead.');
+                warning(['DQ_SerialManipulatorDH(A,convention) is deprecated.' ...
+                    ' Please use DQ_SerialManipulatorDH(A) instead.']);
                 
             end
             
@@ -166,30 +168,47 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
            
         end      
                       
-       
+        function ret = get_parameters(obj, parameter)
+            %GET_PARAMETERS(parameter) Returns the vector containing the
+            % parameter specified. The parameter can be theta, a, d, alpha, 
+            % and JointType
+            ret = obj.dh_matrix_(parameter,:);
+        end
+
+        function ret = get_parameter(obj, parameter, ith)
+            %GET_PARAMETERS(parameter, ith) Returns the scalar containing the
+            % parameter specified of the ith joint. 
+            % The parameter can be theta, a, d, alpha, and JointType
+            ret = obj.dh_matrix_(parameter,ith);
+        end
         
         function th = get_dh_parameters_theta(obj)
-            %GET_DH_PARAMETERS_THETA() Returns the vector containing the theta parameters of the DH table.
+            %GET_DH_PARAMETERS_THETA() Returns the vector containing the 
+            % theta parameters of the DH table.
             th = obj.dh_matrix_(1,:); %obj.theta;
         end
         
         function ds = get_dh_parameters_d(obj)
-            % GET_DH_PARAMETERS_D() Returns the vector containing the d parameters of the DH table.
+            % GET_DH_PARAMETERS_D() Returns the vector containing the d 
+            % parameters of the DH table.
             ds = obj.dh_matrix_(2,:); %obj.d;
         end
         
         function as = get_dh_parameters_a(obj)
-            % GET_DH_PARAMETERS_A() Returns the vector containing the a parameters of the DH table.
+            % GET_DH_PARAMETERS_A() Returns the vector containing the a 
+            % parameters of the DH table.
             as = obj.dh_matrix_(3,:); %obj.a;
         end
         
         function alphas = get_dh_parameters_alpha(obj)
-            % GET_DH_PARAMETERS_ALPHA() Returns the vector containing the alpha parameters of the DH table.
+            % GET_DH_PARAMETERS_ALPHA() Returns the vector containing 
+            % the alpha parameters of the DH table.
             alphas =  obj.dh_matrix_(4,:); %obj.alpha;            
         end
         
         function types = get_joint_types(obj)
-            % GET_JOINT_TYPES() Returns the joint type, which can be either REVOLUTE or PRISMATIC.
+            % GET_JOINT_TYPES() Returns the joint type, which can be 
+            % either REVOLUTE or PRISMATIC.
             types = obj.dh_matrix_(5,:); %obj.type; 
         end
         
