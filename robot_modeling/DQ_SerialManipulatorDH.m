@@ -68,7 +68,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         JOINT_ROTATIONAL = 1;
         % Prismatic joint
         JOINT_PRISMATIC = 2;
-        parameter = struct('theta', 1, 'd',2, 'a', 3, 'alpha', 4, 'JointType', 5);
+        Parameter = struct('Theta', 1, 'D',2, 'A', 3, 'Alpha', 4, 'JointType', 5);
     end
     
     methods (Access = protected)       
