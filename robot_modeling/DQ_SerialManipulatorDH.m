@@ -1,22 +1,22 @@
 % Concrete class that extends the DQ_SerialManipulator using the
 % Denavit-Hartenberg parameters (DH)
 %
-% Usage: robot = DQ_SerialManipulatorDH(A)
-% - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
+% Usage: robot = DQ_SerialManipulatorDH(dh_matrix)
+% - 'dh_matrix' is a 5 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
-%    A = [theta1 ... thetan;
-%            d1  ...   dn;
-%            a1  ...   an;
-%         alpha1 ... alphan;
-%         type1  ... typen]
+%    dh_matrix = [theta1 ... thetan;
+%                 d1  ...   dn;
+%                 a1  ...   an;
+%                 alpha1 ... alphan;
+%                 type1  ... typen]
 % where type is the actuation type, either DQ_SerialManipulatorDH.REVOLUTE
 % or DQ_SerialManipulatorDH.PRISMATIC
 % - The only accepted convention in this subclass is the 'standard' DH
 % convention.
 %
-% If the joint is of type REVOLUTE, then the first row of A will
+% If the joint is of type REVOLUTE, then the first row of dh_matrix will
 % have the joint offsets. If the joint is of type PRISMATIC, then the
-% second row of A will have the joints offsets.
+% second row of dh_matrix will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
 %       get_dh_parameters_theta - Returns the vector containing the theta parameters of the DH table. 
@@ -140,16 +140,16 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     end
     
     methods
-        function obj = DQ_SerialManipulatorDH(A, convention)
+        function obj = DQ_SerialManipulatorDH(dh_matrix, convention)
             % These are initialized in the constructor of
-            % DQ_SerialManipulator, where A is given as follows
-            %    A = [theta1 ... thetan;
+            % DQ_SerialManipulator, where dh_matrix is given as follows
+            %    dh_matrix = [theta1 ... thetan;
             %            d1  ...   dn;
             %            a1  ...   an;
             %         alpha1 ... alphan;
             %         type1  ... typen]
-            str = ['DQ_SerialManipulatorDH(A), where ' ...
-                   'A = [theta1 ... thetan; ' ...
+            str = ['DQ_SerialManipulatorDH(dh_matrix), where ' ...
+                   'dh_matrix = [theta1 ... thetan; ' ...
                    ' d1  ...   dn; ' ...
                    ' a1  ...   an; ' ...
                    ' alpha1 ... alphan; ' ...
@@ -161,8 +161,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                        ' and type of joints. Example: ' str])
             end            
             if nargin == 2
-                warning(['DQ_SerialManipulatorDH(A,convention) is deprecated.' ...
-                    ' Please use DQ_SerialManipulatorDH(A) instead.']);
+                warning(['DQ_SerialManipulatorDH(dh_matrix, convention) is deprecated.' ...
+                        ' Please use DQ_SerialManipulatorDH(dh_matrix) instead.']);
                 
             end
             
@@ -171,22 +171,29 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                        'Example: ' str])
             end
 
-            obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.dh_matrix_ = A;
+            obj = obj@DQ_SerialManipulator(size(dh_matrix,2));
+            obj.dh_matrix_ = dh_matrix;
            
         end      
                       
         function ret = get_parameters(obj, parameter)
             %GET_PARAMETERS(parameter) Returns the vector containing the
-            % parameter specified. The parameter can be theta, a, d, alpha, 
-            % and JointType
+            % parameter specified. The parameter can be the DH parameters as
+            % Theta, A, D, Alpha, or can be JointType.
+            % Example: 
+            % robot = DQ_SerialManipulatorDH(dh_matrix);
+            % dh_alphas = robot.get_parameters(robot.Parameter.Alpha)
             ret = obj.dh_matrix_(parameter,:);
         end
 
         function ret = get_parameter(obj, parameter, ith)
             %GET_PARAMETERS(parameter, ith) Returns the scalar containing the
             % parameter specified of the ith joint. 
-            % The parameter can be theta, a, d, alpha, and JointType
+            % The parameter can be the DH parameters as
+            % Theta, A, D, Alpha, or can be JointType.
+            % Example: 
+            % robot = DQ_SerialManipulatorDH(dh_matrix);
+            % dh_alpha = robot.get_parameter(robot.Parameter.Alpha, 3)
             ret = obj.dh_matrix_(parameter,ith);
         end
         
