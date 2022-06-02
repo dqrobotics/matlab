@@ -184,22 +184,22 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         % TODO:
         % This method is not defined in the DQ_Kinematics superclass
         % we need to fix it in the future.
-        function J_dot = pose_jacobian_derivative(obj,q,q_dot, ith)
+        function J_dot = pose_jacobian_derivative(obj,q,q_dot, to_ith_link)
             % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
             % time derivative.
             % 
-            % POSE_JACOBIAN_DERIVATIVE(q,q_dot,ith) returns the first
-            % ith columns of the Jacobian time derivative.
+            % POSE_JACOBIAN_DERIVATIVE(q,q_dot,to_ith_link) returns the first
+            % to_ith_link columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
             obj.check_q_vec(q);
             obj.check_q_vec(q_dot); 
             
             if nargin == 4
-                n = ith;
-                x_effector = obj.raw_fkm(q,ith);
-                J = obj.raw_pose_jacobian(q,ith);
-                vec_x_effector_dot = J*q_dot(1:ith);
+                n = to_ith_link;
+                x_effector = obj.raw_fkm(q,to_ith_link);
+                J = obj.raw_pose_jacobian(q,to_ith_link);
+                vec_x_effector_dot = J*q_dot(1:to_ith_link);
             else
                 n = obj.dim_configuration_space_;
                 obj.check_to_ith_link(n);
