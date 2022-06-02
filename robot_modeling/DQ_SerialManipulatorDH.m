@@ -140,7 +140,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     end
     
     methods
-        function obj = DQ_SerialManipulatorDH(A,convention)
+        function obj = DQ_SerialManipulatorDH(A, convention)
             % These are initialized in the constructor of
             % DQ_SerialManipulator, where A is given as follows
             %    A = [theta1 ... thetan;
@@ -170,7 +170,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 error(['Input: Invalid DH matrix. It should have 5 rows. ' ...
                        'Example: ' str])
             end
-            
+
             obj = obj@DQ_SerialManipulator(size(A,2));
             obj.dh_matrix_ = A;
            
