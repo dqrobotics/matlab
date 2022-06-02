@@ -100,22 +100,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if nargin ~= 3
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
-            
-            %The unoptimized standard dh2dq calculation is commented below
-            %if obj.type(ith) == obj.JOINT_ROTATIONAL
-            %    % If joint is rotational
-            %    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
-            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
-            %else
-            %    % If joint is prismatic
-            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
-            %    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
-            %end
-            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
-            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
-            %dq = h1*h2*h3*h4;
-            
-            % The optimized standard dh2dq calculation
+         
             % Store half angles and displacements
             half_theta = obj.dh_matrix_(1,ith)/2.0; %obj.theta(ith)/2.0; 
             d = obj.dh_matrix_(2,ith); %obj.d(ith);
@@ -138,30 +123,6 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             sine_of_half_alpha = sin(half_alpha);
             cosine_of_half_alpha = cos(half_alpha);
             
-            % Return the optimized standard dh2dq calculation
-
-%             dq = DQ([
-%                 cosine_of_half_alpha*cosine_of_half_theta
-%                 
-%                 sine_of_half_alpha*cosine_of_half_theta
-%                 
-%                 sine_of_half_alpha*sine_of_half_theta
-%                 
-%                 cosine_of_half_alpha*sine_of_half_theta
-%                 
-%                 -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
-%                 - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
-%                 
-%                 (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-%                 - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
-%                 
-%                 (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0...
-%                 + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
-%                 
-%                 (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
-%                 - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
-%                 ]);
-
             d2 = d/2;
             a2 = a/2;
             h(1) = cosine_of_half_alpha*cosine_of_half_theta;
