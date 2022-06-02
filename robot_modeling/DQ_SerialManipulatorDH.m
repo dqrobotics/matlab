@@ -65,9 +65,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties (Constant)
         % Joints that can be actuated
         % Revolute joint
-        JOINT_ROTATIONAL = 1;
+        JOINT_ROTATIONAL = 1; % Deprecated
         % Prismatic joint
-        JOINT_PRISMATIC = 2;
+        JOINT_PRISMATIC = 2;   % Deprecated
         Parameter = struct('Theta', 1, 'D',2, 'A', 3, 'Alpha', 4, 'JointType', 5);
         JointType = struct('REVOLUTE',1, 'PRISMATIC',2);
     end
