@@ -69,6 +69,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Prismatic joint
         JOINT_PRISMATIC = 2;
         Parameter = struct('Theta', 1, 'D',2, 'A', 3, 'Alpha', 4, 'JointType', 5);
+        JointType = struct('REVOLUTE',1, 'PRISMATIC',2);
     end
     
     methods (Access = protected)       
@@ -166,7 +167,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 
             end
             
-            if(size(A,1) ~= 5)
+            if(size(dh_matrix,1) ~= 5)
                 error(['Input: Invalid DH matrix. It should have 5 rows. ' ...
                        'Example: ' str])
             end
