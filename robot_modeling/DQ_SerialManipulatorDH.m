@@ -148,13 +148,17 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             %            a1  ...   an;
             %         alpha1 ... alphan;
             %         type1  ... typen]
-            
+            str = ['DQ_SerialManipulatorDH(A), where ' ...
+                   'A = [theta1 ... thetan; ' ...
+                   ' d1  ...   dn; ' ...
+                   ' a1  ...   an; ' ...
+                   ' alpha1 ... alphan; ' ...
+                   ' type1  ... typen]'];
               
-            obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.dh_matrix_ = A;
            
             if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
+                error(['Input: matrix whose columns contain the DH parameters' ...
+                       ' and type of joints. Example: ' str])
             end            
             if nargin == 2
                 warning(['DQ_SerialManipulatorDH(A,convention) is deprecated.' ...
@@ -163,8 +167,12 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
             
             if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
+                error(['Input: Invalid DH matrix. It should have 5 rows. ' ...
+                       'Example: ' str])
             end
+            
+            obj = obj@DQ_SerialManipulator(size(A,2));
+            obj.dh_matrix_ = A;
            
         end      
                       
