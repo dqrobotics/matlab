@@ -140,17 +140,24 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
             % DQ_SerialManipulator
-             
-            obj = obj@DQ_SerialManipulator(size(A,2));
-            obj.mdh_matrix_ = A;
-      
+             str = ['DQ_SerialManipulatorMDH(A), where ' ...
+                   'A = [theta1 ... thetan; ' ...
+                   ' d1  ...   dn; ' ...
+                   ' a1  ...   an; ' ...
+                   ' alpha1 ... alphan; ' ...
+                   ' type1  ... typen]'];
             if nargin == 0
-                error('Input: matrix whose columns contain the MDH parameters')
+                error(['Input: matrix whose columns contain the MDH parameters' ...
+                       ' and type of joints. Example: ' str])
             end         
             
             if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
+                error(['Input: Invalid DH matrix. It should have 5 rows.' ...
+                       ' Example: ' str])
             end
+
+            obj = obj@DQ_SerialManipulator(size(A,2));
+            obj.mdh_matrix_ = A;
 
         end       
                                      
