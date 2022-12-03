@@ -51,8 +51,7 @@
 % affected methods are: FKM and Jacobian.
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
-    properties  
-        convention;        
+    properties        
         effector;
         
         % Properties for the plot function        
@@ -118,12 +117,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
-
-            if nargin==1
-                obj.convention='standard';
-            else
-                obj.convention=convention;
-            end
             
             %For visualisation
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
@@ -161,56 +154,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
             end
         end
-
-%  This method is not required in the abstrac class. 
-%
-%         function dq = dh2dq(obj,theta,i)
-%             %   For a given link's DH parameters, calculate the correspondent dual
-%             %   quaternion
-%             %   Usage: dq = dh2dq(theta,i), where
-%             %          theta: joint angle
-%             %          i: link number
-%             
-%             if nargin ~= 3
-%                 error('Wrong number of arguments. The parameters are theta and the correspondent link')
-%             end
-%             d = obj.d(i);
-%             a = obj.a(i);
-%             alpha = obj.alpha(i);
-%             
-%             if strcmp(obj.convention,'standard')
-%                 h(1) = cos((theta+obj.theta(i))/2)*cos(alpha/2);
-%                 h(2) = cos((theta+obj.theta(i))/2)*sin(alpha/2);
-%                 h(3) = sin((theta+obj.theta(i))/2)*sin(alpha/2);
-%                 h(4) = sin((theta+obj.theta(i))/2)*cos(alpha/2);
-%                 d2 = d/2;
-%                 a2 = a/2;
-%                 
-%                 
-%                 h(5) = -d2*h(4)-a2*h(2);
-%                 h(6) = -d2*h(3)+a2*h(1);
-%                 h(7) = d2*h(2)+a2*h(4);
-%                 h(8) = d2*h(1)-a2*h(3);
-%             else
-%                 h1 = cos((theta+obj.theta(i))/2)*cos(alpha/2);
-%                 h2 = cos((theta+obj.theta(i))/2)*sin(alpha/2);
-%                 h3 = sin((theta+obj.theta(i))/2)*sin(alpha/2);
-%                 h4 = sin((theta+obj.theta(i))/2)*cos(alpha/2);
-%                 h(1) = h1;
-%                 h(2) = h2;
-%                 h(3) = -h3;
-%                 h(4) = h4;
-%                 d2 = d/2;
-%                 a2 = a/2;
-%                 
-%                 h(5) = -d2*h4-a2*h2;
-%                 h(6) = -d2*h3+a2*h1;
-%                 h(7) = -(d2*h2+a2*h4);
-%                 h(8) = d2*h1-a2*h3;
-%             end
-%             
-%             dq = DQ(h);
-%         end
         
         function p = get_z(~,h)
             p(1) = 0;
