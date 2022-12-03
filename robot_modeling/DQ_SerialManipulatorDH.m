@@ -238,11 +238,11 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
 
-        function J_dot = pose_jacobian_derivative(obj,q,q_dot, to_ith_link)
-            % POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
+        function J_dot = raw_pose_jacobian_derivative(obj,q,q_dot, to_ith_link)
+            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
             % time derivative.
             % 
-            % POSE_JACOBIAN_DERIVATIVE(q,q_dot,to_ith_link) returns the first
+            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot,to_ith_link) returns the first
             % to_ith_link columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
