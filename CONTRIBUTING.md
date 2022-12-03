@@ -7,7 +7,10 @@ This is a set of guidelines for contribuiting to [DQ Robotics](https://dqrobotic
 # Workflow
 
 - Fork the [master branch of the dqrobotics/matlab](https://github.com/dqrobotics/matlab).
-- Propose your modifications and open a draft pull request.
+- Propose your modifications and open a draft pull request. Keep in mind the following recomentations:
+   - Propose individual changes (several changes of the same type are allowed on the same pull request).
+   - Do not unnecessarily change any internal implementation that is working correctly without prior approval.
+   - Include a clear and concise rationale behind each pull request.
 - Your modifications will be tested automatically by Github actions. Specifically, Github actions runs the tests of [matlab-tests](https://github.com/dqrobotics/matlab-tests), which executes all the examples of [matlab-examples](https://github.com/dqrobotics/matlab-examples). 
 - Once your draft pull request passes all the tests, you can switch the status to pull request. (More details [here](https://github.blog/2019-02-14-introducing-draft-pull-requests/)).
 
