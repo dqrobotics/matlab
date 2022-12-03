@@ -64,71 +64,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Prismatic joint
         JOINT_PRISMATIC = 2;
     end
-    
-    methods
-        function obj = DQ_SerialManipulatorDH(A, convention)
-            % These are initialized in the constructor of
-            % DQ_SerialManipulator 
-            % obj.dim_configuration_space = dim_configuration_space;
 
-            str = ['DQ_SerialManipulatorDH(A), where ' ...
-                   'A = [theta1 ... thetan; ' ...
-                   ' d1  ...   dn; ' ...
-                   ' a1  ...   an; ' ...
-                   ' alpha1 ... alphan; ' ...
-                   ' type1  ... typen]'];
-            
-            
-            if nargin == 0
-                error(['Input: matrix whose columns contain the DH parameters' ...
-                       ' and type of joints. Example: ' str])
-            end
-
-            if nargin == 2
-                warning(['DQ_SerialManipulatorDH(A, convention) is deprecated.' ...
-                        ' Please use DQ_SerialManipulatorDH(A) instead.']);    
-            end
-            
-            if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
-            end
-
-            obj = obj@DQ_SerialManipulator(size(A,2));
-
-            % Add theta, d, a, alpha and type
-            obj.theta = A(1,:);
-            obj.d     = A(2,:);
-            obj.a     = A(3,:);
-            obj.alpha = A(4,:);
-            obj.type  = A(5,:);
-        end
-        
-        function x = raw_fkm(obj,q,to_ith_link)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %   'to_ith_link' defines until which link the raw_fkm will be
-            %   calculated.
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            if nargin == 3
-                n = to_ith_link;
-            else
-                n = obj.n_links;
-            end
-            
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*dh2dq(obj,q(i),i);
-            end
-        end
-        
-        
+    methods (Access = protected)
         function dq = dh2dq(obj,q,ith)
             %   For a given link's Extended DH parameters, calculate the correspondent dual
             %   quaternion
@@ -200,13 +137,87 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 ]);
         end
         
-        function w = get_w(obj,ith)       
+        function w = get_w(obj,ith)  
+        % This method returns the term 'w' related with the time derivative of 
+        % the unit dual quaternion pose using the Standard DH convention.
+        % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % Human-Robot Collaboration' by Bruno Adorno.
+        % Usage: w = get_w(ith), where
+        %          ith: link number    
             if obj.type(ith) == obj.JOINT_ROTATIONAL
                 w = DQ.k;
             else
+                % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
+                % by Silva, F. F. A., Quiroz-Omaña, J. J., and Adorno, B. V. (April 12, 2022).  
+                % ASME. J. Mechanisms Robotics. doi: https://doi.org/10.1115/1.4054320
                 w = DQ.E*DQ.k;
             end
         end
+    end
+    
+    methods
+        function obj = DQ_SerialManipulatorDH(A, convention)
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator 
+            % obj.dim_configuration_space = dim_configuration_space;
+
+            str = ['DQ_SerialManipulatorDH(A), where ' ...
+                   'A = [theta1 ... thetan; ' ...
+                   ' d1  ...   dn; ' ...
+                   ' a1  ...   an; ' ...
+                   ' alpha1 ... alphan; ' ...
+                   ' type1  ... typen]'];
+            
+            
+            if nargin == 0
+                error(['Input: matrix whose columns contain the DH parameters' ...
+                       ' and type of joints. Example: ' str])
+            end
+
+            if nargin == 2
+                warning(['DQ_SerialManipulatorDH(A, convention) is deprecated.' ...
+                        ' Please use DQ_SerialManipulatorDH(A) instead.']);    
+            end
+            
+            if(size(A,1) ~= 5)
+                error('Input: Invalid DH matrix. It should have 5 rows.')
+            end
+
+            obj = obj@DQ_SerialManipulator(size(A,2));
+
+            % Add theta, d, a, alpha and type
+            obj.theta = A(1,:);
+            obj.d     = A(2,:);
+            obj.a     = A(3,:);
+            obj.alpha = A(4,:);
+            obj.type  = A(5,:);
+        end
+        
+        function x = raw_fkm(obj,q,to_ith_link)
+            %   RAW_FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   last joint (the displacements due to the base and the effector
+            %   are not taken into account).
+            %
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines until which link the raw_fkm will be
+            %   calculated.
+            %
+            %   This is an auxiliary function to be used mainly with the
+            %   Jacobian function.
+            if nargin == 3
+                n = to_ith_link;
+            else
+                n = obj.n_links;
+            end
+            
+            x = DQ(1);
+            
+            for i=1:n
+                x = x*dh2dq(obj,q(i),i);
+            end
+        end
+        
         
         function J = raw_pose_jacobian(obj,q,to_ith_link)
             % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
