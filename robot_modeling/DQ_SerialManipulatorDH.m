@@ -53,6 +53,7 @@
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
+        theta,d,a,alpha;
         type
     end
     
@@ -65,27 +66,51 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     end
     
     methods
-        function obj = DQ_SerialManipulatorDH(A,convention)
-            % These are initialized in the constructor of
-            % DQ_SerialManipulator
-            %obj.convention = convention;
-            %obj.n_links = size(A,2);
-            %obj.theta = A(1,:);
-            %obj.d = A(2,:);
-            %obj.a = A(3,:);
-            %obj.alpha = A(4,:);
-            obj = obj@DQ_SerialManipulator(A(1:4,:),convention);
+        function obj = DQ_SerialManipulatorDH(A, convention)
+            %  Constructor of the DQ_SerialManipulatorDH class.
+            % 'A' is a matrix 5 x number_of_joints that represent the DH parameters of the robot. 
+            %
+            %                    Example: Consider the Stanford manipulator. Using the DH parameters, we have:
+            %                    (See Table 3.4 from Robot Modeling and Control Second Edition, Spong, Mark W.
+            %                    Hutchinson, Seth M., Vidyasagar)
+            %
+            %                    robot_dh = [ 0, 0, 0, 0, 0, 0;                       % theta
+            %                                 0,d2,d3,0,0,d6;                         % d
+            %                                 0, 0, 0, 0, 0, 0;                       % a
+            %                                 -pi/2, pi/2,  0, -pi/2, pi/2,0;         % alpha
+            %                                 0,0,1,0,0,0;]  % Type of joints. The joints are rotational, except the third joint, which is prismatic.
+            %                    StandfordManipulator = DQ_SerialManipulatorDH(robot_dh); 
+
+            str = ['DQ_SerialManipulatorDH(A), where ' ...
+                   'A = [theta1 ... thetan; ' ...
+                   ' d1  ...   dn; ' ...
+                   ' a1  ...   an; ' ...
+                   ' alpha1 ... alphan; ' ...
+                   ' type1  ... typen]'];
+            
             
             if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
+                error(['Input: matrix whose columns contain the DH parameters' ...
+                       ' and type of joints. Example: ' str])
+            end
+
+            if nargin == 2
+                warning(['DQ_SerialManipulatorDH(A, convention) is deprecated.' ...
+                        ' Please use DQ_SerialManipulatorDH(A) instead.']);    
             end
             
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It should have 5 rows.')
             end
-            
-            % Add type
-            obj.type = A(5,:);
+
+            obj = obj@DQ_SerialManipulator(size(A,2));
+
+            % Add theta, d, a, alpha and type
+            obj.theta = A(1,:);
+            obj.d     = A(2,:);
+            obj.a     = A(3,:);
+            obj.alpha = A(4,:);
+            obj.type  = A(5,:);
         end
         
         function x = raw_fkm(obj,q,to_ith_link)
