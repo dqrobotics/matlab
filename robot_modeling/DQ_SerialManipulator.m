@@ -51,8 +51,7 @@
 % affected methods are: FKM and Jacobian.
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
-    properties        
-        %theta,d,a,alpha;
+    properties  
         convention;        
         effector;
         
@@ -81,7 +80,16 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
          % end-effector displacements and should be used mostly
          % internally in DQ_kinematics
          J = raw_pose_jacobian(obj, q,to_ith_link);
-         
+
+
+         % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
+         % time derivative.
+         % 
+         % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot, to_ith_link) returns the first
+         % to_ith_link columns of the Jacobian time derivative.
+         % This function does not take into account any base or
+         % end-effector displacements.
+         J_dot = raw_pose_jacobian_derivative(obj, q, q_dot, to_ith_link);
        
          %   RAW_FKM(q) calculates the forward kinematic model and
          %   returns the dual quaternion corresponding to the
@@ -102,12 +110,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end
-            
-%             obj.n_links = size(A,2);
-%             obj.theta = A(1,:);
-%             obj.d = A(2,:);
-%             obj.a = A(3,:);
-%             obj.alpha = A(4,:);
             
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
@@ -250,48 +252,18 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % This function does not take into account any base or
             % end-effector displacements.
             
-            if nargin == 4
-                n = ith;
-                x_effector = obj.raw_fkm(q,ith);
-                J = obj.raw_pose_jacobian(q,ith);
-                vec_x_effector_dot = J*q_dot(1:ith);
+            if nargin == 4 && ith < obj.n_links
+                % If the Jacobian is not related to the mapping between the
+                % end-effector velocities and the joint velocities, it takes
+                % into account only the base displacement
+                J_dot = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian_derivative(...
+                    q, q_dot, ith);
             else
-                n = obj.n_links;
-                x_effector = obj.raw_fkm(q);
-                J = obj.raw_pose_jacobian(q);
-                vec_x_effector_dot = J*q_dot;
-            end
-                                 
-            x = DQ(1);            
-            J_dot = zeros(8,n);
-
-            for i = 0:n-1
-                % Use the standard DH convention
-                if strcmp(obj.convention,'standard')
-                    w = DQ.k;
-                    z = DQ(obj.get_z(x.q));
-                else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
-                        0,-obj.a(i+1)*cos(obj.alpha(i+1)),...
-                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
-                    z = 0.5*x*w*x';
-                end
-                
-                % When i = 0 and length(theta) = 1, theta(1,i) returns
-                % a 1 x 0 vector, differently from the expected
-                % behavior, which is to return a 0 x 1 matrix.
-                % Therefore, we have to deal with the case i = 0
-                % explictly.
-                if i ~= 0
-                    vec_zdot = 0.5*(haminus8(w*x') + ...
-                        hamiplus8(x*w)*DQ.C8) * ...
-                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
-                else
-                    vec_zdot = zeros(8,1);
-                end
-                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
-                    hamiplus8(z)*vec_x_effector_dot;
-                x = x*obj.dh2dq(q(i+1),i+1);
+                % Otherwise, it the Jacobian is related to the
+                % end-effector velocity, it takes into account both base
+                % and end-effector (constant) displacements.
+                J_dot = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*...
+                    obj.raw_pose_jacobian_derivative(q, q_dot);
             end
         end
         
