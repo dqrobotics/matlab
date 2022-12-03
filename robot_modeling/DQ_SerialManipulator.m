@@ -112,7 +112,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
             obj.effector = DQ(1); %Default effector's pose
-            obj.dim_configuration_space = dim_configuration_space;
             obj.n_links = dim_configuration_space;
             
             % Define a unique robot name
