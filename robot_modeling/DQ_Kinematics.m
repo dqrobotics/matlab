@@ -73,7 +73,9 @@ classdef DQ_Kinematics < handle
         % Frame used to determine the robot physical location
         base_frame;
         % Robot configuration vector
-        q        
+        q 
+        %  Dimension of the robot configuration space
+        dim_configuration_space;
     end
     
     methods
