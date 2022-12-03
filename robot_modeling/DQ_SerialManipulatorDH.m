@@ -2,7 +2,7 @@
 % Denavit-Hartenberg parameters (DH)
 %
 % Usage: robot = DQ_SerialManipulatorDH(A)
-% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
+% - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
 %            d1  ...   dn;
@@ -67,19 +67,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     
     methods
         function obj = DQ_SerialManipulatorDH(A, convention)
-            %  Constructor of the DQ_SerialManipulatorDH class.
-            % 'A' is a matrix 5 x number_of_joints that represent the DH parameters of the robot. 
-            %
-            %                    Example: Consider the Stanford manipulator. Using the DH parameters, we have:
-            %                    (See Table 3.4 from Robot Modeling and Control Second Edition, Spong, Mark W.
-            %                    Hutchinson, Seth M., Vidyasagar)
-            %
-            %                    robot_dh = [ 0, 0, 0, 0, 0, 0;                       % theta
-            %                                 0,d2,d3,0,0,d6;                         % d
-            %                                 0, 0, 0, 0, 0, 0;                       % a
-            %                                 -pi/2, pi/2,  0, -pi/2, pi/2,0;         % alpha
-            %                                 0,0,1,0,0,0;]  % Type of joints. The joints are rotational, except the third joint, which is prismatic.
-            %                    StandfordManipulator = DQ_SerialManipulatorDH(robot_dh); 
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator 
+            % obj.dim_configuration_space = dim_configuration_space;
 
             str = ['DQ_SerialManipulatorDH(A), where ' ...
                    'A = [theta1 ... thetan; ' ...
