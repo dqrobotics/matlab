@@ -1,7 +1,7 @@
 % comau = DQ_COMAU returns a DQ_kinematics object using the modified
 % Denavit-Hartenberg parameters of the COMAU SmartSiX robot
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2015-2022 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -18,10 +18,10 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vihena Adorno - adorno@ieee.org
 
 classdef ComauSmartSixRobot
     methods (Static)
@@ -32,13 +32,14 @@ classdef ComauSmartSixRobot
             comau_DH_d =     [-0.45, 0, 0, -0.64707, 0, -0.095];
             comau_DH_a =     [0, 0.150, 0.590, 0.13, 0, 0];
             comau_DH_alpha = [pi, pi/2, pi, -pi/2, -pi/2, pi/2];
-
+            comau_DH_type =  double(repmat(DQ_JointType.REVOLUTE,1,6));
             comau_DH_matrix = [comau_DH_theta;
-                comau_DH_d;
-                comau_DH_a;
-                comau_DH_alpha];
+                               comau_DH_d;
+                               comau_DH_a;
+                               comau_DH_alpha
+                               comau_DH_type];
 
-            comau = DQ_SerialManipulator(comau_DH_matrix, 'modified');
+            comau = DQ_SerialManipulatorMDH(comau_DH_matrix);
             
             % There is a final transformation for the end-effector given by
             % a rotation of pi around the local x-axis followed by a
