@@ -108,7 +108,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     methods
         function obj = DQ_SerialManipulator(dim_configuration_space)
             if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
+                error('Input: dimension of the configuration space')
             end
             
             obj.reference_frame = DQ(1); %Default base's pose
