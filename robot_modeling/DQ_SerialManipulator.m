@@ -50,10 +50,10 @@
 % confusion, specially among those trying to learn the library. The
 % affected methods are: FKM and Jacobian.
 
-classdef DQ_SerialManipulator < DQ_Kinematics
+classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
-        theta,d,a,alpha;
-        convention;        
+        %theta,d,a,alpha;
+        %convention;        
         effector;
         
         % Properties for the plot function        
@@ -69,20 +69,22 @@ classdef DQ_SerialManipulator < DQ_Kinematics
     end
     
     methods
-        function obj = DQ_SerialManipulator(A,convention)
+        function obj = DQ_SerialManipulator(dim_configuration_space)
             if nargin == 0
                 error('Input: matrix whose columns contain the DH parameters')
             end
             
-            obj.n_links = size(A,2);
-            obj.theta = A(1,:);
-            obj.d = A(2,:);
-            obj.a = A(3,:);
-            obj.alpha = A(4,:);
+%             obj.n_links = size(A,2);
+%             obj.theta = A(1,:);
+%             obj.d = A(2,:);
+%             obj.a = A(3,:);
+%             obj.alpha = A(4,:);
             
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
             obj.effector = DQ(1); %Default effector's pose
+            obj.dim_configuration_space = dim_configuration_space;
+            obj.n_links = dim_configuration_space;
             
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
