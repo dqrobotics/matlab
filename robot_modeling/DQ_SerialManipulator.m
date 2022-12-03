@@ -53,7 +53,7 @@
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
         %theta,d,a,alpha;
-        %convention;        
+        convention;        
         effector;
         
         % Properties for the plot function        
@@ -66,6 +66,35 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % mainly in the plot function.
         handle
         n_links;
+    end
+
+    methods (Abstract)
+         % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
+         % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
+         % vector of joint variables.
+         %
+         % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
+         % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
+         % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
+         %
+         % This function does not take into account any base or
+         % end-effector displacements and should be used mostly
+         % internally in DQ_kinematics
+         J = raw_pose_jacobian(obj, q,to_ith_link);
+         
+       
+         %   RAW_FKM(q) calculates the forward kinematic model and
+         %   returns the dual quaternion corresponding to the
+         %   last joint (the displacements due to the base and the effector
+         %   are not taken into account).
+         %
+         %   'q' is the vector of joint variables
+         %   'to_ith_link' defines until which link the raw_fkm will be
+         %   calculated.
+         %
+         %   This is an auxiliary function to be used mainly with the
+         %   Jacobian function.   
+         pose = raw_fkm(obj,q, to_ith_link); 
     end
     
     methods
@@ -88,7 +117,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
-            
+
             if nargin==1
                 obj.convention='standard';
             else
@@ -109,34 +138,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % SET_EFFECTOR(effector) sets the pose of the effector
             
             obj.effector = DQ(effector);
-        end
-        
-        function x = raw_fkm(obj,q, ith)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector 
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            
-            if nargin == 3
-                n = ith;
-            else
-                n = obj.n_links;
-            end
-            
-            if length(q) ~= obj.n_links
-                error('Incorrect number of joint variables');
-            end
-            
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*dh2dq(obj,q(i),i);
-            end
         end
         
         function x = fkm(obj,q, ith)
