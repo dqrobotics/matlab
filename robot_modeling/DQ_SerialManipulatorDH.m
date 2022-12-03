@@ -255,7 +255,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 J = obj.raw_pose_jacobian(q,to_ith_link);
                 vec_x_effector_dot = J*q_dot(1:to_ith_link);
             else
-                n = obj.dim_configuration_space;
+                n = obj.n_links;
                 % obj.check_to_ith_link(n);
                 x_effector = obj.raw_fkm(q);
                 J = obj.raw_pose_jacobian(q);
