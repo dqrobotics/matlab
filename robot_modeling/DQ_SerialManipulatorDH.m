@@ -128,25 +128,6 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
         end
         
-        function x = fkm(obj,q,to_ith_link)
-            %   FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   end-effector pose. This function takes into account the
-            %   displacement due to the base's and effector's poses.
-            %
-            %   'q' is the vector of joint variables
-            %   'to_ith_link' defines up to which link the fkm will be
-            %   calculated. If to_ith_link corresponds to the last link,
-            %   the method DOES NOT take into account the transformation
-            %   given by set_effector. If you want to take into account
-            %   that transformation, use FKM(q) instead.
-            
-            if nargin == 3
-                x = obj.reference_frame*obj.raw_fkm(q, to_ith_link); %Takes into account the base displacement
-            else
-                x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
-            end
-        end
         
         function dq = dh2dq(obj,q,ith)
             %   For a given link's Extended DH parameters, calculate the correspondent dual
