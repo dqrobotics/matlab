@@ -41,11 +41,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
-
-% TODO: Remove the virtual joints. Instead of helping, they cause a lot of
-% confusion, specially among those trying to learn the library. The
-% affected methods are: FKM and Jacobian.
+%     Bruno Vihena Adorno - adorno@ieee.org
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
