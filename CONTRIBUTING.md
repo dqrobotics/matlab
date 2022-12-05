@@ -16,7 +16,8 @@ This is a set of guidelines for contributing to [DQ Robotics](https://dqrobotics
 - Your modifications will be tested automatically through Github actions. Github actions run the tests of [matlab-tests](https://github.com/dqrobotics/matlab-tests), which execute all the examples of [matlab-examples](https://github.com/dqrobotics/matlab-examples). 
 - Once your draft pull request passes all the tests, you can switch the status to pull request. (More details [here](https://github.blog/2019-02-14-introducing-draft-pull-requests/)).
 
-![Untitled Diagram](https://user-images.githubusercontent.com/23158313/150255548-b4475747-444e-4530-9b20-def1655bb4f9.png)
+<img src="https://user-images.githubusercontent.com/23158313/205527140-74e7ad26-17b3-4f2c-a159-fca7c52a42ea.png" alt="drawing" width="1200"/>
+
 
 ## Case 1 (Common cases)
 
