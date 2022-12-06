@@ -642,7 +642,7 @@ function o = plot_options(robot, optin)
             % and link length, we add them.
 
             % TODO
-            % This part is strange because it assumes we are using the 
+            % This part of the code assumes we are using the 
             %  DH parametrization. We need to fix it in future versions.
             reach = reach + abs(robot.a(i)) + abs(robot.d(i));
         end
