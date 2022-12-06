@@ -193,7 +193,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 4 && ith < obj.n_links
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
-                % into account only the base displacement
+                % into account only the constant base displacement
                 J_dot = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian_derivative(...
                     q, q_dot, ith);
             else
