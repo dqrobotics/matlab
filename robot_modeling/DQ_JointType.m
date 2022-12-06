@@ -22,7 +22,7 @@
 %   Implementation of the original code:
 %      Juan Jose Quiroz Omana - (juanjqo@g.ecc.u-tokyo.ac.jp) 
 %
-classdef JointType < double
+classdef DQ_JointType <  uint32
 
    % This class is based on Table 1 of  Silva, Quiroz-Omaña, and Adorno (2022).
    % Dynamics of Mobile Manipulators Using Dual Quaternion Algebra
