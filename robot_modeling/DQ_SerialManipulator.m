@@ -96,7 +96,22 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
          %   Jacobian function.   
          pose = raw_fkm(obj,q, to_ith_link); 
     end
-    
+
+    methods (Abstract, Access = protected)   
+        %   DQ2DQ(q, ith) calculates  the corresponding dual quaternion for
+        %   a given link's DH parameters
+        %
+        %   Usage: dq = dh2dq(q,ith), where
+        %          q: joint value
+        %          ith: link number
+        %
+        %   Eq. (2.34) of Adorno, B. V. (2011). Two-arm Manipulation: From Manipulators
+        %   to Enhanced Human-Robot Collaboration [Contribution à la manipulation à deux bras : 
+        %   des manipulateurs à la collaboration homme-robot]. 
+        %   https://tel.archives-ouvertes.fr/tel-00641678/
+        dq = dh2dq(obj,q,ith);
+    end
+
     methods
         function obj = DQ_SerialManipulator(dim_configuration_space)
             if nargin == 0
