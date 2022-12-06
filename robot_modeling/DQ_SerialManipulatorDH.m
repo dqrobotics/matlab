@@ -155,7 +155,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
             
             if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It should have 5 rows.')
+                error('Input: Invalid DH matrix. It must have 5 rows.')
             end
 
             obj = obj@DQ_SerialManipulator(size(A,2));
