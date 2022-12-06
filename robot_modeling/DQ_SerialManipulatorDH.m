@@ -49,7 +49,20 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Bruno Vihena Adorno (adorno@ieee.org)
+%        Responsible for the original implementation in file SerialManipulator.m 
+%       (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
+%
+%     2. Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
+%        - Created this file by reorganizing the code in the original file to comply 
+%          with SerialManipulator.m becoming an abstract class, according to the discussion 
+%          at #56 (https://github.com/dqrobotics/matlab/pull/56).
+%        - Added support for prismatic joints. 
+%         (f5aa70a) https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
+%
+%     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%        - Added some modifications discussed at #56 (https://github.com/dqrobotics/matlab/pull/75)
+%          to define DQ_SerialManipulator as an abstract class.           
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
