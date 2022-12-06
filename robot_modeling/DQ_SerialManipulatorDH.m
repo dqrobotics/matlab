@@ -67,8 +67,8 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
 
     methods (Access = protected)
         function dq = dh2dq(obj,q,ith)
-            %   For a given link's DH parameters, calculate the corresponding dual
-            %   quaternion
+            %   DQ2DQ(q, ith) calculates  the corresponding dual quaternion for
+            %   a given link's DH parameters
             %
             %   Usage: dq = dh2dq(q,ith), where
             %          q: joint value
