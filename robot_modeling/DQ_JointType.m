@@ -19,8 +19,8 @@
 %
 % Contributors to this file:
 %
-%   Implementation of the original code:
-%      Juan Jose Quiroz Omana - (juanjqo@g.ecc.u-tokyo.ac.jp) 
+%   1. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp) 
+%      Responsible for the original implementation.
 %
 classdef DQ_JointType <  uint32
 
