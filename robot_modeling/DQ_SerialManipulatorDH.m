@@ -67,11 +67,17 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
 
     methods (Access = protected)
         function dq = dh2dq(obj,q,ith)
-            %   For a given link's Extended DH parameters, calculate the correspondent dual
+            %   For a given link's DH parameters, calculate the corresponding dual
             %   quaternion
+            %
             %   Usage: dq = dh2dq(q,ith), where
             %          q: joint value
             %          ith: link number
+            %
+            %   Eq. (2.34) of Adorno, B. V. (2011). Two-arm Manipulation: From Manipulators
+            %   to Enhanced Human-Robot Collaboration [Contribution à la manipulation à deux bras : 
+            %   des manipulateurs à la collaboration homme-robot]. 
+            %   https://tel.archives-ouvertes.fr/tel-00641678/
             
             if nargin ~= 3
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
