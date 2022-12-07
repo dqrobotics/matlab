@@ -51,14 +51,17 @@
 % Contributors to this file:
 %     1. Bruno Vihena Adorno (adorno@ieee.org)
 %        Responsible for the original implementation in file SerialManipulator.m 
-%       (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
+%        [bvadorno committed on Apr 10, 2019] (bc7a95f)
+%        (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
 %
 %     2. Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
 %        - Created this file by reorganizing the code in the original file to comply 
 %          with SerialManipulator.m becoming an abstract class, according to the discussion 
 %          at #56 (https://github.com/dqrobotics/matlab/pull/56).
+% 
 %        - Added support for prismatic joints. 
-%         (f5aa70a) https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
+%          [mmmarinho committed on Apr 28, 2020] (f5aa70a) 
+%          https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Added some modifications discussed at #56 (https://github.com/dqrobotics/matlab/pull/75)
@@ -176,7 +179,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It must have 5 rows.')
             end
-            
+
             % n_links 
             % TODO: change n_links to dim_configuration_space
             obj.n_links = size(A,2);
