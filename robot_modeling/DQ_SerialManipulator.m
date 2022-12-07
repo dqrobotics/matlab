@@ -113,23 +113,17 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     end
 
     methods
-        function obj = DQ_SerialManipulator(dim_configuration_space)
-            if nargin == 0
-                error('Input: dimension of the configuration space')
-            end
-            
+        function obj = DQ_SerialManipulator()
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
             obj.effector = DQ(1); %Default effector's pose
-            obj.n_links = dim_configuration_space;
-            
+
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
             %For visualisation
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
-            obj.plotopt = {};
-            
+            obj.plotopt = {};           
         end
         
         function ret = get_dim_configuration_space(obj)
@@ -137,8 +131,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         end
         
         function set_effector(obj,effector)
-            % SET_EFFECTOR(effector) sets the pose of the effector
-            
+            % SET_EFFECTOR(effector) sets the pose of the effector         
             obj.effector = DQ(effector);
         end
         
