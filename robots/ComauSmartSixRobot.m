@@ -1,7 +1,7 @@
 % comau = DQ_COMAU returns a DQ_kinematics object using the modified
 % Denavit-Hartenberg parameters of the COMAU SmartSiX robot
 
-% (C) Copyright 2015 DQ Robotics Developers
+% (C) Copyright 2015-2022 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -18,10 +18,10 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vihena Adorno - adorno@ieee.org
 
 classdef ComauSmartSixRobot
     methods (Static)
