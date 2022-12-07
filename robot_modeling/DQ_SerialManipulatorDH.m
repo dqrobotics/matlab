@@ -176,8 +176,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             if(size(A,1) ~= 5)
                 error('Input: Invalid DH matrix. It must have 5 rows.')
             end
-
-            obj = obj@DQ_SerialManipulator(size(A,2));
+            
+            % n_links 
+            % TODO: change n_links to dim_configuration_space
+            obj.n_links = size(A,2);
 
             % Add theta, d, a, alpha and type
             obj.theta = A(1,:);
