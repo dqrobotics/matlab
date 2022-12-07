@@ -9,13 +9,13 @@
 %            a1  ...   an;
 %         alpha1 ... alphan;
 %         type1  ... typen]
-% where type is the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
-% or DQ_SerialManipulatorDH.JOINT_PRISMATIC
+% where type is the actuation type, either DQ_JointType.REVOLUTE
+% or DQ_JointType.PRISMATIC
 % - The only accepted convention in this subclass is the 'standard' DH
 % convention.
 %
-% If the joint is of type JOINT_ROTATIONAL, then the first row of A will
-% have the joint offsets. If the joint is of type JOINT_PRISMATIC, then the
+% If the joint is of type REVOLUTE, then the first row of A will
+% have the joint offsets. If the joint is of type PRISMATIC, then the
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
@@ -76,9 +76,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties (Constant)
         % Joints that can be actuated
         % Rotational joint
-        JOINT_ROTATIONAL = 1;
+        JOINT_ROTATIONAL = 1; % Deprecated
         % Prismatic joint
-        JOINT_PRISMATIC = 2;
+        JOINT_PRISMATIC = 2;  % Deprecated
     end
 
     methods (Access = protected)
@@ -104,10 +104,9 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             d = obj.d(ith);
             a = obj.a(ith);
             half_alpha = obj.alpha(ith)/2.0;
-            
             % Add the effect of the joint value
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
-                % If joint is rotational
+            if obj.type(ith) == DQ_JointType.REVOLUTE
+                % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
                 % If joint is prismatic
@@ -141,7 +140,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number    
-            if obj.type(ith) == obj.JOINT_ROTATIONAL
+            if obj.type(ith) == DQ_JointType.REVOLUTE
                 w = DQ.k;
             else
                 % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
