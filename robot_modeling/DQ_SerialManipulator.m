@@ -174,7 +174,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % both base and end-effector displacements (their default
             % values are 1).
             
-            if nargin == 3 
+            if nargin == 3 && ith < obj.n_links
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the constant base displacement
