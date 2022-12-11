@@ -55,9 +55,10 @@
 %        (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
 %
 %     2. Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
-%        - Created the file DQ_SerialManipulatorDH at #56
+%        - Reorganized the code by moving the implementation of SerialManipulator.m 
+%         to the file DQ_SerialManipulatorDH at #56
 %        (https://github.com/dqrobotics/matlab/pull/56),
-%         in which this file is based. 
+%         which is the starting point for this file.
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Created this file. Implemented the case for prismatic joints
