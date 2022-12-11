@@ -1,8 +1,5 @@
 % Abstract class that defines serial manipulators.
 %
-% Usage: robot = DQ_SerialManipulator(dim_configuration_space)
-% - 'dim_configuration_space' is the dimension of the
-%   configuration space.
 %
 % DQ_SerialManipulator Methods (Concrete):
 %       get_dim_configuration_space - Return the dimension of the configuration space.
