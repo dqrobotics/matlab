@@ -11,7 +11,7 @@
 %         type1  ... typen]
 % where type is the actuation type, either DQ_JointType.REVOLUTE
 % or DQ_JointType.PRISMATIC
-% - The only accepted convention in this subclass is the 'standard' DH
+% - The only accepted convention in this subclass is the 'modified' DH
 % convention.
 %
 % If the joint is of type REVOLUTE, then the first row of A will
@@ -60,7 +60,8 @@
 %         in which this file is based. 
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Created this file.
+%        - Created this file. Implemented the case for prismatic joints
+%          in method get_w().
 
 
 
