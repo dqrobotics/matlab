@@ -181,7 +181,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % This function does not take into account any base or
             % end-effector displacements.
             
-            if nargin == 4 
+            if nargin == 4 && ith < obj.n_links
                 % If the Jacobian derivative is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the constant base displacement
