@@ -64,7 +64,7 @@
 %          https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Added some modifications discussed at #56 (https://github.com/dqrobotics/matlab/pull/75)
+%        - Added some modifications discussed at #75 (https://github.com/dqrobotics/matlab/pull/75)
 %          to define DQ_SerialManipulator as an abstract class.           
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
