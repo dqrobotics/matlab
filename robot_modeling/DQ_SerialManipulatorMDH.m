@@ -68,14 +68,25 @@
 
 
 
-classdef DQ_SerialManipulatorMDH < DQ_SerialManipulatorDH
-   
+classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
+    properties
+        theta,d,a,alpha;
+        type
+    end
+    
+    properties (Constant)
+        % Joints that can be actuated
+        % Rotational joint
+        JOINT_ROTATIONAL = 1; % Deprecated
+        % Prismatic joint
+        JOINT_PRISMATIC = 2;  % Deprecated
+    end
     methods (Access = protected)
-        function dq = dh2dq(obj,q,ith)
-            %   DQ2DQ(q, ith) calculates  the corresponding dual quaternion for
+        function dq = get_link2dq(obj,q,ith)
+            %   GET_LINK2DQ(q, ith) calculates  the corresponding dual quaternion for
             %   a given link's modified DH parameters
             %
-            %   Usage: dq = dh2dq(q,ith), where
+            %   Usage: dq = get_link2dq(q,ith), where
             %          q: joint value
             %          ith: link number
             %
@@ -136,6 +147,42 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulatorDH
             else % if joint is PRISMATIC          
                 w = DQ.E*(cos(obj.alpha(ith))*DQ.k - sin(obj.alpha(ith))*DQ.j);
             end
+        end
+        
+    end
+    methods
+        function obj = DQ_SerialManipulatorMDH(A)
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator 
+            % obj.dim_configuration_space = dim_configuration_space;
+
+            str = ['DQ_SerialManipulatorMDH(A), where ' ...
+                   'A = [theta1 ... thetan; ' ...
+                   ' d1  ...   dn; ' ...
+                   ' a1  ...   an; ' ...
+                   ' alpha1 ... alphan; ' ...
+                   ' type1  ... typen]'];
+            
+            
+            if nargin == 0
+                error(['Input: matrix whose columns contain the modified DH parameters' ...
+                       ' and type of joints. Example: ' str])
+            end
+            
+            if(size(A,1) ~= 5)
+                error('Input: Invalid modified DH matrix. It must have 5 rows.')
+            end
+
+            % n_links 
+            % TODO: change n_links to dim_configuration_space
+            obj.n_links = size(A,2);
+
+            % Add theta, d, a, alpha and type
+            obj.theta = A(1,:);
+            obj.d     = A(2,:);
+            obj.a     = A(3,:);
+            obj.alpha = A(4,:);
+            obj.type  = A(5,:);
         end
         
     end
