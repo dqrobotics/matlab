@@ -68,26 +68,14 @@
 
 
 
-classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
-    properties
-        theta,d,a,alpha;
-        type
-    end
-    
-    properties (Constant)
-        % Joints that can be actuated
-        % Rotational joint
-        JOINT_ROTATIONAL = 1; % Deprecated
-        % Prismatic joint
-        JOINT_PRISMATIC = 2;  % Deprecated
-    end
-    
+classdef DQ_SerialManipulatorMDH < DQ_SerialManipulatorDH
+   
     methods (Access = protected)
-        function dq = mdh2dq(obj,q,ith)
-            %   MDQ2DQ(q, ith) calculates  the corresponding dual quaternion for
+        function dq = dh2dq(obj,q,ith)
+            %   DQ2DQ(q, ith) calculates  the corresponding dual quaternion for
             %   a given link's modified DH parameters
             %
-            %   Usage: dq = mdh2dq(q,ith), where
+            %   Usage: dq = dh2dq(q,ith), where
             %          q: joint value
             %          ith: link number
             %
@@ -152,155 +140,4 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         
     end
     
-    methods
-        function obj = DQ_SerialManipulatorMDH(A)
-
-            str = ['DQ_SerialManipulatorMDH(A), where ' ...
-                   'A = [theta1 ... thetan; ' ...
-                   ' d1  ...   dn; ' ...
-                   ' a1  ...   an; ' ...
-                   ' alpha1 ... alphan; ' ...
-                   ' type1  ... typen]'];
-
-            if nargin == 0
-                error(['Input: matrix whose columns contain the modified DH parameters' ...
-                       ' and type of joints. Example: ' str])
-            end
-            
-            if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It must have 5 rows.')
-            end
-
-            % n_links 
-            % TODO: change n_links to dim_configuration_space
-            obj.n_links = size(A,2);
-
-            % Add theta, d, a, alpha and type
-            obj.theta = A(1,:);
-            obj.d     = A(2,:);
-            obj.a     = A(3,:);
-            obj.alpha = A(4,:);
-            obj.type  = A(5,:);
-        end       
-                                     
-        
-        function x = raw_fkm(obj,q,to_ith_link)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %   'to_ith_link' defines until which link the raw_fkm will be
-            %   calculated.
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            
-            %obj.check_q_vec(q);
-            
-            if nargin == 3
-                n = to_ith_link;
-            else
-                n = obj.n_links;
-            end
-            
-            %obj.check_to_ith_link(n);
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*mdh2dq(obj,q(i),i);
-            end
-        end
-        
-        function J = raw_pose_jacobian(obj,q,to_ith_link)
-            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
-            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
-            % vector of joint variables.
-            %
-            % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
-            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
-            % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
-            %
-            % This function does not take into account any base or
-            % end-effector displacements and should be used mostly
-            % internally in DQ_kinematics
-            % obj.check_q_vec(q);
-
-            if nargin == 3
-                n = to_ith_link;
-            else
-                n = obj.n_links;
-            end
-
-            %obj.check_to_ith_link(n);
-            x_effector = obj.raw_fkm(q,n);
-          
-            x = DQ(1);
-            J = zeros(8,n);
-            for i = 1:n
-                w = obj.get_w(i);
-                z = 0.5*Ad(x,w);
-                x = x*obj.mdh2dq(q(i),i);
-                j = z * x_effector;
-                J(:,i) = vec8(j);
-            end
-            
-        end
-
-        % TODO:
-        % This method is not defined in the DQ_Kinematics superclass
-        % we need to fix it in the future.
-        function J_dot = raw_pose_jacobian_derivative(obj,q,q_dot, to_ith_link)
-            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
-            % time derivative.
-            % 
-            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot,to_ith_link) returns the first
-            % to_ith_link columns of the Jacobian time derivative.
-            % This function does not take into account any base or
-            % end-effector displacements.
-            %obj.check_q_vec(q);
-            %obj.check_q_vec(q_dot); 
-            
-            if nargin == 4
-                n = to_ith_link;
-                x_effector = obj.raw_fkm(q,to_ith_link);
-                J = obj.raw_pose_jacobian(q,to_ith_link);
-                vec_x_effector_dot = J*q_dot(1:to_ith_link);
-            else
-                n = obj.n_links;
-                %obj.check_to_ith_link(n);
-                x_effector = obj.raw_fkm(q);
-                J = obj.raw_pose_jacobian(q);
-                vec_x_effector_dot = J*q_dot;
-            end
-            
-                                 
-            x = DQ(1);            
-            J_dot = zeros(8,n);
-
-            for i = 0:n-1
-                % Use the standard DH convention                
-                w = obj.get_w(i+1);               
-                z = 0.5*x*w*conj(x);
-                
-                % When i = 0 and length(theta) = 1, theta(1,i) returns
-                % a 1 x 0 vector, differently from the expected
-                % behavior, which is to return a 0 x 1 matrix.
-                % Therefore, we have to deal with the case i = 0
-                % explictly.
-                if i ~= 0
-                    vec_zdot = 0.5*(haminus8(w*x') + ...
-                        hamiplus8(x*w)*DQ.C8) * ...
-                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
-                else
-                    vec_zdot = zeros(8,1);
-                end
-                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
-                    hamiplus8(z)*vec_x_effector_dot;
-                x = x*obj.mdh2dq(q(i+1),i+1);
-            end
-        end
-        
-    end
 end
