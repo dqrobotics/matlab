@@ -56,6 +56,29 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         n_links;
     end
 
+     methods (Abstract, Access = protected)   
+        %   GET_LINK2DQ(q, ith) calculates  the corresponding dual quaternion for
+        %   a given link's parameters
+        %
+        %   Usage: dq = get_link2dq(q,ith), where
+        %          q: joint value
+        %          ith: link number
+        %
+        %   Eq. (2.34) of Adorno, B. V. (2011). Two-arm Manipulation: From Manipulators
+        %   to Enhanced Human-Robot Collaboration [Contribution à la manipulation à deux bras : 
+        %   des manipulateurs à la collaboration homme-robot]. 
+        %   https://tel.archives-ouvertes.fr/tel-00641678/
+        dq = get_link2dq(obj,q,ith);
+
+        % This method returns the term 'w' related with the time derivative of 
+        % the unit dual quaternion pose.
+        % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % Human-Robot Collaboration' by Bruno Adorno.
+        % Usage: w = get_w(ith), where
+        %          ith: link number
+        w = get_w(obj,ith) ; 
+    end
+
     methods (Abstract)
          % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
          % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
