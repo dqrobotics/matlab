@@ -138,8 +138,8 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %   are not taken into account).
             %
             %   'q' is the vector of joint variables
-            %   'to_ith_link' defines until which link the raw_fkm will be
-            %   calculated.
+            %   'to_ith_link' defines the last link that will be used in 
+            %    calculations of the forward kinematics.
             %
             %   This is an auxiliary function to be used mainly with the
             %   Jacobian function.
