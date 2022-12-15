@@ -1,17 +1,5 @@
-% Concrete class that defines serial manipulators.
+% Abstract class that defines serial manipulators.
 %
-% Usage: robot = DQ_SerialManipulator(A,convention)
-% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
-%   (n is the number of links)
-%    A = [theta1 ... thetan;
-%            d1  ...   dn;
-%            a1  ...   an;
-%         alpha1 ... alphan]
-% - 'convention' is the convention used for the D-H parameters. Accepted
-%    values are 'standard' and 'modified'
-%
-% The first row of 'A' contains the joint offsets. More specifically,
-% theta_i is the offset for the i-th joint.
 %
 % DQ_SerialManipulator Methods (Concrete):
 %       get_dim_configuration_space - Return the dimension of the configuration space.
@@ -19,12 +7,15 @@
 %       plot - Plots the serial manipulator.
 %       pose_jacobian - Compute the pose Jacobian while taking into account base's and end-effector's rigid transformations.
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
+%       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
-%       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
+%       raw_pose_jacobian_derivative - Compute the pose Jacobian derivative without taking into account base's and end-effector's rigid transformations.
+%       
+%
 % See also DQ_Kinematics.
 
-% (C) Copyright 2011-2020 DQ Robotics Developers
+% (C) Copyright 2011-2022 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -44,16 +35,10 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vihena Adorno - adorno@ieee.org
 
-% TODO: Remove the virtual joints. Instead of helping, they cause a lot of
-% confusion, specially among those trying to learn the library. The
-% affected methods are: FKM and Jacobian.
-
-classdef DQ_SerialManipulator < DQ_Kinematics
+classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
-        theta,d,a,alpha;
-        convention;        
         effector;
         
         % Properties for the plot function        
@@ -67,36 +52,42 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         handle
         n_links;
     end
-    
+
+     methods (Abstract, Access = protected)   
+        %   GET_LINK2DQ(q, ith) calculates  the corresponding dual quaternion for
+        %   a given link's parameters
+        %
+        %   Usage: dq = get_link2dq(q,ith), where
+        %          q: joint value
+        %          ith: link number
+        %
+        %   Eq. (2.34) of Adorno, B. V. (2011). Two-arm Manipulation: From Manipulators
+        %   to Enhanced Human-Robot Collaboration [Contribution à la manipulation à deux bras : 
+        %   des manipulateurs à la collaboration homme-robot]. 
+        %   https://tel.archives-ouvertes.fr/tel-00641678/
+        dq = get_link2dq(obj,q,ith);
+
+        % This method returns the term 'w' related with the time derivative of 
+        % the unit dual quaternion pose.
+        % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
+        % Human-Robot Collaboration' by Bruno Adorno.
+        % Usage: w = get_w(ith), where
+        %          ith: link number
+        w = get_w(obj,ith) ; 
+     end
+
     methods
-        function obj = DQ_SerialManipulator(A,convention)
-            if nargin == 0
-                error('Input: matrix whose columns contain the DH parameters')
-            end
-            
-            obj.n_links = size(A,2);
-            obj.theta = A(1,:);
-            obj.d = A(2,:);
-            obj.a = A(3,:);
-            obj.alpha = A(4,:);
-            
+        function obj = DQ_SerialManipulator()
             obj.reference_frame = DQ(1); %Default base's pose
             obj.base_frame = DQ(1);
             obj.effector = DQ(1); %Default effector's pose
-            
+
             % Define a unique robot name
             obj.name = sprintf('%f',rand(1));
             
-            if nargin==1
-                obj.convention='standard';
-            else
-                obj.convention=convention;
-            end
-            
             %For visualisation
             obj.lineopt = {'Color', 'black', 'Linewidth', 2};            
-            obj.plotopt = {};
-            
+            obj.plotopt = {};           
         end
         
         function ret = get_dim_configuration_space(obj)
@@ -104,37 +95,8 @@ classdef DQ_SerialManipulator < DQ_Kinematics
         end
         
         function set_effector(obj,effector)
-            % SET_EFFECTOR(effector) sets the pose of the effector
-            
+            % SET_EFFECTOR(effector) sets the pose of the effector         
             obj.effector = DQ(effector);
-        end
-        
-        function x = raw_fkm(obj,q, ith)
-            %   RAW_FKM(q) calculates the forward kinematic model and
-            %   returns the dual quaternion corresponding to the
-            %   last joint (the displacements due to the base and the effector 
-            %   are not taken into account).
-            %
-            %   'q' is the vector of joint variables
-            %
-            %   This is an auxiliary function to be used mainly with the
-            %   Jacobian function.
-            
-            if nargin == 3
-                n = ith;
-            else
-                n = obj.n_links;
-            end
-            
-            if length(q) ~= obj.n_links
-                error('Incorrect number of joint variables');
-            end
-            
-            x = DQ(1);
-            
-            for i=1:n
-                x = x*dh2dq(obj,q(i),i);
-            end
         end
         
         function x = fkm(obj,q, ith)
@@ -158,54 +120,6 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             end
         end
         
-        function dq = dh2dq(obj,theta,i)
-            %   For a given link's DH parameters, calculate the correspondent dual
-            %   quaternion
-            %   Usage: dq = dh2dq(theta,i), where
-            %          theta: joint angle
-            %          i: link number
-            
-            if nargin ~= 3
-                error('Wrong number of arguments. The parameters are theta and the correspondent link')
-            end
-            d = obj.d(i);
-            a = obj.a(i);
-            alpha = obj.alpha(i);
-            
-            if strcmp(obj.convention,'standard')
-                h(1) = cos((theta+obj.theta(i))/2)*cos(alpha/2);
-                h(2) = cos((theta+obj.theta(i))/2)*sin(alpha/2);
-                h(3) = sin((theta+obj.theta(i))/2)*sin(alpha/2);
-                h(4) = sin((theta+obj.theta(i))/2)*cos(alpha/2);
-                d2 = d/2;
-                a2 = a/2;
-                
-                
-                h(5) = -d2*h(4)-a2*h(2);
-                h(6) = -d2*h(3)+a2*h(1);
-                h(7) = d2*h(2)+a2*h(4);
-                h(8) = d2*h(1)-a2*h(3);
-            else
-                h1 = cos((theta+obj.theta(i))/2)*cos(alpha/2);
-                h2 = cos((theta+obj.theta(i))/2)*sin(alpha/2);
-                h3 = sin((theta+obj.theta(i))/2)*sin(alpha/2);
-                h4 = sin((theta+obj.theta(i))/2)*cos(alpha/2);
-                h(1) = h1;
-                h(2) = h2;
-                h(3) = -h3;
-                h(4) = h4;
-                d2 = d/2;
-                a2 = a/2;
-                
-                h(5) = -d2*h4-a2*h2;
-                h(6) = -d2*h3+a2*h1;
-                h(7) = -(d2*h2+a2*h4);
-                h(8) = d2*h1-a2*h3;
-            end
-            
-            dq = DQ(h);
-        end
-        
         function p = get_z(~,h)
             p(1) = 0;
             p(2) = h(2)*h(4) + h(1)*h(3);
@@ -215,9 +129,35 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             p(6) = h(2)*h(8)+h(6)*h(4)+h(1)*h(7)+h(5)*h(3);
             p(7) = h(3)*h(8)+h(7)*h(4)-h(1)*h(6)-h(5)*h(2);
             p(8) = h(4)*h(8)-h(3)*h(7)-h(2)*h(6)+h(1)*h(5);
+        end    
+
+        function x = raw_fkm(obj,q,to_ith_link)
+            %   RAW_FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   last joint (the displacements due to the base and the effector
+            %   are not taken into account).
+            %
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines the last link that will be used in 
+            %    calculations of the forward kinematics.
+            %
+            %   This is an auxiliary function to be used mainly with the
+            %   Jacobian function.
+            if nargin == 3
+                n = to_ith_link;
+            else
+                n = obj.n_links;
+            end
+            
+            x = DQ(1);
+            
+            for i=1:n
+                x = x*get_link2dq(obj,q(i),i);
+            end
         end
         
-        function J = raw_pose_jacobian(obj,q,ith)
+        
+        function J = raw_pose_jacobian(obj,q,to_ith_link)
             % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
             % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
             % vector of joint variables.
@@ -230,31 +170,72 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             % end-effector displacements and should be used mostly
             % internally in DQ_kinematics
             
-            if nargin == 3
-                n = ith;
-                x_effector = obj.raw_fkm(q,ith);
-            else
-                n = obj.n_links;
-                x_effector = obj.raw_fkm(q);
+            if nargin < 3
+                to_ith_link = obj.n_links;
             end
+            x_effector = obj.raw_fkm(q,to_ith_link);
             
             x = DQ(1);
-            J = zeros(8,n);
+            J = zeros(8,to_ith_link);
             
-            for i = 0:n-1
-                % Use the standard DH convention
-                if strcmp(obj.convention,'standard')
-                    z = DQ(obj.get_z(x.q));
-                else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
-                        0,-obj.a(i+1)*cos(obj.alpha(i+1)), ...
-                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
-                    z = 0.5*x*w*x';
-                end
-                
-                x = x*obj.dh2dq(q(i+1),i+1);
+            for i = 0:to_ith_link-1
+                w = obj.get_w(i+1);
+                z = 0.5*Ad(x,w);
+                x = x*obj.get_link2dq(q(i+1),i+1);
                 j = z * x_effector;
                 J(:,i+1) = vec8(j);
+            end
+        end
+
+        function J_dot = raw_pose_jacobian_derivative(obj,q,q_dot, to_ith_link)
+            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot) returns the Jacobian 
+            % time derivative.
+            % 
+            % RAW_POSE_JACOBIAN_DERIVATIVE(q,q_dot,to_ith_link) returns the first
+            % to_ith_link columns of the Jacobian time derivative.
+            % This function does not take into account any base or
+            % end-effector displacements.
+            % obj.check_q_vec(q);
+            % obj.check_q_vec(q_dot);            
+            
+            if nargin == 4
+                n = to_ith_link;
+                x_effector = obj.raw_fkm(q,to_ith_link);
+                J = obj.raw_pose_jacobian(q,to_ith_link);
+                vec_x_effector_dot = J*q_dot(1:to_ith_link);
+            else
+                n = obj.n_links;
+                % obj.check_to_ith_link(n);
+                x_effector = obj.raw_fkm(q);
+                J = obj.raw_pose_jacobian(q);
+                vec_x_effector_dot = J*q_dot;
+            end
+                                
+            x = DQ(1);            
+            J_dot = zeros(8,n);
+
+            for i = 0:n-1
+                % Use the standard DH convention
+                
+                w = obj.get_w(i+1); %w = DQ.k;
+                %z = DQ(obj.get_z(x.q));
+                z = 0.5*x*w*conj(x);
+                
+                % When i = 0 and length(theta) = 1, theta(1,i) returns
+                % a 1 x 0 vector, differently from the expected
+                % behavior, which is to return a 0 x 1 matrix.
+                % Therefore, we have to deal with the case i = 0
+                % explictly.
+                if i ~= 0
+                    vec_zdot = 0.5*(haminus8(w*x') + ...
+                        hamiplus8(x*w)*DQ.C8) * ...
+                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
+                else
+                    vec_zdot = zeros(8,1);
+                end
+                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
+                    hamiplus8(z)*vec_x_effector_dot;
+                x = x*obj.get_link2dq(q(i+1),i+1);
             end
         end
         
@@ -268,7 +249,7 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             if nargin == 3 && ith < obj.n_links
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
-                % into account only the base displacement
+                % into account only the constant base displacement
                 J = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian(...
                     q, ith);
             else
@@ -289,48 +270,18 @@ classdef DQ_SerialManipulator < DQ_Kinematics
             % This function does not take into account any base or
             % end-effector displacements.
             
-            if nargin == 4
-                n = ith;
-                x_effector = obj.raw_fkm(q,ith);
-                J = obj.raw_pose_jacobian(q,ith);
-                vec_x_effector_dot = J*q_dot(1:ith);
+            if nargin == 4 && ith < obj.n_links
+                % If the Jacobian derivative is not related to the mapping between the
+                % end-effector velocities and the joint velocities, it takes
+                % into account only the constant base displacement
+                J_dot = hamiplus8(obj.reference_frame)*obj.raw_pose_jacobian_derivative(...
+                    q, q_dot, ith);
             else
-                n = obj.n_links;
-                x_effector = obj.raw_fkm(q);
-                J = obj.raw_pose_jacobian(q);
-                vec_x_effector_dot = J*q_dot;
-            end
-                                 
-            x = DQ(1);            
-            J_dot = zeros(8,n);
-
-            for i = 0:n-1
-                % Use the standard DH convention
-                if strcmp(obj.convention,'standard')
-                    w = DQ.k;
-                    z = DQ(obj.get_z(x.q));
-                else % Use the modified DH convention
-                    w = DQ([0,0,-sin(obj.alpha(i+1)),cos(obj.alpha(i+1)),0, ...
-                        0,-obj.a(i+1)*cos(obj.alpha(i+1)),...
-                        -obj.a(i+1)*sin(obj.alpha(i+1))] );
-                    z = 0.5*x*w*x';
-                end
-                
-                % When i = 0 and length(theta) = 1, theta(1,i) returns
-                % a 1 x 0 vector, differently from the expected
-                % behavior, which is to return a 0 x 1 matrix.
-                % Therefore, we have to deal with the case i = 0
-                % explictly.
-                if i ~= 0
-                    vec_zdot = 0.5*(haminus8(w*x') + ...
-                        hamiplus8(x*w)*DQ.C8) * ...
-                        obj.raw_pose_jacobian(q,i)*q_dot(1:i);
-                else
-                    vec_zdot = zeros(8,1);
-                end
-                J_dot(:,i+1) = haminus8(x_effector)*vec_zdot +...
-                    hamiplus8(z)*vec_x_effector_dot;
-                x = x*obj.dh2dq(q(i+1),i+1);
+                % Otherwise, it the Jacobian derivative is related to the
+                % end-effector velocity, it takes into account both base
+                % and end-effector (constant) displacements.
+                J_dot = hamiplus8(obj.reference_frame)*haminus8(obj.effector)*...
+                    obj.raw_pose_jacobian_derivative(q, q_dot);
             end
         end
         
@@ -769,6 +720,10 @@ function o = plot_options(robot, optin)
         for i=1:robot.n_links
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
+
+            % TODO
+            % This part of the code assumes we are using the 
+            %  DH parametrization. We need to fix it in future versions.
             reach = reach + abs(robot.a(i)) + abs(robot.d(i));
         end
         o.workspace = [-reach reach -reach reach -reach reach];      
