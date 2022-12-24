@@ -141,7 +141,7 @@ classdef DQ
         %Imaginary k
         k = DQ([0,0,0,1]);
         %Absolute values below the threshold are considered zero. This
-        %threshold is used in the following functions: display, norm, ne,
+        %threshold is used in the following functions: disp, norm, ne,
         %and eq.
         threshold = 1e-12;
         % Given the dual quaternion x, the matrix C8 is the one that

@@ -20,13 +20,10 @@
 % Contributors to this file:
 %     Bruno Vihena Adorno - adorno@ufmg.br
 
-function display(obj)
+function disp(obj)
 
     row = size(obj,1);
     column = size(obj,2);
-    
-    disp([inputname(1),' = '])
-    
     
     
     for i = 1:row   
