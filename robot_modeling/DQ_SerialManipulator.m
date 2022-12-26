@@ -75,7 +75,11 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Usage: w = get_w(ith), where
         %          ith: link number
         w = get_w(obj,ith) ; 
+
+        % This method returns the supported joint types.
+        st = get_supported_joint_types(~);
      end
+     
 
     methods
         function obj = DQ_SerialManipulator()

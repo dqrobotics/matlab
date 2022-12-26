@@ -148,6 +148,11 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 w = DQ.E*(cos(obj.alpha(ith))*DQ.k - sin(obj.alpha(ith))*DQ.j);
             end
         end
+
+        function ret = get_supported_joint_types(~)
+        % This method returns the supported joint types.
+            ret = [DQ_JointType.REVOLUTE, DQ_JointType.PRISMATIC];
+        end
         
     end
     methods
