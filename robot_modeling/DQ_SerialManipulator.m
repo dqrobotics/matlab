@@ -51,6 +51,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % mainly in the plot function.
         handle
         n_links;
+        joint_types;
     end
 
      methods (Abstract, Access = protected)   
@@ -97,6 +98,30 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         function set_effector(obj,effector)
             % SET_EFFECTOR(effector) sets the pose of the effector         
             obj.effector = DQ(effector);
+        end
+
+        function set_joint_types(obj, joint_types)
+            %  SET_JOINT_TYPES(joint_types) sets the joint types.
+            % 'joint_types' the vector that contains the joint types.
+            obj.joint_types = joint_types;
+        end
+
+        function set_joint_type(obj, joint_type, ith_joint)
+            % SET_JOINT_TYPE(joint_type, ith_joint) sets the joint type of the ith
+            % joint.
+            % 'joint_type' type of joint to be set.
+            % 'ith_joint' ith joint to be set.
+            obj.joint_types(ith_joint) = joint_type;
+        end
+
+        function ret = get_joint_types(obj)
+            % GET_JOINT_TYPES() returns the vector of the joint types.
+            ret = obj.joint_types;
+        end
+
+        function ret = get_joint_type(obj, ith_joint)
+            % GET_JOINT_TYPE(ith_joint) returns the joint type of the ith joint.
+            ret = obj.joint_types(ith_joint);
         end
         
         function x = fkm(obj,q, ith)
