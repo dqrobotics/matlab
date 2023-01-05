@@ -2,20 +2,20 @@
 % Denavit-Hartenberg parameters (DH)
 %
 % Usage: robot = DQ_SerialManipulatorDH(A)
-% - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
+% - 'A' is a 4 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
 %            d1  ...   dn;
 %            a1  ...   an;
 %         alpha1 ... alphan;
 %         type1  ... typen]
-% where type is the actuation type, either DQ_JointType.REVOLUTE
-% or DQ_JointType.PRISMATIC
+% where type is the actuation type, either DQ_SerialManipulatorDH.JOINT_ROTATIONAL
+% or DQ_SerialManipulatorDH.JOINT_PRISMATIC
 % - The only accepted convention in this subclass is the 'standard' DH
 % convention.
 %
-% If the joint is of type REVOLUTE, then the first row of A will
-% have the joint offsets. If the joint is of type PRISMATIC, then the
+% If the joint is of type JOINT_ROTATIONAL, then the first row of A will
+% have the joint offsets. If the joint is of type JOINT_PRISMATIC, then the
 % second row of A will have the joints offsets.
 %
 % DQ_SerialManipulatorDH Methods (Concrete):
@@ -26,11 +26,10 @@
 %       pose_jacobian_derivative - Compute the time derivative of the pose Jacobian.
 %       raw_fkm - Compute the FKM without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
-%       raw_pose_jacobian_derivative - Compute the pose Jacobian derivative without taking into account base's and end-effector's rigid transformations.
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_SerialManipulator.
 
-% (C) Copyright 2020-2022 DQ Robotics Developers
+% (C) Copyright 2020 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -50,64 +49,125 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     1. Bruno Vihena Adorno (adorno@ieee.org)
-%        Responsible for the original implementation in file SerialManipulator.m 
-%        [bvadorno committed on Apr 10, 2019] (bc7a95f)
-%        (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
-%
-%     2. Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
-%        - Created this file by reorganizing the code in the original file to comply 
-%          with SerialManipulator.m becoming an abstract class, according to the discussion 
-%          at #56 (https://github.com/dqrobotics/matlab/pull/56).
-% 
-%        - Added support for prismatic joints. 
-%          [mmmarinho committed on Apr 28, 2020] (f5aa70a) 
-%          https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
-%
-%     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Added some modifications discussed at #75 (https://github.com/dqrobotics/matlab/pull/75)
-%          to define DQ_SerialManipulator as an abstract class.           
+%     Murilo M. Marinho - murilo@nml.t.u-tokyo.ac.jp
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
-        theta,d,a,alpha;
         type
     end
     
     properties (Constant)
         % Joints that can be actuated
         % Rotational joint
-        JOINT_ROTATIONAL = 1; % Deprecated
+        JOINT_ROTATIONAL = 1;
         % Prismatic joint
-        JOINT_PRISMATIC = 2;  % Deprecated
+        JOINT_PRISMATIC = 2;
     end
-
-    methods (Access = protected)
-        function dq = get_link2dq(obj,q,ith)
-            %   GET_LINK2DQ(q, ith) calculates  the corresponding dual quaternion for
-            %   a given link's DH parameters
+    
+    methods
+        function obj = DQ_SerialManipulatorDH(A,convention)
+            % These are initialized in the constructor of
+            % DQ_SerialManipulator
+            %obj.convention = convention;
+            %obj.n_links = size(A,2);
+            %obj.theta = A(1,:);
+            %obj.d = A(2,:);
+            %obj.a = A(3,:);
+            %obj.alpha = A(4,:);
+            obj = obj@DQ_SerialManipulator(A(1:4,:),convention);
+            
+            if nargin == 0
+                error('Input: matrix whose columns contain the DH parameters')
+            end
+            
+            if(size(A,1) ~= 5)
+                error('Input: Invalid DH matrix. It should have 5 rows.')
+            end
+            
+            % Add type
+            obj.type = A(5,:);
+        end
+        
+        function x = raw_fkm(obj,q,to_ith_link)
+            %   RAW_FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   last joint (the displacements due to the base and the effector
+            %   are not taken into account).
             %
-            %   Usage: dq = get_link2dq(q,ith), where
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines until which link the raw_fkm will be
+            %   calculated.
+            %
+            %   This is an auxiliary function to be used mainly with the
+            %   Jacobian function.
+            if nargin == 3
+                n = to_ith_link;
+            else
+                n = obj.n_links;
+            end
+            
+            x = DQ(1);
+            
+            for i=1:n
+                x = x*dh2dq(obj,q(i),i);
+            end
+        end
+        
+        function x = fkm(obj,q,to_ith_link)
+            %   FKM(q) calculates the forward kinematic model and
+            %   returns the dual quaternion corresponding to the
+            %   end-effector pose. This function takes into account the
+            %   displacement due to the base's and effector's poses.
+            %
+            %   'q' is the vector of joint variables
+            %   'to_ith_link' defines up to which link the fkm will be
+            %   calculated. If to_ith_link corresponds to the last link,
+            %   the method DOES NOT take into account the transformation
+            %   given by set_effector. If you want to take into account
+            %   that transformation, use FKM(q) instead.
+            
+            if nargin == 3
+                x = obj.reference_frame*obj.raw_fkm(q, to_ith_link); %Takes into account the base displacement
+            else
+                x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
+            end
+        end
+        
+        function dq = dh2dq(obj,q,ith)
+            %   For a given link's Extended DH parameters, calculate the correspondent dual
+            %   quaternion
+            %   Usage: dq = dh2dq(q,ith), where
             %          q: joint value
             %          ith: link number
-            %
-            %   Eq. (2.34) of Adorno, B. V. (2011). Two-arm Manipulation: From Manipulators
-            %   to Enhanced Human-Robot Collaboration [Contribution à la manipulation à deux bras : 
-            %   des manipulateurs à la collaboration homme-robot]. 
-            %   https://tel.archives-ouvertes.fr/tel-00641678/
             
             if nargin ~= 3
                 error('Wrong number of arguments. The parameters are joint value and the correspondent link')
             end
             
+            %The unoptimized standard dh2dq calculation is commented below
+            %if obj.type(ith) == obj.JOINT_ROTATIONAL
+            %    % If joint is rotational
+            %    h1 = cos((obj.theta(ith)+q)/2.0)+DQ.k*sin((obj.theta(ith)+q)/2.0);
+            %    h2 = 1 + DQ.E*0.5*obj.d(ith)*DQ.k;
+            %else
+            %    % If joint is prismatic
+            %    h1 = cos(obj.theta(ith)/2.0)+DQ.k*sin(obj.theta(ith)/2.0);
+            %    h2 = 1 + DQ.E*0.5*(obj.d(ith)+q)*DQ.k;
+            %end
+            %h3 = 1 + DQ.E*0.5*obj.a(ith)*DQ.i;
+            %h4 = cos(obj.alpha(ith)/2.0)+DQ.i*sin(obj.alpha(ith)/2.0);
+            %dq = h1*h2*h3*h4;
+            
+            % The optimized standard dh2dq calculation
             % Store half angles and displacements
             half_theta = obj.theta(ith)/2.0;
             d = obj.d(ith);
             a = obj.a(ith);
             half_alpha = obj.alpha(ith)/2.0;
+            
             % Add the effect of the joint value
-            if obj.type(ith) == DQ_JointType.REVOLUTE
-                % If joint is revolute
+            if obj.type(ith) == obj.JOINT_ROTATIONAL
+                % If joint is rotational
                 half_theta = half_theta + (q/2.0);
             else
                 % If joint is prismatic
@@ -120,79 +180,67 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             sine_of_half_alpha = sin(half_alpha);
             cosine_of_half_alpha = cos(half_alpha);
             
-            % Return the standard dh2dq calculation
-            d2 = d/2;
-            a2 = a/2;
-            h(1) = cosine_of_half_alpha*cosine_of_half_theta;
-            h(2) = sine_of_half_alpha*cosine_of_half_theta;
-            h(3) = sine_of_half_alpha*sine_of_half_theta;
-            h(4) = cosine_of_half_alpha*sine_of_half_theta;
-            h(5) = -a2*h(2) - d2*h(4);
-            h(6) =  a2*h(1) - d2*h(3);
-            h(7) =  a2*h(4) + d2*h(2);
-            h(8) = d2*h(1)  - a2*h(3);
-            dq = DQ(h);
+            % Return the optimized standard dh2dq calculation
+            dq = DQ([
+                cosine_of_half_alpha*cosine_of_half_theta
+                
+                sine_of_half_alpha*cosine_of_half_theta
+                
+                sine_of_half_alpha*sine_of_half_theta
+                
+                cosine_of_half_alpha*sine_of_half_theta
+                
+                -(a*sine_of_half_alpha*cosine_of_half_theta)  /2.0...
+                - (d*cosine_of_half_alpha*sine_of_half_theta)/2.0
+                
+                (a*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+                - (d*sine_of_half_alpha*sine_of_half_theta  )/2.0
+                
+                (a*cosine_of_half_alpha*sine_of_half_theta)  /2.0...
+                + (d*sine_of_half_alpha*cosine_of_half_theta)/2.0
+                
+                (d*cosine_of_half_alpha*cosine_of_half_theta)/2.0...
+                - (a*sine_of_half_alpha*sine_of_half_theta  )/2.0
+                ]);
         end
         
-        function w = get_w(obj,ith)  
-        % This method returns the term 'w' related with the time derivative of 
-        % the unit dual quaternion pose using the Standard DH convention.
-        % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
-        % Human-Robot Collaboration' by Bruno Adorno.
-        % Usage: w = get_w(ith), where
-        %          ith: link number    
-            if obj.type(ith) == DQ_JointType.REVOLUTE
+        function w = get_w(obj,ith)       
+            if obj.type(ith) == obj.JOINT_ROTATIONAL
                 w = DQ.k;
             else
-                % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
-                % by Silva, F. F. A., Quiroz-Omaña, J. J., and Adorno, B. V. (April 12, 2022).  
-                % ASME. J. Mechanisms Robotics. doi: https://doi.org/10.1115/1.4054320
                 w = DQ.E*DQ.k;
             end
         end
-    end
-    
-    methods
-        function obj = DQ_SerialManipulatorDH(A, convention)
-            % These are initialized in the constructor of
-            % DQ_SerialManipulator 
-            % obj.dim_configuration_space = dim_configuration_space;
-
-            str = ['DQ_SerialManipulatorDH(A), where ' ...
-                   'A = [theta1 ... thetan; ' ...
-                   ' d1  ...   dn; ' ...
-                   ' a1  ...   an; ' ...
-                   ' alpha1 ... alphan; ' ...
-                   ' type1  ... typen]'];
-            
-            
-            if nargin == 0
-                error(['Input: matrix whose columns contain the DH parameters' ...
-                       ' and type of joints. Example: ' str])
-            end
-
-            if nargin == 2
-                warning(['DQ_SerialManipulatorDH(A, convention) is deprecated.' ...
-                        ' Please use DQ_SerialManipulatorDH(A) instead.']);    
-            end
-            
-            if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It must have 5 rows.')
-            end
-
-            % n_links 
-            % TODO: change n_links to dim_configuration_space
-            obj.n_links = size(A,2);
-
-            % Add theta, d, a, alpha and type
-            obj.theta = A(1,:);
-            obj.d     = A(2,:);
-            obj.a     = A(3,:);
-            obj.alpha = A(4,:);
-            obj.type  = A(5,:);
-        end
         
-    
+        function J = raw_pose_jacobian(obj,q,to_ith_link)
+            % RAW_POSE_JACOBIAN(q) returns the Jacobian that satisfies 
+            % vec(x_dot) = J * q_dot, where x = fkm(q) and q is the 
+            % vector of joint variables.
+            %
+            % RAW_POSE_JACOBIAN(q,ith) returns the Jacobian that
+            % satisfies vec(x_ith_dot) = J * q_dot(1:ith), where 
+            % x_ith = fkm(q, ith), that is, the fkm up to the i-th link.
+            %
+            % This function does not take into account any base or
+            % end-effector displacements and should be used mostly
+            % internally in DQ_kinematics
+            
+            if nargin < 3
+                to_ith_link = obj.n_links;
+            end
+            x_effector = obj.raw_fkm(q,to_ith_link);
+            
+            x = DQ(1);
+            J = zeros(8,to_ith_link);
+            
+            for i = 0:to_ith_link-1
+                w = obj.get_w(i+1);
+                z = 0.5*Ad(x,w);
+                x = x*obj.dh2dq(q(i+1),i+1);
+                j = z * x_effector;
+                J(:,i+1) = vec8(j);
+            end
+        end
         
     end
 end
