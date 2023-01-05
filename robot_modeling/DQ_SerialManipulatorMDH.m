@@ -1,7 +1,7 @@
 % Concrete class that extends the DQ_SerialManipulator using the
-% Denavit-Hartenberg parameters (DH)
+% modified Denavit-Hartenberg parameters (MDH)
 %
-% Usage: robot = DQ_SerialManipulatorDH(A)
+% Usage: robot = DQ_SerialManipulatorMDH(A)
 % - 'A' is a 5 x n matrix containing the Denavit-Hartenberg parameters
 %   (n is the number of links)
 %    A = [theta1 ... thetan;
@@ -11,14 +11,14 @@
 %         type1  ... typen]
 % where type is the actuation type, either DQ_JointType.REVOLUTE
 % or DQ_JointType.PRISMATIC
-% - The only accepted convention in this subclass is the 'standard' DH
+% - The only accepted convention in this subclass is the 'modified' DH
 % convention.
 %
 % If the joint is of type REVOLUTE, then the first row of A will
 % have the joint offsets. If the joint is of type PRISMATIC, then the
 % second row of A will have the joints offsets.
 %
-% DQ_SerialManipulatorDH Methods (Concrete):
+% DQ_SerialManipulatorMDH Methods (Concrete):
 %       get_dim_configuration_space - Return the dimension of the configuration space.
 %       fkm - Compute the forward kinematics while taking into account base and end-effector's rigid transformations.
 %       plot - Plots the serial manipulator.
@@ -56,19 +56,20 @@
 %        (https://github.com/dqrobotics/matlab/blob/bc7a95f064b15046f43421d418946f60b1b33058/robot_modeling/DQ_SerialManipulator.m).
 %
 %     2. Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
-%        - Created this file by reorganizing the code in the original file to comply 
-%          with SerialManipulator.m becoming an abstract class, according to the discussion 
-%          at #56 (https://github.com/dqrobotics/matlab/pull/56).
-% 
-%        - Added support for prismatic joints. 
-%          [mmmarinho committed on Apr 28, 2020] (f5aa70a) 
-%          https://github.com/dqrobotics/matlab/commit/f5aa70ac6a0a676557543e2bf7c418ab05c47326
+%        - Reorganized the code by moving the implementation of SerialManipulator.m 
+%         to the file DQ_SerialManipulatorDH at #56
+%        (https://github.com/dqrobotics/matlab/pull/56),
+%         which is the starting point for this file.
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Added some modifications discussed at #75 (https://github.com/dqrobotics/matlab/pull/75)
-%          to define DQ_SerialManipulator as an abstract class.           
+%        - Created this file. Implemented the case for prismatic joints
+%          in method get_w().
 
-classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
+
+
+
+
+classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     properties
         theta,d,a,alpha;
         type
@@ -81,11 +82,10 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Prismatic joint
         JOINT_PRISMATIC = 2;  % Deprecated
     end
-
     methods (Access = protected)
         function dq = get_link2dq(obj,q,ith)
             %   GET_LINK2DQ(q, ith) calculates  the corresponding dual quaternion for
-            %   a given link's DH parameters
+            %   a given link's modified DH parameters
             %
             %   Usage: dq = get_link2dq(q,ith), where
             %          q: joint value
@@ -105,6 +105,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             d = obj.d(ith);
             a = obj.a(ith);
             half_alpha = obj.alpha(ith)/2.0;
+            
             % Add the effect of the joint value
             if obj.type(ith) == DQ_JointType.REVOLUTE
                 % If joint is revolute
@@ -120,45 +121,43 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             sine_of_half_alpha = sin(half_alpha);
             cosine_of_half_alpha = cos(half_alpha);
             
-            % Return the standard dh2dq calculation
             d2 = d/2;
             a2 = a/2;
             h(1) = cosine_of_half_alpha*cosine_of_half_theta;
             h(2) = sine_of_half_alpha*cosine_of_half_theta;
-            h(3) = sine_of_half_alpha*sine_of_half_theta;
+            h(3) = -sine_of_half_alpha*sine_of_half_theta;
             h(4) = cosine_of_half_alpha*sine_of_half_theta;
             h(5) = -a2*h(2) - d2*h(4);
-            h(6) =  a2*h(1) - d2*h(3);
-            h(7) =  a2*h(4) + d2*h(2);
-            h(8) = d2*h(1)  - a2*h(3);
+            h(6) =  a2*h(1) - d2*-h(3);
+            h(7) = -a2*h(4) - d2*h(2);
+            h(8) = d2*h(1)  - a2*-h(3);
             dq = DQ(h);
-        end
-        
-        function w = get_w(obj,ith)  
+        end 
+
+        function w = get_w(obj,ith) 
         % This method returns the term 'w' related with the time derivative of 
-        % the unit dual quaternion pose using the Standard DH convention.
+        % the unit dual quaternion pose using the Modified DH convention.
         % See. eq (2.32) of 'Two-arm Manipulation: From Manipulators to Enhanced 
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
-        %          ith: link number    
-            if obj.type(ith) == DQ_JointType.REVOLUTE
-                w = DQ.k;
-            else
-                % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
-                % by Silva, F. F. A., Quiroz-Omaña, J. J., and Adorno, B. V. (April 12, 2022).  
-                % ASME. J. Mechanisms Robotics. doi: https://doi.org/10.1115/1.4054320
-                w = DQ.E*DQ.k;
+        %          ith: link number
+
+            if obj.type(ith) == DQ_JointType.REVOLUTE            
+                w = -DQ.j*sin(obj.alpha(ith))+ DQ.k*cos(obj.alpha(ith))...
+                    -DQ.E*obj.a(ith)*(DQ.j*cos(obj.alpha(ith)) + DQ.k*sin(obj.alpha(ith)));
+            else % if joint is PRISMATIC          
+                w = DQ.E*(cos(obj.alpha(ith))*DQ.k - sin(obj.alpha(ith))*DQ.j);
             end
         end
+        
     end
-    
     methods
-        function obj = DQ_SerialManipulatorDH(A, convention)
+        function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
             % DQ_SerialManipulator 
             % obj.dim_configuration_space = dim_configuration_space;
 
-            str = ['DQ_SerialManipulatorDH(A), where ' ...
+            str = ['DQ_SerialManipulatorMDH(A), where ' ...
                    'A = [theta1 ... thetan; ' ...
                    ' d1  ...   dn; ' ...
                    ' a1  ...   an; ' ...
@@ -167,17 +166,12 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             
             
             if nargin == 0
-                error(['Input: matrix whose columns contain the DH parameters' ...
+                error(['Input: matrix whose columns contain the modified DH parameters' ...
                        ' and type of joints. Example: ' str])
-            end
-
-            if nargin == 2
-                warning(['DQ_SerialManipulatorDH(A, convention) is deprecated.' ...
-                        ' Please use DQ_SerialManipulatorDH(A) instead.']);    
             end
             
             if(size(A,1) ~= 5)
-                error('Input: Invalid DH matrix. It must have 5 rows.')
+                error('Input: Invalid modified DH matrix. It must have 5 rows.')
             end
 
             % n_links 
@@ -192,7 +186,6 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             obj.type  = A(5,:);
         end
         
-    
-        
     end
+    
 end
