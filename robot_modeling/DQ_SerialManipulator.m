@@ -158,12 +158,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         end
 
         function ret = get_joint_types(obj)
-            % GET_JOINT_TYPES() returns the vector of the joint types.
+            % GET_JOINT_TYPES() returns a vector containing the joint types.
             ret = obj.joint_types;
         end
 
-        function ret = get_joint_type(obj, ith_joint)
-            % GET_JOINT_TYPE(ith_joint) returns a vector containing the joint types.
+        function ret = get_joint_type(obj, ith_joint) 
+            % GET_JOINT_TYPE(ith_joint) returns the joint type of the ith joint.
             ret = obj.joint_types(ith_joint);
         end
         
