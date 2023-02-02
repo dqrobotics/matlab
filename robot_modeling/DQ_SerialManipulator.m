@@ -15,7 +15,7 @@
 %
 % See also DQ_Kinematics.
 
-% (C) Copyright 2011-2022 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %

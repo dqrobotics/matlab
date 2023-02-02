@@ -30,7 +30,7 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_SerialManipulator.
 
-% (C) Copyright 2020-2022 DQ Robotics Developers
+% (C) Copyright 2020-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
