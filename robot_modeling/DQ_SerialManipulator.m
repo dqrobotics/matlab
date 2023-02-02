@@ -15,7 +15,7 @@
 %
 % See also DQ_Kinematics.
 
-% (C) Copyright 2011-2022 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -51,6 +51,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % mainly in the plot function.
         handle
         n_links;
+        joint_types;
     end
 
      methods (Abstract, Access = protected)   
@@ -73,8 +74,49 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
-        w = get_w(obj,ith) ; 
+        w = get_w(obj,ith) ;   
      end
+
+     methods (Abstract, Static, Access = protected) 
+         % This method returns the supported joint types.
+        st = get_supported_joint_types();
+     end
+
+     methods (Access = protected)  
+         function check_joint_types(obj)
+            %  CHECK_JOINT_TYPES() throws an exception if the joint types
+            %  are different from the supported joints.
+            types = obj.get_joint_types();
+            supported_types = obj.get_supported_joint_types();
+            n = size(types, 2);
+            k = size(supported_types, 2);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %  Create a string containing the valid type of joints.
+            msg = 'Unsupported joint types. Use valid joint types: '; 
+            for i=1:k
+              msg_type = ' DQ_JointType.' + string(supported_types(i));  
+              if i==k
+                  ps = '. ';
+              else
+                  ps = ', ';
+              end
+              msg = msg + msg_type + ps;
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            for i=1:n
+                  match = false;
+                  for j=1:k
+                      if types(i) == supported_types(j)
+                          match = true;
+                          break;
+                      end
+                  end
+                  if match == false
+                      error(msg);
+                  end
+            end
+         end
+     end 
 
     methods
         function obj = DQ_SerialManipulator()
@@ -97,6 +139,32 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         function set_effector(obj,effector)
             % SET_EFFECTOR(effector) sets the pose of the effector         
             obj.effector = DQ(effector);
+        end
+
+         function set_joint_types(obj, joint_types)
+            %  SET_JOINT_TYPES(joint_types) sets the joint types.
+            % 'joint_types' is a vector containing the joint types.
+            obj.joint_types = joint_types;
+            obj.check_joint_types();
+        end
+
+        function set_joint_type(obj, joint_type, ith_joint)
+            % SET_JOINT_TYPE(joint_type, ith_joint) sets the joint type of the ith
+            % joint.
+            % 'joint_type' type of joint to be set.
+            % 'ith_joint' ith joint to be set.
+            obj.joint_types(ith_joint) = joint_type;
+            obj.check_joint_types();
+        end
+
+        function ret = get_joint_types(obj)
+            % GET_JOINT_TYPES() returns a vector containing the joint types.
+            ret = obj.joint_types;
+        end
+
+        function ret = get_joint_type(obj, ith_joint) 
+            % GET_JOINT_TYPE(ith_joint) returns the joint type of the ith joint.
+            ret = obj.joint_types(ith_joint);
         end
         
         function x = fkm(obj,q, ith)

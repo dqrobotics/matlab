@@ -30,7 +30,7 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_SerialManipulator.
 
-% (C) Copyright 2020-2022 DQ Robotics Developers
+% (C) Copyright 2020-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -71,7 +71,6 @@
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties
         theta,d,a,alpha;
-        type
     end
     
     properties (Constant)
@@ -106,7 +105,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             a = obj.a(ith);
             half_alpha = obj.alpha(ith)/2.0;
             % Add the effect of the joint value
-            if obj.type(ith) == DQ_JointType.REVOLUTE
+            if obj.get_joint_type(ith) == DQ_JointType.REVOLUTE
                 % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
@@ -141,7 +140,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number    
-            if obj.type(ith) == DQ_JointType.REVOLUTE
+            if obj.get_joint_type(ith) == DQ_JointType.REVOLUTE
                 w = DQ.k;
             else
                 % see Table 1 of "Dynamics of Mobile Manipulators using Dual Quaternion Algebra."
@@ -150,6 +149,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 w = DQ.E*DQ.k;
             end
         end
+    end
+
+    methods (Static, Access = protected) 
+         function ret = get_supported_joint_types()
+         % This method returns the supported joint types.
+            ret = [DQ_JointType.REVOLUTE, DQ_JointType.PRISMATIC];
+         end
     end
     
     methods
@@ -189,7 +195,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             obj.d     = A(2,:);
             obj.a     = A(3,:);
             obj.alpha = A(4,:);
-            obj.type  = A(5,:);
+            obj.set_joint_types(A(5,:));
         end
         
     

@@ -30,7 +30,7 @@
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
 % See also DQ_SerialManipulator.
 
-% (C) Copyright 2020-2022 DQ Robotics Developers
+% (C) Copyright 2020-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -72,7 +72,6 @@
 classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
     properties
         theta,d,a,alpha;
-        type
     end
     
     properties (Constant)
@@ -107,7 +106,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             half_alpha = obj.alpha(ith)/2.0;
             
             % Add the effect of the joint value
-            if obj.type(ith) == DQ_JointType.REVOLUTE
+            if obj.get_joint_type(ith) == DQ_JointType.REVOLUTE
                 % If joint is revolute
                 half_theta = half_theta + (q/2.0);
             else
@@ -142,15 +141,23 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         % Usage: w = get_w(ith), where
         %          ith: link number
 
-            if obj.type(ith) == DQ_JointType.REVOLUTE            
+            if obj.get_joint_type(ith) == DQ_JointType.REVOLUTE            
                 w = -DQ.j*sin(obj.alpha(ith))+ DQ.k*cos(obj.alpha(ith))...
                     -DQ.E*obj.a(ith)*(DQ.j*cos(obj.alpha(ith)) + DQ.k*sin(obj.alpha(ith)));
             else % if joint is PRISMATIC          
                 w = DQ.E*(cos(obj.alpha(ith))*DQ.k - sin(obj.alpha(ith))*DQ.j);
             end
-        end
-        
+        end 
     end
+
+    methods (Static, Access = protected) 
+         % This method returns the supported joint types.
+         function ret = get_supported_joint_types()
+        % This method returns the supported joint types.
+            ret = [DQ_JointType.REVOLUTE, DQ_JointType.PRISMATIC];
+         end
+    end
+
     methods
         function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
@@ -183,7 +190,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             obj.d     = A(2,:);
             obj.a     = A(3,:);
             obj.alpha = A(4,:);
-            obj.type  = A(5,:);
+            obj.set_joint_types(A(5,:));
         end
         
     end
