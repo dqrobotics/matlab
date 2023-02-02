@@ -74,10 +74,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Human-Robot Collaboration' by Bruno Adorno.
         % Usage: w = get_w(ith), where
         %          ith: link number
-        w = get_w(obj,ith) ; 
+        w = get_w(obj,ith) ;   
+     end
 
-        % This method returns the supported joint types.
-        st = get_supported_joint_types(~);
+     methods (Abstract, Static, Access = protected) 
+         % This method returns the supported joint types.
+        st = get_supported_joint_types();
      end
 
      methods (Access = protected)  

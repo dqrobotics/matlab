@@ -149,12 +149,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
                 w = DQ.E*DQ.k;
             end
         end
+    end
 
-
-        function ret = get_supported_joint_types(~)
-        % This method returns the supported joint types.
+    methods (Static, Access = protected) 
+         function ret = get_supported_joint_types()
+         % This method returns the supported joint types.
             ret = [DQ_JointType.REVOLUTE, DQ_JointType.PRISMATIC];
-        end
+         end
     end
     
     methods

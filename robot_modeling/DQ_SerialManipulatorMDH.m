@@ -147,15 +147,17 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
             else % if joint is PRISMATIC          
                 w = DQ.E*(cos(obj.alpha(ith))*DQ.k - sin(obj.alpha(ith))*DQ.j);
             end
-        end
+        end 
+    end
 
-
-        function ret = get_supported_joint_types(~)
+    methods (Static, Access = protected) 
+         % This method returns the supported joint types.
+         function ret = get_supported_joint_types()
         % This method returns the supported joint types.
             ret = [DQ_JointType.REVOLUTE, DQ_JointType.PRISMATIC];
-        end
-        
+         end
     end
+
     methods
         function obj = DQ_SerialManipulatorMDH(A)
             % These are initialized in the constructor of
