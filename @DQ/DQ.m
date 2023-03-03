@@ -76,6 +76,7 @@
 %       DQ Methods (vector operations on dual quaternions)
 %       crossmatrix4 -  map a pure quaternion into an expanded skew-symmetric matrix
 %       hamiplus4, haminus4, hamiplus8, haminus8 - return the Hamilton operators
+%       Q4 - return the partial derivative of the unit quaternion r with respect to log(r)
 %       Q8 - return the partial derivative of the unit dual quaternion x with respect to log(x)
 %       vec3, vec4, vec6, vec8 - map quaternions and dual quaternions to vectors
 %     
@@ -90,7 +91,7 @@
 %
 %       See also DQ_Kinematics, DQ_KinematicController
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
