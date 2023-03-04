@@ -30,7 +30,8 @@
 %        - Responsible for the original implementation.
 %
 % 2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Removed Q4() from Q8.m and exposed the method to the user.
+%        - Removed Q4() as requested in #90.
+%          https://github.com/dqrobotics/matlab/issues/90
 
 
 function ret = Q8(x)

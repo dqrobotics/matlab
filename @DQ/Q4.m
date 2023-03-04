@@ -29,7 +29,10 @@
 %        - Responsible for the original implementation.
 %
 % 2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Removed Q4() from Q8.m and exposed the method to the user.
+%      Implemented the modifications requested in #90
+%          (https://github.com/dqrobotics/matlab/issues/90)
+%        - Removed Q4() from Q8.m, exposed the method to the user, and
+%        - added the check for unit norm.        
 
 function ret = Q4(x)
 % Return the partial derivative of the unit quaternion r with respect to
