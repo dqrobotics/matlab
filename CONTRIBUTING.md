@@ -30,7 +30,7 @@ This is a set of guidelines for contributing to [DQ Robotics](https://dqrobotics
 ![master_and_release](https://user-images.githubusercontent.com/23158313/150379489-cabc85bb-dbe4-41be-a405-7b254a36092a.png)
 
 - After your dqrobotics/matlab pull request is adjusted accordingly and passes all the tests, your proposed modifications will be scrutinized to ensure they follow the coding style and development philosophy, are technically correct, and add value to the current implementation. 
-- Finally, your modifications will be accepted in the master branch.
+- Finally, your modifications will be accepted in the master branch. The approver will squash and merge to ensure that there is just one commit file.
 
 # Example
 
