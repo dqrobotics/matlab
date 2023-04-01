@@ -107,12 +107,14 @@ classdef LBR4pVrepRobot < DQ_VrepRobot
             LBR4p_DH_d = [0.200, 0, 0.4, 0, 0.39, 0, 0];
             LBR4p_DH_a = [0, 0, 0, 0, 0, 0, 0];
             LBR4p_DH_alpha = [pi/2, -pi/2, pi/2, -pi/2, pi/2, -pi/2, 0];
+            LBR4p_DH_type = double(repmat(DQ_JointType.REVOLUTE,1,7));
             LBR4p_DH_matrix = [LBR4p_DH_theta;
                 LBR4p_DH_d;
                 LBR4p_DH_a;
-                LBR4p_DH_alpha];
+                LBR4p_DH_alpha
+                LBR4p_DH_type];
             
-            kin = DQ_SerialManipulator(LBR4p_DH_matrix,'standard');
+            kin = DQ_SerialManipulatorDH(LBR4p_DH_matrix);
             
             kin.set_reference_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
             kin.set_base_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
