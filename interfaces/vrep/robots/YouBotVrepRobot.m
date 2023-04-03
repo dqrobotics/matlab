@@ -131,12 +131,14 @@ classdef YouBotVrepRobot < DQ_VrepRobot
             arm_DH_d =   [  0.147,      0,       0,        0,    0.218];
             arm_DH_a =   [  0.033,  0.155,   0.135,        0,        0];
             arm_DH_alpha =   [pi2,      0,       0,      pi2,        0];
+            arm_DH_type = double(repmat(DQ_JointType.REVOLUTE,1,5));
             arm_DH_matrix = [arm_DH_theta;
                 arm_DH_d;
                 arm_DH_a;
-                arm_DH_alpha];
+                arm_DH_alpha
+                arm_DH_type];
             
-            arm =  DQ_SerialManipulator(arm_DH_matrix,'standard');
+            arm =  DQ_SerialManipulatorDH(arm_DH_matrix);
             base = DQ_HolonomicBase();
             
             x_bm = 1 + E_*0.5*(0.165*i_ + 0.11*k_);
