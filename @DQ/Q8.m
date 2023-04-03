@@ -1,5 +1,5 @@
-% Q8(x) returns the partial derivative of the unit dual quaternion x with
-%       respect to log(x).
+% Q8(x) Given the unit dual quaternion x, Q8(x) returns the partial derivative of vec8(x) 
+% with respect to vec6(log(x)).
 %       See theorem 4 of Savino et al (2020). 
 %       Pose consensus based on dual quaternion algebra with application to 
 %       decentralized formation control of mobile manipulators.
