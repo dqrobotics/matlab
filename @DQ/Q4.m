@@ -37,8 +37,8 @@
 function ret = Q4(x)
 % Return the partial derivative of the unit quaternion r with respect to
 % log(r).
-    if ~is_unit(x)
-        error('Q4 function is defined only for unit dual quaternions');
+    if ~is_unit(x) || ~is_quaternion(x)
+        error('Q4 function is defined only for unit quaternions');
     end
 
     r = vec4(x);
