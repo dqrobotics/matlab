@@ -1,6 +1,6 @@
-% Q8(x) Given the unit dual quaternion x, Q8(x) returns the partial derivative of vec8(x) 
-% with respect to vec6(log(x)).
-%       See theorem 4 of Savino et al (2020). 
+% Q4(x) Given the unit quaternion r, return the partial derivative of vec4(r) 
+% with respect to vec3(log(r)).
+%       See Eq. (22) of Savino et al (2020). 
 %       Pose consensus based on dual quaternion algebra with application to 
 %       decentralized formation control of mobile manipulators.
 %       https://doi.org/10.1016/j.jfranklin.2019.09.045
@@ -25,29 +25,37 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%
 % 1. Bruno Vilhena Adorno (adorno@ieee.org)
 %        - Responsible for the original implementation.
 %
 % 2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
-%        - Removed Q4() as requested in #90.
-%          https://github.com/dqrobotics/matlab/issues/90
+%      Implemented the modifications requested in #90
+%          (https://github.com/dqrobotics/matlab/issues/90)
+%        - Removed Q4() from Q8.m, exposed the method to the user, and
+%        - added the check for unit norm.        
 
-
-function ret = Q8(x)
-
-    if ~is_unit(x)
-        error('Q8 function is defined only for unit dual quaternions');
+function ret = Q4(x)
+% Return the partial derivative of the unit quaternion r with respect to
+% log(r).
+    if ~is_unit(x) || ~is_quaternion(x)
+        error('Q4 function is defined only for unit quaternions');
     end
 
-    r = rotation(x);
-    p = translation(x);
+    r = vec4(x);
+    phi = double(rotation_angle(x));
+    n = vec3(rotation_axis(x));
+    nx = n(1); ny = n(2); nz = n(3);
 
-    Q = Q4(r);
-    Qp = [zeros(1,3);
-          eye(3)];
+    if phi == 0
+        theta = 1;
+    else
+        theta = sin(phi/2)/(phi/2);
+    end
+ 
+    gamma = r(1) - theta; 
 
-    ret = [Q, zeros(4,3);
-           0.5*hamiplus4(p)*Q, haminus4(r)*Qp];
-
+    ret = [           -r(2),            -r(3),            -r(4);
+           gamma*nx^2+theta,      gamma*nx*ny,      gamma*nx*nz; 
+                gamma*nx*ny, gamma*ny^2+theta,      gamma*ny*nz;
+                gamma*nz*nx,      gamma*nz*ny, gamma*nz^2+theta];
 end
