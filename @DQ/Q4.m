@@ -1,5 +1,5 @@
-% Q4(x) returns the partial derivative of the unit quaternion r with
-%       respect to log(r).
+% Q4(x) Given the unit quaternion r, return the partial derivative of vec4(r) 
+% with respect to vec3(log(r)).
 %       See Eq. (22) of Savino et al (2020). 
 %       Pose consensus based on dual quaternion algebra with application to 
 %       decentralized formation control of mobile manipulators.
