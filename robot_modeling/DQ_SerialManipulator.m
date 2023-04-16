@@ -792,7 +792,7 @@ function o = plot_options(robot, optin)
             % TODO
             % This part of the code assumes we are using the 
             %  DH parametrization. We need to fix it in future versions.
-            reach = reach + abs(robot.a(i)) + abs(robot.d(i));
+            reach = reach + abs(robot.get_dh_parameter("A",i)) + abs(robot.get_dh_parameter("D",i));
         end
         o.workspace = [-reach reach -reach reach -reach reach];      
     else
