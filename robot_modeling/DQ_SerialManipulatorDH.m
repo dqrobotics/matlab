@@ -204,7 +204,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             obj.set_joint_types(A(5,:));
         end
 
-function ret = get_dh_parameters(obj, parameterType)
+        function ret = get_dh_parameters(obj, parameterType)
             % This method returns a vector containing the DH parameters.
             % Usage: get_dh_parameters(parameterType)
             %           parameterType: Parameter type, which corresponds to
