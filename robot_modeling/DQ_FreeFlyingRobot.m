@@ -45,7 +45,6 @@ classdef DQ_FreeFlyingRobot < DQ_Kinematics
     end
     
     properties (Access = private)
-        dim_configuration_space;
         shape_template;
         handle;
     end

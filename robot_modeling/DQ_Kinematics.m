@@ -74,6 +74,8 @@ classdef DQ_Kinematics < handle
         base_frame;
         % Robot configuration vector
         q; 
+        % Dimension of the configuration space
+        dim_configuration_space;
     end
     
     methods

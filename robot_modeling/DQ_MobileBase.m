@@ -47,7 +47,6 @@ classdef (Abstract) DQ_MobileBase < DQ_Kinematics
     
     properties (Access = protected)
         handle;
-        dim_configuration_space;
         frame_displacement;
     end
     

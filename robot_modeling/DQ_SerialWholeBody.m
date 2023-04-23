@@ -86,7 +86,6 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
         % fkm of chain{ith} is its conjugate and the corresponding pose_jacobian is
         % DQ.C8*J.
         reversed;
-        dim_configuration_space;
     end
     
     methods
