@@ -181,9 +181,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
                 error('Input: Invalid modified DH matrix. It must have 5 rows.')
             end
 
-            % n_links 
-            % TODO: change n_links to dim_configuration_space
-            obj.n_links = size(A,2);
+            obj.dim_configuration_space = size(A,2);
 
             % Add theta, d, a, alpha and type
             obj.theta = A(1,:);
