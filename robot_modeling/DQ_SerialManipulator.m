@@ -35,7 +35,12 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ieee.org
+%     1. Bruno Vihena Adorno - adorno@ieee.org
+%          Responsible for the original implementation. 
+%
+%     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%        - Removed the property n_links. The dimension of the configuration
+%          space is now stored in DQ_Kinematics.dim_configuration_space.
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
