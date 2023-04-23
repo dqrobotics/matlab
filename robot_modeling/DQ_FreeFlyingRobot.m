@@ -16,7 +16,7 @@
 %
 %       See also DQ_MobileBase, DQ_DifferentialDriveRobot, DQ_HolonomicBase
 
-% (C) Copyright 2011-2020 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
