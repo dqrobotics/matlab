@@ -1,6 +1,6 @@
 # dqrobotics-matlab
 
-The DQ Robotics library in [Matlab](https://www.mathworks.com/).
+The DQ Robotics library in [MATLAB](https://www.mathworks.com/).
 
 ## Installation
 
