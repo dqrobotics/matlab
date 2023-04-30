@@ -45,3 +45,11 @@ There are several examples inside the folder `$HOME/Toolboxes/dqrobotics-YY-MM/e
 All classes and methods are well documented. To access their documentation, just type `help CLASS_NAME`. For instance, `help DQ` will show all methods available in the class DQ with their corresponding description. To show more information about a particular method or property, it suffices to type `help CLASS_NAME/method`; for instance, `help DQ/plot`  will show the help for the plot  function of the DQ class.
 
 Although the library is self-contained and it suffices to know only basic dual quaternion algebra and robot modeling and control techniques to use it, there is a great amount of theory behind the controllers and modeling techniques implemented in DQ Robotics. Therefore, several methods and classes point to relevant references in the literature and users who want to better understand the implementation may find those references very useful.
+
+## Contributing
+
+DQ Robotics is a standalone, fully moderated open-source library, with a core developer team who determines the directions of new developments. To ensure quality control, the team follows a scrict procedure for new pull requests, described [here](https://github.com/dqrobotics/matlab/blob/master/CONTRIBUTING.md). 
+
+Anyone wanting to propose a new modification or introduce new functionality should reach out to the team first, as proposed modifications that do not comply with the development philosophy and style, do not follow the library's architecture, don't introduce a clear and general benefit to the library other than to the person who proposed the modification will likely be rejected with no further discussion.
+
+Good places to initiate such a discussion might be in the [discussion forum](https://github.com/orgs/dqrobotics/discussions).
