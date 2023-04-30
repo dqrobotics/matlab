@@ -35,7 +35,12 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ieee.org
+%     1. Bruno Vihena Adorno - adorno@ieee.org
+%          Responsible for the original implementation. 
+%
+%     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%        - Removed the property n_links. The dimension of the configuration
+%          space is now stored in DQ_Kinematics.dim_configuration_space.
 
 classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
     properties        
@@ -50,7 +55,6 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         % Handle used to access the robot's graphics information. It's used
         % mainly in the plot function.
         handle
-        n_links;
         joint_types;
     end
 
@@ -133,7 +137,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         end
         
         function ret = get_dim_configuration_space(obj)
-            ret = obj.n_links;
+            ret = obj.dim_configuration_space;
         end
         
         function set_effector(obj,effector)
@@ -214,7 +218,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             if nargin == 3
                 n = to_ith_link;
             else
-                n = obj.n_links;
+                n = obj.get_dim_configuration_space();
             end
             
             x = DQ(1);
@@ -239,7 +243,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % internally in DQ_kinematics
             
             if nargin < 3
-                to_ith_link = obj.n_links;
+                to_ith_link = obj.get_dim_configuration_space();
             end
             x_effector = obj.raw_fkm(q,to_ith_link);
             
@@ -272,7 +276,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 J = obj.raw_pose_jacobian(q,to_ith_link);
                 vec_x_effector_dot = J*q_dot(1:to_ith_link);
             else
-                n = obj.n_links;
+                n = obj.get_dim_configuration_space();
                 % obj.check_to_ith_link(n);
                 x_effector = obj.raw_fkm(q);
                 J = obj.raw_pose_jacobian(q);
@@ -314,7 +318,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % both base and end-effector displacements (their default
             % values are 1).
             
-            if nargin == 3 && ith < obj.n_links
+            if nargin == 3 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the constant base displacement
@@ -338,7 +342,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % This function does not take into account any base or
             % end-effector displacements.
             
-            if nargin == 4 && ith < obj.n_links
+            if nargin == 4 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian derivative is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
                 % into account only the constant base displacement
@@ -463,7 +467,7 @@ function dq_kinematics_plot(robot, q, varargin)
         opt = plot_options(robot, varargin);
     end
 
-    n = robot.n_links;
+    n = robot.get_dim_configuration_space();
 
     if length(q) ~= n
         error('Incorrect number of joints. The correct number is %d', n);
@@ -591,7 +595,7 @@ function h = create_new_robot(robot, opt)
     end
 
     % Display cylinders (revolute each joint).
-    for i = 1:robot.n_links
+    for i = 1:robot.get_dim_configuration_space()
         if opt.joints
             %TODO: implement prismatic joints
             N = 8;
@@ -641,7 +645,7 @@ end
 % kinematic robot, and graphics are defined by the handle structure robot.handle, 
 % which stores the 'graphical robot' as robot.handle.robot.
 function update_robot(robot, q)
-    n = robot.n_links;
+    n = robot.get_dim_configuration_space();
     
     % Get the handle to the graphical robot. Since each kinematic robot
     % stores just one graphical handle, if we want to plot the same robot
@@ -785,7 +789,7 @@ function o = plot_options(robot, optin)
     % simple heuristic to figure the maximum reach of the robot
     if isempty(o.workspace)
         reach = 0;
-        for i=1:robot.n_links
+        for i=1:robot.get_dim_configuration_space()
             % Since the maximum reaching distance are given by the link offset 
             % and link length, we add them.
 

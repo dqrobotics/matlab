@@ -18,7 +18,7 @@
 %
 % See also DQ_Kinematics, DQ_HolonomicBase.
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -38,7 +38,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vihena Adorno - adorno@ieee.org
 
 classdef (Abstract) DQ_MobileBase < DQ_Kinematics
     properties      
@@ -47,7 +47,6 @@ classdef (Abstract) DQ_MobileBase < DQ_Kinematics
     
     properties (Access = protected)
         handle;
-        dim_configuration_space;
         frame_displacement;
     end
     
