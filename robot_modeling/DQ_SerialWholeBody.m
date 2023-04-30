@@ -51,7 +51,7 @@
 %
 % See also DQ_kinematics, DQ_MobileBase
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -71,7 +71,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     Bruno Vihena Adorno - adorno@ieee.org
 
 classdef DQ_SerialWholeBody < DQ_Kinematics
     properties (Access = protected)
@@ -86,7 +86,6 @@ classdef DQ_SerialWholeBody < DQ_Kinematics
         % fkm of chain{ith} is its conjugate and the corresponding pose_jacobian is
         % DQ.C8*J.
         reversed;
-        dim_configuration_space;
     end
     
     methods

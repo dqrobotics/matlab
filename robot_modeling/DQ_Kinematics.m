@@ -36,7 +36,7 @@
 %       translation_jacobian - Compute the translation Jacobian.
 % See also DQ_SerialManipulator, DQ_MobileBase, DQ_CooperativeDualTaskSpace.
 
-% (C) Copyright 2011-2022 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -56,7 +56,11 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ieee.org
+%     1. Bruno Vihena Adorno (adorno@ieee.org)
+%          Responsible for the original implementation. 
+%
+%     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%        - Added the property dim_configuration_space. 
 
 classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
@@ -74,6 +78,8 @@ classdef DQ_Kinematics < handle
         base_frame;
         % Robot configuration vector
         q; 
+        % Dimension of the configuration space
+        dim_configuration_space;
     end
     
     methods
