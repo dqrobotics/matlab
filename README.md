@@ -48,4 +48,4 @@ Although the library is self-contained and it suffices to know only basic dual q
 
 ## Contributing
 
-Contributing to **dqrobotics-matlab** follows the [same criteria](https://github.com/dqrobotics/.github/blob/master/profile/README.md#contributing) as for other parts of DQ Robotics.
+Contributing to **dqrobotics-matlab** follows the [same criteria](https://github.com/dqrobotics/.github/blob/master/profile/README.md#contributing) as for other parts of DQ Robotics. More information about the procedures for contributing can be found [here](https://github.com/dqrobotics/matlab/blob/master/CONTRIBUTING.md).
