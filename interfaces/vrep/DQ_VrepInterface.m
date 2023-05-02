@@ -539,7 +539,7 @@ classdef DQ_VrepInterface < handle
        function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
             % This method gets the joint velocities.
             % Usage:
-            %      get_joint_velocities(jointnames, opmode)   
+            %      joint_velocities = get_joint_velocities(jointnames, opmode)   
             %          jointnames: The joint names.
             %          (optional) opmode: The operation mode.
             %
