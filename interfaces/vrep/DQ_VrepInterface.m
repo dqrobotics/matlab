@@ -48,13 +48,22 @@
 %       set_joint_target_positions - Set the joint target positions of a
 %       robot
 %       get_joint_positions - Get the joint positions of a robot
+%       set_synchronous - Set the stepped (synchronous) mode for the remote
+%       API server service that the client is connected to. 
+%       trigger_next_simulation_step - Send a synchronization trigger 
+%       signal to the server
+%       wait_for_simulation_step_to_end - Return the time needed for a 
+%       command to be sent to the server, executed, and sent back.
+%       set_joint_target_velocities -  Set the joint target velocities of a
+%       robot
+%       get_joint_velocities - Get the joint velocities of a robot
 %
 %   DQ_VrepInterface Methods (For advanced users)
 %       get_handle - Get the handle of a V-REP object
 %       get_handles - Get the handles for multiple V-REP objects
 %
 
-% (C) Copyright 2018-2019 DQ Robotics Developers
+% (C) Copyright 2018-2023 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -71,10 +80,19 @@
 %     You should have received a copy of the GNU Lesser General Public License
 %     along with DQ Robotics.  If not, see <http://www.gnu.org/licenses/>.
 %
-% DQ Robotics website: dqrobotics.sourceforge.net
+% DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Murilo Marques Marinho (murilo@nml.t.u-tokyo.ac.jp)
+%        - Responsible for the original implementation.
+%
+%     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%        - Added the following methods:
+%             - set_synchronous()
+%             - trigger_next_simulation_step()
+%             - wait_for_simulation_step_to_end()
+%             - set_joint_target_velocities()
+%             - get_joint_velocities()
 
 classdef DQ_VrepInterface < handle
     
@@ -96,6 +114,8 @@ classdef DQ_VrepInterface < handle
         OP_ONESHOT   = remApi('remoteApi').simx_opmode_oneshot;
         % Constant that denotes the V-VREP's remote API buffer operation mode
         OP_BUFFER    = remApi('remoteApi').simx_opmode_buffer;
+        % Constant that denotes the V-VREP's remote API joint velocity ID
+        JOINT_VELOCITY_PARAMETER_ID = remApi('remoteApi').sim_jointfloatparam_velocity;
     end
     
     methods (Access = private)
@@ -151,6 +171,32 @@ classdef DQ_VrepInterface < handle
         function disconnect_all(obj)
             %% Flushes all V-REP remote API connections from the server
             obj.vrep.simxFinish(-1);
+        end
+
+
+        function set_synchronous(obj,flag)
+            % This method enables or disables the stepped (synchronous) mode
+            % for the remote API server service that the client is connected to.
+            % Example:
+            %       set_synchronous(true)    % synchronous mode enabled
+            %       set_synchronous(false)   % synchronous mode disabled
+            if (~islogical(flag))
+                error('Error in set_synchronous: argument must be logical, not a %s. \nExample:\n set_synchronous(true)', class(flag));
+            end
+            obj.vrep.simxSynchronous(obj.clientID,flag);
+        end
+
+
+        function trigger_next_simulation_step(obj)
+            % This method sends a synchronization trigger signal to the server, which performs
+            % a simulation step when the synchronous mode is used.
+            obj.vrep.simxSynchronousTrigger(obj.clientID);
+        end
+
+
+        function ping_time = wait_for_simulation_step_to_end(obj)
+            % This method  returns the time needed for a command to be sent to the server, executed, and sent back.
+            [~, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
         end
         
         %% Start Simulation
@@ -488,6 +534,103 @@ classdef DQ_VrepInterface < handle
                 thetas(joint_index) = double(tmp);
             end
         end
+
+
+       function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
+            % This method gets the joint velocities.
+            % Usage:
+            %      joint_velocities = get_joint_velocities(jointnames, opmode)   
+            %          jointnames: The joint names.
+            %          (optional) opmode: The operation mode.
+            %
+            % Example:
+            % jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %             'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            % joint_velocities = get_joint_velocities(jointnames);
+
+            joint_velocities = zeros(length(jointnames),1);
+            for joint_index=1:length(jointnames)
+                % First approach to the auto-management using
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
+                % opmode, it is chosen first as STREAMING and then as BUFFER,
+                % as specified by the remote API documentation
+                if nargin <= 2
+                    if isa(jointnames,'cell')
+                        element = obj.element_from_string(jointnames{joint_index});
+                    else
+                        element = obj.element_from_string(jointnames);
+                    end
+                    if(~element.state_from_function_signature('get_joint_velocities'))
+                        [~,tmp] =  obj.vrep.simxGetObjectFloatParameter(...
+                            obj.clientID,...
+                            element.handle,...
+                            obj.JOINT_VELOCITY_PARAMETER_ID,...
+                            obj.OP_STREAMING);
+                        retval=1;
+                        while retval==1
+                            [retval,tmp] = obj.vrep.simxGetObjectFloatParameter(...
+                                obj.clientID,...
+                                element.handle,...
+                                obj.JOINT_VELOCITY_PARAMETER_ID,...
+                                obj.OP_BUFFER);
+                        end
+                    else
+                        [~,tmp] = obj.vrep.simxGetObjectFloatParameter(...
+                            obj.clientID,...
+                            element.handle,...
+                            obj.JOINT_VELOCITY_PARAMETER_ID,...
+                            obj.OP_BUFFER);
+                    end
+                else
+                    [~,tmp] = obj.vrep.simxGetObjectFloatParameter(...
+                        obj.clientID,...
+                        obj.handle_from_string_or_handle(jointnames{joint_index}),...
+                        obj.JOINT_VELOCITY_PARAMETER_ID,...
+                        opmode);
+                end
+                joint_velocities(joint_index) = double(tmp);
+            end
+        end 
+
+        function set_joint_target_velocities(obj,jointnames,joint_target_velocities,opmode)
+            % This method sets the joint velocities. It is required a
+            % dynamics enabled scene, and joints in dynamic mode with velocity
+            % control mode.
+            %
+            % Usage:
+            %      set_joint_target_velocities(jointnames, joint_target_velocities, opmode)   
+            %          jointnames: The joint names.
+            %          joint_target_velocities: The joint target velocities.
+            %          (optional) opmode: The operation mode.
+            %
+            % Example:
+            % jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %             'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %       set_joint_target_velocities(jointnames, u);
+            
+            if nargin == 3
+                % The recommended mode is OP_ONESHOT
+                opmode = obj.OP_ONESHOT;
+            end            
+            
+            for joint_index=1:length(jointnames)
+                if isa(jointnames,'cell')
+                    obj.vrep.simxSetJointTargetVelocity(...
+                        obj.clientID,...
+                        obj.handle_from_string_or_handle(jointnames{joint_index}),...
+                        joint_target_velocities(joint_index),...
+                        opmode);
+                else
+                    obj.vrep.simxSetJointTargetVelocity(...
+                        obj.clientID,...
+                        obj.handle_from_string_or_handle(jointnames),...
+                        joint_target_velocities(joint_index),...
+                        opmode);
+                end                
+            end            
+        end     
+
         
     end
     
