@@ -284,9 +284,8 @@ classdef DQ_VrepInterface < handle
             % opmode, it is chosen first as STREAMING and then as BUFFER,
             % as specified by the remote API documentation
             
-            handle = objectname;
-            relative_to_handle = reference_frame;
-
+            handle = objectname; % aliase
+            
             if nargin <= 2
                 element = obj.element_from_string(handle);
                 if(~element.state_from_function_signature('get_object_translation'))
@@ -313,6 +312,7 @@ classdef DQ_VrepInterface < handle
                         obj.OP_BUFFER);
                 end
             else
+                relative_to_handle = reference_frame; % aliase
                 [~,object_position]  = obj.vrep.simxGetObjectPosition(...
                     obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -338,10 +338,10 @@ classdef DQ_VrepInterface < handle
             %      t = DQ.i*0.01;
             %      set_object_translation('DefaultCamera', t);
 
+            % Create some aliases
             handle = objectname;
             t = translation;
-            relative_to_handle = reference_frame;
-            
+  
             if nargin == 3
                 obj.vrep.simxSetObjectPosition(obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -349,6 +349,7 @@ classdef DQ_VrepInterface < handle
                     t.q(2:4),...
                     obj.OP_ONESHOT);
             else
+                relative_to_handle = reference_frame; % aliase
                 obj.vrep.simxSetObjectPosition(obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
                     obj.handle_from_string_or_handle(relative_to_handle),...
@@ -374,8 +375,6 @@ classdef DQ_VrepInterface < handle
             
             % Create some aliases
             handle = objectname;
-            relative_to_handle = reference_frame;
-
             id = obj.clientID;
             handle1 = obj.handle_from_string_or_handle(handle);
             
@@ -406,6 +405,7 @@ classdef DQ_VrepInterface < handle
                         obj.OP_BUFFER);
                 end
             else
+                relative_to_handle = reference_frame; % aliase
                 handle2 = obj.handle_from_string_or_handle(relative_to_handle);
                 [~,obj_rot] = obj.vrep.simxGetObjectQuaternion(id,...
                     handle1,...
@@ -438,10 +438,10 @@ classdef DQ_VrepInterface < handle
             %      r = DQ.i;
             %      set_object_rotation('DefaultCamera', r);
  
+            % create some aliases
             handle = objectname;
             r = rotation;
-            relative_to_handle = reference_frame;
-
+            
             if nargin == 3
                 obj.vrep.simxSetObjectQuaternion(...
                     obj.clientID,...
@@ -450,6 +450,7 @@ classdef DQ_VrepInterface < handle
                     [r.q(2:4); r.q(1)],...
                     obj.OP_ONESHOT); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
             else
+                relative_to_handle = reference_frame; % aliase
                 obj.vrep.simxSetObjectQuaternion(...
                     obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -474,13 +475,14 @@ classdef DQ_VrepInterface < handle
             % Example:
             %      r = get_object_pose('DefaultCamera');
 
-            handle = objectname;
-            relative_to_handle = reference_frame;
+            handle = objectname; % aliase
+            
 
             if nargin <= 2
                 t = obj.get_object_translation(handle);
                 r = obj.get_object_rotation(handle);
             else
+                relative_to_handle = reference_frame; % aliase
                 t = obj.get_object_translation(...
                     obj.handle_from_string_or_handle(handle),...
                     obj.handle_from_string_or_handle(relative_to_handle),...
@@ -511,9 +513,9 @@ classdef DQ_VrepInterface < handle
             %      x = r+0.5*DQ.E*t*r;
             %      set_object_pose('DefaultCamera', x);
  
+            % create some aliases
             handle = objectname;
-            x = pose;
-            relative_to_handle = reference_frame;
+            x = pose;            
 
             if nargin == 3
                 t = translation(x);
@@ -529,6 +531,7 @@ classdef DQ_VrepInterface < handle
                     -1,...
                     obj.OP_ONESHOT);
             else
+                relative_to_handle = reference_frame;
                 t = translation(x);
                 r = rotation(x);
                 obj.set_object_translation(...
@@ -561,6 +564,7 @@ classdef DQ_VrepInterface < handle
             %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
             %       set_joint_positions(jointnames, u);
             
+            % create some aliases
             handles = jointnames;
             thetas = joint_positions;
 
@@ -604,6 +608,7 @@ classdef DQ_VrepInterface < handle
             %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
             %       set_joint_target_positions(jointnames, u);     
             
+            % create some aliases
             handles = jointnames;
             thetas = joint_target_positions;
 
@@ -629,7 +634,7 @@ classdef DQ_VrepInterface < handle
             end            
         end
         
-        %% Get Joint Positions
+        
         function [joint_positions,retval]=get_joint_positions(obj,jointnames,opmode)
             % This method gets the joint positions of a robot in the server.
             % Usage:
@@ -646,9 +651,10 @@ classdef DQ_VrepInterface < handle
             %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
             %      joint_positions = get_joint_positions(jointnames);
 
+            % create some aliases
             handles = jointnames;    
-
             thetas = zeros(length(handles),1);
+
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
                 % DQ_VrepInterfaceMapElements. If the user does not specify the
@@ -742,7 +748,7 @@ classdef DQ_VrepInterface < handle
                         obj.JOINT_VELOCITY_PARAMETER_ID,...
                         opmode);
                 end
-                joint_velocities(joint_index) = double(tmp);
+                joint_velocities(joint_index) = double(tmp); 
             end
         end 
 
