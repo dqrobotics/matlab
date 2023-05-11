@@ -23,6 +23,7 @@
 %       line_to_point_distance_jacobian - Compute the line-to-line distance Jacobian.
 %       line_to_point_residual - Compute the line-to-point residual.
 %       line_to_line_angle_jacobian - Compute the line-to-line angle Jacobian.
+%       line_to_line_angle_residual - Compute the line-to-line angle residual.
 %       plane_jacobian - Compute the plane Jacobian.
 %       plane_to_point_distance_jacobian - Compute the plane-to-point distance Jacobian.
 %       plane_to_point_residual - Compute the plane-to-point residual.
@@ -61,6 +62,7 @@
 %
 %     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Added the property dim_configuration_space. 
+%        - Added the method line_to_line_angle_residual().
 
 classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
@@ -366,6 +368,29 @@ classdef DQ_Kinematics < handle
             Jl = line_jacobian(1:4, 1:n_columns);
             J = 2*vec4(robot_line - workspace_line)'*Jl;
             
+        end
+
+
+        function residual = line_to_line_angle_residual(robot_line, ...
+                 workspace_line, workspace_line_derivative) 
+        % LINE_TO_LINE_ANGLE_RESIDUAL(robot_point, workspace_line,
+        % workspace_line_derivative) returns the residual related to the
+        % moving line orientation in the workspace that is independent of 
+        % the robot motion (i.e., which does not depend on the robot joint
+        % velocities). 
+        %
+        % For more details see Eq. 4.30 of Juan José Quiroz-Omaña."Whole-Body 
+        % Control of Humanoids Robots at Second Order Kinematics Under 
+        % Unilateral Constraints." PhD thesis, Federal University of
+        % Minas Gerais, 2021.
+        % https://repositorio.ufmg.br/handle/1843/38700
+
+                if ~is_line(robot_line) || ~is_line(workspace_line)
+                    error(['robot_line and'...
+                           'workspace_line must be lines.']);
+                end
+                residual = 2*dot(robot_line-workspace_line,...
+                            -1.0*workspace_line_derivative);
         end
    
         
