@@ -357,7 +357,7 @@ classdef DQ_Kinematics < handle
         % 
         % As f(d) is a continuous bijective function, controlling f(d) is
         % equivalent to controlling the angle between the lines.
-        
+        %
         %
         % For more details, see Eq. (10) of Juan José Quiroz-Omaña, and
         % Bruno Vilhena Adorno (2019). Whole-Body Control with (Self) Collision
