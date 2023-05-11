@@ -404,7 +404,7 @@ classdef DQ_Kinematics < handle
         % to the line collinear with, respectively, the x-axis, y-axis, and 
         % z-axis of 'x'.
         %
-        % For more details see Eq. 20 of?Marinho, M. M., Adorno, B. V., 
+        % For more details see Eq. 20 of Marinho, M. M., Adorno, B. V., 
         % Harada, K., & Mitsuishi, M. "Active Constraints Using Vector
         % Field Inequalities for Surgical Robots." ICRA 2018.
         % https://doi.org/10.1109/ICRA.2018.8461105
