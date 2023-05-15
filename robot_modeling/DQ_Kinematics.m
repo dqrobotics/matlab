@@ -371,12 +371,12 @@ classdef DQ_Kinematics < handle
         end
 
 
-        function residual = line_to_line_angle_residual(robot_line, ...
-                 workspace_line, workspace_line_derivative) 
-        % LINE_TO_LINE_ANGLE_RESIDUAL(robot_point, workspace_line,
-        % workspace_line_derivative) returns the residual related to the
-        % moving line orientation in the workspace that is independent of 
-        % the robot motion (i.e., which does not depend on the robot joint
+        function residual = line_to_line_angle_residual(robot_line_direction, ...
+                 workspace_line_direction, workspace_line_direction_derivative) 
+        % LINE_TO_LINE_ANGLE_RESIDUAL(robot_line_direction,  workspace_line_direction,
+        % workspace_line_direction_derivative) returns the residual related 
+        % to the moving line orientation in the workspace that is independent 
+        % of the robot motion (i.e., which does not depend on the robot joint
         % velocities). 
         %
         % For more details see Eq. 4.30 of Juan José Quiroz-Omaña."Whole-Body 
@@ -385,12 +385,20 @@ classdef DQ_Kinematics < handle
         % Minas Gerais, 2021.
         % https://repositorio.ufmg.br/handle/1843/38700
 
-                if ~is_line(robot_line) || ~is_line(workspace_line)
-                    error(['robot_line and'...
-                           'workspace_line must be lines.']);
+                if ~is_line(robot_line_direction) ...
+                    || ~is_quaternion(robot_line_direction) 
+                    error('robot_line_direction must be a unit pure quaternion.');
                 end
-                residual = 2*dot(robot_line-workspace_line,...
-                            -1.0*workspace_line_derivative);
+                if ~is_line(workspace_line_direction) ||...
+                    ~is_quaternion(workspace_line_direction) 
+                    error('workspace_line_direction must be a unit pure quaternion.');
+                end
+                if ~is_pure(workspace_line_direction_derivative) ...
+                    || ~is_quaternion(workspace_line_direction_derivative) 
+                    error('workspace_line_direction_derivative must be a pure quaternion.');
+                end
+                residual = 2*dot(robot_line_direction - workspace_line_direction,...
+                                    -workspace_line_direction_derivative);
         end
    
         
