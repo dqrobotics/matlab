@@ -809,8 +809,10 @@ classdef DQ_VrepInterface < handle
             %      joint_positions] = get_joint_positions(jointnames,opmode);
             %      [joint_positions, retval] = get_joint_positions(jointnames, opmode);  
             %
-            %          jointnames: The joint names.
-            %          (optional) opmode: The operation mode. If not specified, 
+            %          -Parameters:
+            %
+            %            jointnames: The joint names.
+            %            (optional) opmode: The operation mode. If not specified, 
             %                       the opmode will be set automatically. 
             %                          
             %                        You can use the following modes:
@@ -822,11 +824,11 @@ classdef DQ_VrepInterface < handle
             %                       Check this link for more details:
             %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
             %
-            %          Outputs:
+            %          - Outputs:
             %
-            %          joint_positions: The joints positions
-            %          retval: The return code of the Remote API function, 
-            %                  which is defined in https://www.coppeliarobotics.com/helpFiles/en/remoteApiConstants.htm#functionErrorCodes
+            %            joint_positions: The joints positions
+            %            retval: The return code of the Remote API function, 
+            %                   which is defined in https://www.coppeliarobotics.com/helpFiles/en/remoteApiConstants.htm#functionErrorCodes
             %       
             %
             % Example:
@@ -966,7 +968,9 @@ classdef DQ_VrepInterface < handle
         function set_joint_target_velocities(obj,jointnames,joint_target_velocities,opmode)
             % This method sets the joint velocities of a robot in the CoppeliaSim scene.
             % It is required a dynamics enabled scene, and joints in dynamic mode 
-            % with velocity control mode.
+            % with velocity control mode. Check this link for more
+            % information about joint modes:
+            % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
             %
             % Usage:
             %      Recommended:
