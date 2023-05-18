@@ -93,18 +93,28 @@
 %             - wait_for_simulation_step_to_end()
 %             - set_joint_target_velocities()
 %             - get_joint_velocities()
-%
 %        - Improved the documentation of the class
+%
+%     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%       - Altered the following properties from 'private' to 'protected'
+%       (see discussions in https://github.com/dqrobotics/matlab/pull/101
+%       to further details):
+%             - vrep
+%             - clientID
+
 
 classdef DQ_VrepInterface < handle
     
     properties (Access = private)
+        % a map between V-REP object names and DQ_VrepInterfaceMapElements
+        handles_map;
+    end
+
+    properties (Access = protected)
         % the V-REP remote API instance used by this interface
         vrep;
         % the client ID of this remote API connection
         clientID;
-        % a map between V-REP object names and DQ_VrepInterfaceMapElements
-        handles_map;
     end
     
     properties (Constant)
