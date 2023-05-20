@@ -51,9 +51,9 @@
 %       set_synchronous - Set the stepped (synchronous) mode for the remote
 %       API server service that the client is connected to. 
 %       trigger_next_simulation_step - Send a synchronization trigger 
-%       signal to the server
+%       signal to the CoppeliaSim scene
 %       wait_for_simulation_step_to_end - Return the time needed for a 
-%       command to be sent to the server, executed, and sent back.
+%       command to be sent to the CoppeliaSim scene, executed, and sent back.
 %       set_joint_target_velocities -  Set the joint target velocities of a
 %       robot
 %       get_joint_velocities - Get the joint velocities of a robot
@@ -93,16 +93,28 @@
 %             - wait_for_simulation_step_to_end()
 %             - set_joint_target_velocities()
 %             - get_joint_velocities()
+%        - Improved the documentation of the class
+%
+%     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%       - Altered the following properties from 'private' to 'protected'
+%       (see discussions in https://github.com/dqrobotics/matlab/pull/101
+%       to further details):
+%             - vrep
+%             - clientID
+
 
 classdef DQ_VrepInterface < handle
     
     properties (Access = private)
+        % a map between V-REP object names and DQ_VrepInterfaceMapElements
+        handles_map;
+    end
+
+    properties (Access = protected)
         % the V-REP remote API instance used by this interface
         vrep;
         % the client ID of this remote API connection
         clientID;
-        % a map between V-REP object names and DQ_VrepInterfaceMapElements
-        handles_map;
     end
     
     properties (Constant)
@@ -152,7 +164,16 @@ classdef DQ_VrepInterface < handle
         end
         
         function connect(obj,ip,port)
-            %% Connects to a V-REP remote API server on a given ip and port
+            % This method connects to the remote api server (i.e. CoppeliaSim).
+            % Calling this function is required before anything else can happen.
+            % Usage:
+            %     connect(ip, port);  
+            %          ip:  The ip address where the CoppeliaSim is located.
+            %          port: The port number where to connect.
+            %
+            % Example:
+            %      connect('127.0.0.1', 19997);
+
             obj.clientID = obj.vrep.simxStart(ip,port,true,true,5000,5);
             if (obj.clientID>-1)
                 disp('Connected to the remote API server');
@@ -161,15 +182,17 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Close
+      
         function disconnect(obj)
-            %% Disconnects from the V-REP remote API server
+            % This method ends the communication between the client and
+            % the CoppeliaSim scene. This should be the very last method called.
             obj.vrep.simxFinish(obj.clientID);
         end
         
-        %% Close all
+        
         function disconnect_all(obj)
-            %% Flushes all V-REP remote API connections from the server
+            % This method ends all running communication threads with the 
+            % CoppeliaSim scene. This should be the very last method called.
             obj.vrep.simxFinish(-1);
         end
 
@@ -188,32 +211,41 @@ classdef DQ_VrepInterface < handle
 
 
         function trigger_next_simulation_step(obj)
-            % This method sends a synchronization trigger signal to the server, which performs
-            % a simulation step when the synchronous mode is used.
+            % This method sends a synchronization trigger signal to the CoppeliaSim scene, 
+            % which performs a simulation step when the synchronous mode is used.
             obj.vrep.simxSynchronousTrigger(obj.clientID);
         end
 
 
         function ping_time = wait_for_simulation_step_to_end(obj)
-            % This method  returns the time needed for a command to be sent to the server, executed, and sent back.
+            % This method returns the time needed for a command to be sent 
+            % to the CoppeliaSim scene, executed, and sent back.
             [~, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
         end
         
-        %% Start Simulation
+        
         function start_simulation(obj)
-            %% Starts the V-REP simulation
+            % This method starts the CoppeliaSim simulation.
             obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
         end
         
-        %% Stop Simulation
+        
         function stop_simulation(obj)
-            %% Stops the V-REP simulation
+            % This method stops the CoppeliaSim simulation.
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
         end
         
-        %% Get Handles
+        
         function handles = get_handles(obj,names)
-            %% Get the V-REP handles for a cell array of object names
+            % This method gets the handles for a cell array of 
+            % object names in the the CoppeliaSim scene.
+            % Usage:
+            %     get_handles(names);  
+            %          names: The cell array of object names.
+            %
+            % Example: 
+            %     handle = get_handles({'ReferenceFrame_1', 'ReferenceFrame_2'});
+
             handles = [];
             if(iscell(names))
                 for i=1:length(names)
@@ -227,24 +259,64 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Get Handle
+        
         function handle = get_handle(obj,name)
-            %% Get the V-REP handle for a given object
+            % This method gets the handle for a given object in the CoppeliaSim scene. 
+            % 
+            % Usage:
+            %     get_handles(name);  
+            %          names: The object name.
+            % Example: 
+            %     handle = get_handle('ReferenceFrame');
+
             [~,handle] = obj.vrep.simxGetObjectHandle(...
                 obj.clientID,...
                 name,...
                 obj.vrep.simx_opmode_blocking);
         end
         
-        %% Get Object Translation
-        function t = get_object_translation(obj,handle,relative_to_handle,opmode)
-            %% Get the translation of an object in V-REP
-            %%  >> t = vi.get_object_translation('DefaultCamera');
+        
+        function t = get_object_translation(obj,objectname,reference_frame,opmode)
+            % This method gets the translation of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %     t = get_object_translation(objectname) 
+            %
+            %     Advanced:
+            %     t = get_object_translation(objectname,reference_frame,opmode);  
+            %
+            %          objectname:  The object name
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which you 
+            %                       want the translation. If not specified, 
+            %                       the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      t = get_object_translation('DefaultCamera');  
+            %
+            %      % For advanced usage:
+            %      t = get_object_translation('DefaultCamera', 'Frame_b', OP_ONESHOT); 
             
             % First approach to the auto-management using
             % DQ_VrepInterfaceMapElements. If the user does not specify the
             % opmode, it is chosen first as STREAMING and then as BUFFER,
             % as specified by the remote API documentation
+            
+            handle = objectname; % alias
+            
             if nargin <= 2
                 element = obj.element_from_string(handle);
                 if(~element.state_from_function_signature('get_object_translation'))
@@ -271,6 +343,7 @@ classdef DQ_VrepInterface < handle
                         obj.OP_BUFFER);
                 end
             else
+                relative_to_handle = reference_frame; % alias
                 [~,object_position]  = obj.vrep.simxGetObjectPosition(...
                     obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -280,12 +353,45 @@ classdef DQ_VrepInterface < handle
             t = DQ([0,double(object_position)]);
         end
         
-        %% Set Object Translation
-        function set_object_translation(obj,handle,t,relative_to_handle,opmode)
-            %% Set the translation of an object in V-REP
-            %%  >> t = DQ.i*0.01;
-            %%  >> vi.set_object_translation('DefaultCamera',t);
-            
+        
+        function set_object_translation(obj,objectname,translation,reference_frame,opmode)
+            % This method sets the translation of an object in the CoppeliaSim scene.
+            % Usage:
+            %     Recommended:
+            %     set_object_translation(objectname,translation);
+            %
+            %     Advanced:
+            %     set_object_translation(objectname,translation,reference_frame,opmode);  
+            %
+            %          objectname:  The object name.
+            %          translation: The desired translation. 
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which 
+            %                       the desired translation is expressed. 
+            %                       If not specified, the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      set_object_translation('DefaultCamera', t);  
+            %
+            %      % For advanced usage:
+            %      set_object_translation('DefaultCamera', t, 'Frame_b', OP_ONESHOT); 
+
+            % create some aliases
+            handle = objectname;
+            t = translation;
+  
             if nargin == 3
                 obj.vrep.simxSetObjectPosition(obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -293,6 +399,7 @@ classdef DQ_VrepInterface < handle
                     t.q(2:4),...
                     obj.OP_ONESHOT);
             else
+                relative_to_handle = reference_frame; % alias
                 obj.vrep.simxSetObjectPosition(obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
                     obj.handle_from_string_or_handle(relative_to_handle),...
@@ -301,12 +408,44 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Get Object Rotation
-        function r = get_object_rotation(obj, handle, relative_to_handle, opmode)
-            %% Get the rotation of an object in V-REP
-            %%  >> r = vi.get_object_rotation('DefaultCamera');
+        
+        function r = get_object_rotation(obj, objectname, reference_frame, opmode)
+            % This method gets the rotation of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %     t = get_object_rotation(objectname);
+            %
+            %     Advanced:
+            %     t = get_object_rotation(objectname,reference_frame,opmode);  
+            %
+            %          objectname: The object name
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which you 
+            %                       want the rotation. If not specified, 
+            %                       the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      r = get_object_rotation('DefaultCamera');  
+            %
+            %      % For advanced usage:
+            %      r = get_object_rotation('DefaultCamera', 'Frame_b', OP_ONESHOT);             
+       
             
-            % Create some aliases
+            % create some aliases
+            handle = objectname;
             id = obj.clientID;
             handle1 = obj.handle_from_string_or_handle(handle);
             
@@ -337,6 +476,7 @@ classdef DQ_VrepInterface < handle
                         obj.OP_BUFFER);
                 end
             else
+                relative_to_handle = reference_frame; % alias
                 handle2 = obj.handle_from_string_or_handle(relative_to_handle);
                 [~,obj_rot] = obj.vrep.simxGetObjectQuaternion(id,...
                     handle1,...
@@ -353,11 +493,44 @@ classdef DQ_VrepInterface < handle
                 object_rotation_double(3)]));
         end
         
-        %% Set Object Rotation
-        function set_object_rotation(obj,handle,r,relative_to_handle,opmode)
-            %% Set the rotation of an object in V-REP
-            %%  >> r = DQ.i;
-            %%  >> vi.set_object_rotation('DefaultCamera',r);
+        
+        function set_object_rotation(obj,objectname,rotation,reference_frame,opmode)
+            % This method sets the rotation of an object in the CoppeliaSim scene.
+            % Usage:
+            %     Recommended:
+            %     set_object_rotation(objectname,rotation);
+            %
+            %     Advanced:
+            %     set_object_rotation(objectname,rotation,reference_frame,opmode);  
+            %
+            %          objectname: The object name.
+            %          rotation: The desired rotation. 
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which 
+            %                       the desired rotation is expressed. 
+            %                       If not specified, the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      set_object_rotation('DefaultCamera', r); 
+            %
+            %      % For advanced usage:
+            %      set_object_rotation('DefaultCamera', r, 'Frame_b', OP_ONESHOT); 
+ 
+            % create some aliases
+            handle = objectname;
+            r = rotation;
             
             if nargin == 3
                 obj.vrep.simxSetObjectQuaternion(...
@@ -367,6 +540,7 @@ classdef DQ_VrepInterface < handle
                     [r.q(2:4); r.q(1)],...
                     obj.OP_ONESHOT); %V-Rep's quaternion representation is [x y z w] so we have to take that into account
             else
+                relative_to_handle = reference_frame; % alias
                 obj.vrep.simxSetObjectQuaternion(...
                     obj.clientID,...
                     obj.handle_from_string_or_handle(handle),...
@@ -376,15 +550,50 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Get Object Pose
-        function x = get_object_pose(obj,handle,relative_to_handle,opmode)
-            %% Get the pose of an object in V-REP
-            %%  >> x = vi.get_object_pose('DefaultCamera');
+        
+        function x = get_object_pose(obj,objectname,reference_frame,opmode)
+            % This method gets the pose of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %      x = get_object_pose(objectname);
+            %
+            %     Advanced:
+            %      x = get_object_pose(objectname,reference_frame,opmode);  
+            %
+            %          objectname: The object name
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which you 
+            %                       want the pose. If not specified, 
+            %                       the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      x = get_object_pose('DefaultCamera'); 
+            %
+            %      % For advanced usage:
+            %      x = get_object_pose('DefaultCamera', 'Frame_b', OP_ONESHOT);              
+
+
+            handle = objectname; % alias
             
+
             if nargin <= 2
                 t = obj.get_object_translation(handle);
                 r = obj.get_object_rotation(handle);
             else
+                relative_to_handle = reference_frame; % alias
                 t = obj.get_object_translation(...
                     obj.handle_from_string_or_handle(handle),...
                     obj.handle_from_string_or_handle(relative_to_handle),...
@@ -397,13 +606,50 @@ classdef DQ_VrepInterface < handle
             x = r + 0.5*DQ.E*t*r;
         end
         
-        %% Set Object Pose
-        function set_object_pose(obj,handle,x,relative_to_handle,opmode)
-            %% Set the pose of an object in V-REP
-            %%  >> t = DQ.i*0.01;
-            %%  >> r = DQ.i;
-            %%  >> x = r+0.5*DQ.E*t*r;
-            
+        
+        function set_object_pose(obj,objectname,pose,reference_frame,opmode)
+            % This method sets the pose of an object in the CoppeliaSim scene.
+            % Usage:
+            %     Recommended:
+            %      set_object_pose(objectname,pose);
+            %     
+            %     Advanced:
+            %     set_object_pose(objectname,pose,reference_frame,opmode);  
+            %
+            %          objectname: The object name.
+            %          pose: The desired pose. 
+            %          (optional) reference_frame:  Indicates the name of 
+            %                       the relative reference frame in which 
+            %                       the desired pose is expressed. 
+            %                       If not specified, the absolute frame is used.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      
+            %      t = DQ.i*0.01;
+            %      r = DQ.i;
+            %      x = r+0.5*DQ.E*t*r;
+            %
+            %      % Recommended:
+            %      set_object_pose('DefaultCamera', x);  
+            %
+            %      % For advanced usage:
+            %      set_object_pose('DefaultCamera', x, 'Frame_b', OP_ONESHOT);  
+ 
+            % create some aliases
+            handle = objectname;
+            x = pose;            
+
             if nargin == 3
                 t = translation(x);
                 r = rotation(x);
@@ -418,6 +664,7 @@ classdef DQ_VrepInterface < handle
                     -1,...
                     obj.OP_ONESHOT);
             else
+                relative_to_handle = reference_frame;
                 t = translation(x);
                 r = rotation(x);
                 obj.set_object_translation(...
@@ -433,12 +680,47 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Set Joint Positions
-        function set_joint_positions(obj,handles,thetas,opmode)
-            %% Set the joint positions of a robot in V-REP. For joints that are in 'Passive Mode' in V-REP
-            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
-            %%  >> vi.set_joint_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+        
+        function set_joint_positions(obj,jointnames,joint_positions,opmode)
+            % This method sets the joint positions of a robot in the CoppeliaSim scene.
+            % It is required a dynamics disabled scene. 
+            %
+            % Usage:
+            %      Recommended:
+            %      set_joint_positions(jointnames, joint_positions);
+            %
+            %      Advanced:
+            %      set_joint_positions(jointnames, joint_positions, opmode);
+            %
+            %          jointnames: The joint names.
+            %          joint_positions: The joint positions.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %
+            %       % Recommended:
+            %       set_joint_positions(jointnames, u);
+            %
+            %       % Advanced usage:
+            %       set_joint_positions(jointnames, u, OP_ONESHOT);
             
+            % create some aliases
+            handles = jointnames;
+            thetas = joint_positions;
+
             if nargin == 3
                 % The recommended mode is OP_ONESHOT
                 opmode = obj.OP_ONESHOT;
@@ -461,12 +743,48 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Set Joint Target Positions
-        function set_joint_target_positions(obj,handles,thetas,opmode)
-            %% Set the joint target positions of a robot in V-REP. For joints that are in 'Force/Torque Mode' in V-REP
-            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
-            %%  >> vi.set_joint_target_positions(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);     
+        
+        function set_joint_target_positions(obj,jointnames,joint_target_positions,opmode)
+            % This method sets the joint target positions of a robot in the CoppeliaSim scene. 
+            % It is required a dynamics enabled scene, and joints in dynamic mode 
+            % with position control mode.
+            %
+            % Usage:
+            %      Recommended:
+            %      set_joint_target_positions(jointnames,joint_target_positions);
+            %      
+            %      Advanced:
+            %      set_joint_target_positions(jointnames, joint_target_positions, opmode);   
+            %
+            %          jointnames: The joint names.
+            %          joint_target_positions: The joint target positions.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            % Example:
+            %       jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %
+            %       % Recommended:
+            %       set_joint_target_positions(jointnames, u);     
+            %
+            %       % Advanced usage:
+            %       set_joint_target_positions(jointnames, u, OP_ONESHOT);
             
+            % create some aliases
+            handles = jointnames;
+            thetas = joint_target_positions;
+
             if nargin == 3
                 % The recommended mode is OP_ONESHOT
                 opmode = obj.OP_ONESHOT;
@@ -489,13 +807,57 @@ classdef DQ_VrepInterface < handle
             end            
         end
         
-        %% Get Joint Positions
-        function [thetas,retval]=get_joint_positions(obj,handles,opmode)
-            %% Get joint positions
-            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
-            %%  >> vi.get_joint_positions(joint_names)
-            
+        
+        function [joint_positions,retval]=get_joint_positions(obj,jointnames,opmode)
+            % This method gets the joint positions of a robot in the CoppeliaSim scene.
+            % Usage:
+            %      Recommended:
+            %      joint_positions = get_joint_positions(jointnames);
+            %      [joint_positions, retval] = get_joint_positions(jointnames);
+            %
+            %      Advanced:
+            %      joint_positions] = get_joint_positions(jointnames,opmode);
+            %      [joint_positions, retval] = get_joint_positions(jointnames, opmode);  
+            %
+            %          -Parameters:
+            %
+            %            jointnames: The joint names.
+            %            (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
+            %
+            %          - Outputs:
+            %
+            %            joint_positions: The joints positions
+            %            retval: The return code of the Remote API function, 
+            %                   which is defined in https://www.coppeliarobotics.com/helpFiles/en/remoteApiConstants.htm#functionErrorCodes
+            %       
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %      
+            %      % Recommended:
+            %      joint_positions = get_joint_positions(jointnames);
+            %      [joint_positions, rtn] = get_joint_positions(jointnames);
+            %      
+            %     % Advanced usage:
+            %      joint_positions = get_joint_positions(jointnames, OP_ONESHOT);
+            %      [joint_positions, rtn] = get_joint_positions(jointnames, OP_ONESHOT);
+
+
+            % create some aliases
+            handles = jointnames;    
             thetas = zeros(length(handles),1);
+
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
                 % DQ_VrepInterfaceMapElements. If the user does not specify the
@@ -533,20 +895,41 @@ classdef DQ_VrepInterface < handle
                 end
                 thetas(joint_index) = double(tmp);
             end
+            joint_positions = thetas;
         end
 
 
        function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
-            % This method gets the joint velocities.
+            % This method gets the joint velocities of a robot in the CoppeliaSim scene.
             % Usage:
+            %      Recommended:
+            %      joint_velocities = get_joint_velocities(jointnames);
+            %
+            %      Advanced:
             %      joint_velocities = get_joint_velocities(jointnames, opmode)   
+            %
             %          jointnames: The joint names.
-            %          (optional) opmode: The operation mode.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
             %
             % Example:
-            % jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
-            %             'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
-            % joint_velocities = get_joint_velocities(jointnames);
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %
+            %      % Recommended:
+            %      joint_velocities = get_joint_velocities(jointnames);
+            %
+            %      % Advanced usage:
+            %      joint_velocities = get_joint_velocities(jointnames, OP_ONESHOT);
 
             joint_velocities = zeros(length(jointnames),1);
             for joint_index=1:length(jointnames)
@@ -588,26 +971,48 @@ classdef DQ_VrepInterface < handle
                         obj.JOINT_VELOCITY_PARAMETER_ID,...
                         opmode);
                 end
-                joint_velocities(joint_index) = double(tmp);
+                joint_velocities(joint_index) = double(tmp); 
             end
         end 
 
         function set_joint_target_velocities(obj,jointnames,joint_target_velocities,opmode)
-            % This method sets the joint velocities. It is required a
-            % dynamics enabled scene, and joints in dynamic mode with velocity
-            % control mode.
+            % This method sets the joint velocities of a robot in the CoppeliaSim scene.
+            % It is required a dynamics enabled scene, and joints in dynamic mode 
+            % with velocity control mode. Check this link for more
+            % information about joint modes:
+            % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
             %
             % Usage:
-            %      set_joint_target_velocities(jointnames, joint_target_velocities, opmode)   
+            %      Recommended:
+            %      set_joint_target_velocities(jointnames, joint_target_velocities);
+            %
+            %      Advanced:
+            %      set_joint_target_velocities(jointnames, joint_target_velocities, opmode);   
+            %
             %          jointnames: The joint names.
             %          joint_target_velocities: The joint target velocities.
-            %          (optional) opmode: The operation mode.
+            %          (optional) opmode: The operation mode. If not specified, 
+            %                       the opmode will be set automatically. 
+            %                          
+            %                        You can use the following modes:
+            %                           OP_BLOCKING 
+            %                           OP_STREAMING 
+            %                           OP_ONESHOT 
+            %                           OP_BUFFER;
+            %
+            %                       Check this link for more details:
+            %                       https://www.coppeliarobotics.com/helpFiles/en/remoteApiModusOperandi.htm
             %
             % Example:
-            % jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
-            %             'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
-            %       u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
-            %       set_joint_target_velocities(jointnames, u);
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %      u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %
+            %      % Recommended:
+            %      set_joint_target_velocities(jointnames, u);
+            %
+            %      % Advanced usage:
+            %      set_joint_target_velocities(jointnames, u, OP_ONESHOT);
             
             if nargin == 3
                 % The recommended mode is OP_ONESHOT
@@ -629,9 +1034,7 @@ classdef DQ_VrepInterface < handle
                         opmode);
                 end                
             end            
-        end     
-
-        
+        end         
     end
     
 end
