@@ -2,7 +2,7 @@
 % using the modified Denavit-Hartenberg parameters of the Franka Emika
 % Panda robot
 
-% (C) Copyright 2015-2022 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
