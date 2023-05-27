@@ -33,12 +33,12 @@ classdef FrankaEmikaPandaRobot
             mDH_a = [0, 0, 0, 8.25e-2, -8.25e-2, 0, 8.8e-2];
             mDH_alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2];
             mDH_type = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,7);
-
-	        mDH_matrix = [mDH_theta;
-	            mDH_d;
-	            mDH_a;
-	            mDH_alpha;
-                mDH_type]; 
+            
+            mDH_matrix = [mDH_theta;
+                          mDH_d;
+                          mDH_a;
+                          mDH_alpha;
+                          mDH_type]; 
                         
             ret = DQ_SerialManipulatorMDH(mDH_matrix);
 
