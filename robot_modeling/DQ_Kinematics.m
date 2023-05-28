@@ -23,6 +23,7 @@
 %       line_to_point_distance_jacobian - Compute the line-to-line distance Jacobian.
 %       line_to_point_residual - Compute the line-to-point residual.
 %       line_to_line_angle_jacobian - Compute the line-to-line angle Jacobian.
+%       line_to_line_angle_residual - Compute the line-to-line angle residual.
 %       plane_jacobian - Compute the plane Jacobian.
 %       plane_to_point_distance_jacobian - Compute the plane-to-point distance Jacobian.
 %       plane_to_point_residual - Compute the plane-to-point residual.
@@ -61,6 +62,7 @@
 %
 %     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Added the property dim_configuration_space. 
+%        - Added the method line_to_line_angle_residual().
 
 classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
@@ -355,7 +357,7 @@ classdef DQ_Kinematics < handle
         % 
         % As f(d) is a continuous bijective function, controlling f(d) is
         % equivalent to controlling the angle between the lines.
-        
+        %
         %
         % For more details, see Eq. (10) of Juan José Quiroz-Omaña, and
         % Bruno Vilhena Adorno (2019). Whole-Body Control with (Self) Collision
@@ -366,6 +368,37 @@ classdef DQ_Kinematics < handle
             Jl = line_jacobian(1:4, 1:n_columns);
             J = 2*vec4(robot_line - workspace_line)'*Jl;
             
+        end
+
+
+        function residual = line_to_line_angle_residual(robot_line_direction, ...
+                 workspace_line_direction, workspace_line_direction_derivative) 
+        % LINE_TO_LINE_ANGLE_RESIDUAL(robot_line_direction,  workspace_line_direction,
+        % workspace_line_direction_derivative) returns the residual related 
+        % to the moving line orientation in the workspace that is independent 
+        % of the robot motion (i.e., which does not depend on the robot joint
+        % velocities). 
+        %
+        % For more details see Eq. 4.30 of Juan José Quiroz-Omaña."Whole-Body 
+        % Control of Humanoids Robots at Second Order Kinematics Under 
+        % Unilateral Constraints." PhD thesis, Federal University of
+        % Minas Gerais, 2021.
+        % https://repositorio.ufmg.br/handle/1843/38700
+
+                if ~is_line(robot_line_direction) ...
+                    || ~is_quaternion(robot_line_direction) 
+                    error('robot_line_direction must be a unit pure quaternion.');
+                end
+                if ~is_line(workspace_line_direction) ||...
+                    ~is_quaternion(workspace_line_direction) 
+                    error('workspace_line_direction must be a unit pure quaternion.');
+                end
+                if ~is_pure(workspace_line_direction_derivative) ...
+                    || ~is_quaternion(workspace_line_direction_derivative) 
+                    error('workspace_line_direction_derivative must be a pure quaternion.');
+                end
+                residual = 2*dot(robot_line_direction - workspace_line_direction,...
+                                    -workspace_line_direction_derivative);
         end
    
         
@@ -379,7 +412,7 @@ classdef DQ_Kinematics < handle
         % to the line collinear with, respectively, the x-axis, y-axis, and 
         % z-axis of 'x'.
         %
-        % For more details see Eq. 20 of?Marinho, M. M., Adorno, B. V., 
+        % For more details see Eq. 20 of Marinho, M. M., Adorno, B. V., 
         % Harada, K., & Mitsuishi, M. "Active Constraints Using Vector
         % Field Inequalities for Surgical Robots." ICRA 2018.
         % https://doi.org/10.1109/ICRA.2018.8461105
