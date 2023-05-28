@@ -2,7 +2,7 @@
 % using the modified Denavit-Hartenberg parameters of the Franka Emika
 % Panda robot
 
-% (C) Copyright 2015-2022 DQ Robotics Developers
+% (C) Copyright 2011-2023 DQ Robotics Developers
 % 
 % This file is part of DQ Robotics.
 % 
@@ -28,19 +28,19 @@ classdef FrankaEmikaPandaRobot
     methods (Static)
         function ret = kinematics()
             % Modified D-H of Franka Emika Panda
-            FEp_DH_theta = [0, 0, 0, 0, 0, 0, 0];
-            FEp_DH_d = [0.333, 0, 3.16e-1, 0, 3.84e-1, 0, 0];
-            FEp_DH_a = [0, 0, 0, 8.25e-2, -8.25e-2, 0, 8.8e-2];
-	        FEp_DH_alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2];
-            FEp_DH_type = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,7);
-
-	        FEp_DH_matrix = [FEp_DH_theta;
-	            FEp_DH_d;
-	            FEp_DH_a;
-	            FEp_DH_alpha;
-                FEp_DH_type]; 
+            mDH_theta = [0, 0, 0, 0, 0, 0, 0];
+            mDH_d = [0.333, 0, 3.16e-1, 0, 3.84e-1, 0, 0];
+            mDH_a = [0, 0, 0, 8.25e-2, -8.25e-2, 0, 8.8e-2];
+            mDH_alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2];
+            mDH_type = repmat(DQ_SerialManipulatorDH.JOINT_ROTATIONAL,1,7);
+            
+            mDH_matrix = [mDH_theta;
+                          mDH_d;
+                          mDH_a;
+                          mDH_alpha;
+                          mDH_type]; 
                         
-            ret = DQ_SerialManipulatorMDH(FEp_DH_matrix);
+            ret = DQ_SerialManipulatorMDH(mDH_matrix);
 
             % Set the base's reference frame
             xb = 1 + DQ.E*0.5*DQ([0, 0.0413, 0, 0]);
