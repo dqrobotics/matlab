@@ -57,6 +57,8 @@
 %       set_joint_target_velocities -  Set the joint target velocities of a
 %       robot
 %       get_joint_velocities - Get the joint velocities of a robot
+%       get_joint_torques - Get the joint torques of a robot
+%       set_joint_torques - Set the joint torques of a robot
 %
 %   DQ_VrepInterface Methods (For advanced users)
 %       get_handle - Get the handle of a V-REP object
@@ -678,38 +680,7 @@ classdef DQ_VrepInterface < handle
                     obj.handle_from_string_or_handle(relative_to_handle),...
                     opmode);
             end
-        end
-
-        
-        %% Get Force Sensor Readings
-        function [force_vec, torque_vec, return_code, state_sensor] = get_force_sensor_readings(obj,handle,opmode)
-            %% Get the readings of a force sensor in V-REP. For joints that are in 'Torque/force mode' in V-REP
-            %%  >> force_sensor_name = 'Sensor_name_in_VREP';
-            %%  >> [force_vec, torque_vec] = vi.get_force_sensor_readings(force_sensor_handle);
-            
-            % First approach to the auto-management using
-            % DQ_VrepInterfaceMapElements. If the user does not specify the
-            % opmode, it is chosen first as STREAMING and then as BUFFER,
-            % as specified by the remote API documentation
-            element = obj.element_from_string(handle);
-            force_sensor_handle = obj.handle_from_string_or_handle(handle);
-            if nargin <= 2
-                if(~element.state_from_function_signature('get_force_sensor_readings'))
-                    [~, ~, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,element.handle,obj.OP_STREAMING);
-                    return_code = 1;
-                    while(return_code == 1)
-                        [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
-                    end
-                else
-                    [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
-                end
-            else
-                [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,opmode);
-            end
-            force_vec = double(tmp_f);
-            torque_vec = double(tmp_t);
-        end
-        
+        end        
         
         function set_joint_positions(obj,jointnames,joint_positions,opmode)
             % This method sets the joint positions of a robot in the CoppeliaSim scene.
@@ -928,8 +899,7 @@ classdef DQ_VrepInterface < handle
             joint_positions = thetas;
         end
 
-
-       function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
+        function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
             % This method gets the joint velocities of a robot in the CoppeliaSim scene.
             % Usage:
             %      Recommended:
@@ -960,7 +930,7 @@ classdef DQ_VrepInterface < handle
             %
             %      % Advanced usage:
             %      joint_velocities = get_joint_velocities(jointnames, OP_ONESHOT);
-
+        
             joint_velocities = zeros(length(jointnames),1);
             for joint_index=1:length(jointnames)
                 % First approach to the auto-management using
@@ -1064,7 +1034,96 @@ classdef DQ_VrepInterface < handle
                         opmode);
                 end                
             end            
-        end         
+        end
+
+        %% Get Joint Torques
+        function [joint_torques,return_code] = get_joint_torques(obj,handles,opmode)
+            %% Get the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.get_joint_torques(joint_names);
+            
+            joint_torques = zeros(length(handles),1);
+            for joint_index=1:length(handles)
+                % First approach to the auto-management using
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
+                % opmode, it is chosen first as STREAMING and then as BUFFER,
+                % as specified by the remote API documentation
+                if nargin <= 2
+                    if isa(handles,'cell')
+                        element = obj.element_from_string(handles{joint_index});
+                    else
+                        element = obj.element_from_string(handles);
+                    end
+                    if(~element.state_from_function_signature('get_joint_torques'))
+                        [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_STREAMING);
+                        return_code = 1;
+                        while(return_code == 1)
+                            [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                        end
+                    else
+                        [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                    end
+                else
+                    [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, ...
+                        obj.handle_from_string_or_handle(handles{joint_index}), opmode);
+                end
+                joint_torques(joint_index) = double(-tmp); % V-REP returns joint torques with an inverse sign
+            end
+        end
+        
+        %% Set Joint Torques
+        function set_joint_torques(obj,joint_names,torques,opmode)
+            %% Set the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
+            %%  >> vi.set_joint_torques(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+            
+            if nargin == 3
+                % The recommended mode is OP_ONESHOT
+                for joint_index=1:length(joint_names)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                        sign(torques(joint_index))*10e10, obj.OP_ONESHOT);
+                    obj.vrep.simxSetJointForce(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                        abs(torques(joint_index)), obj.OP_ONESHOT);
+                end
+            else
+                for joint_index=1:length(joint_names)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}),...
+                        sign(torques(joint_index))*10e10, opmode);
+                    obj.vrep.simxSetJointForce(obj.clientID,obj.handle_from_string_or_handle(joint_names{joint_index}),abs(torques(joint_index)),...
+                        opmode);
+                end
+            end
+        end
+
+        %% Get Force Sensor Readings
+        function [force_vec, torque_vec, return_code, state_sensor] = get_force_sensor_readings(obj,handle,opmode)
+            %% Get the readings of a force sensor in V-REP. For joints that are in 'Torque/force mode' in V-REP
+            %%  >> force_sensor_name = 'Sensor_name_in_VREP';
+            %%  >> [force_vec, torque_vec] = vi.get_force_sensor_readings(force_sensor_handle);
+            
+            % First approach to the auto-management using
+            % DQ_VrepInterfaceMapElements. If the user does not specify the
+            % opmode, it is chosen first as STREAMING and then as BUFFER,
+            % as specified by the remote API documentation
+            element = obj.element_from_string(handle);
+            force_sensor_handle = obj.handle_from_string_or_handle(handle);
+            if nargin <= 2
+                if(~element.state_from_function_signature('get_force_sensor_readings'))
+                    [~, ~, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,element.handle,obj.OP_STREAMING);
+                    return_code = 1;
+                    while(return_code == 1)
+                        [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
+                    end
+                else
+                    [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,obj.OP_BUFFER);
+                end
+            else
+                [return_code, state_sensor, tmp_f, tmp_t] = obj.vrep.simxReadForceSensor(obj.clientID,force_sensor_handle,opmode);
+            end
+            force_vec = double(tmp_f);
+            torque_vec = double(tmp_t);
+        end
+        
     end
     
 end
