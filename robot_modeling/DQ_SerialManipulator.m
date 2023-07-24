@@ -185,7 +185,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %   into account that transformation, use FKM(q)
             %   instead.
             
+            obj.check_q_vec(q);
             if nargin == 3
+                obj.check_ith_link(ith);
                 x = obj.reference_frame*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
                 x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
@@ -317,7 +319,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % q is the vector of joint variables. It takes into account
             % both base and end-effector displacements (their default
             % values are 1).
-            
+
+            obj.check_q_vec(q);
+            if nargin == 3
+                obj.check_ith_link(ith);
+            end
+
             if nargin == 3 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
@@ -341,6 +348,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % ith columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
+
+            obj.check_q_vec(q);
+            obj.check_q_vec(q_dot);
+            if nargin == 4
+                obj.check_ith_link(ith);
+            end
             
             if nargin == 4 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian derivative is not related to the mapping between the
