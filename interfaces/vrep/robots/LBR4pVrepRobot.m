@@ -41,7 +41,13 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Murilo Marques Marinho (murilo@nml.t.u-tokyo.ac.jp)
+%        - Responsible for the original implementation.
+%
+%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%        - Added the following methods:
+%             - send_tau_to_vrep()
+%             - get_tau_from_vrep()
 
 classdef LBR4pVrepRobot < DQ_VrepRobot
     
@@ -96,6 +102,21 @@ classdef LBR4pVrepRobot < DQ_VrepRobot
             %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi)
             %  >> q = vrep_robot.get_q_from_vrep(q)
             q = obj.vrep_interface.get_joint_positions(obj.joint_names);
+        end
+
+        function send_tau_to_vrep(obj,tau)
+            %% Sends the joint torques to VREP
+            %  >> vrep_robot = FrankaEmikaPandaVrepRobot('Franka', vi)
+            %  >> tau = zeros(7,1);
+            %  >> vrep_robot.send_tau_to_vrep(tau)
+            obj.vrep_interface.set_joint_torques(obj.joint_names,tau)
+        end
+        
+        function tau = get_tau_from_vrep(obj)
+            %% Obtains the joint torques from VREP
+            %  >> vrep_robot = FrankaEmikaPandaVrepRobot('Franka', vi)
+            %  >> tau = vrep_robot.get_tau_from_vrep()
+            tau = obj.vrep_interface.get_joint_torques(obj.joint_names);
         end
         
         function kin = kinematics(obj)
