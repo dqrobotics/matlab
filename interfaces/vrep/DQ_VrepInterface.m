@@ -98,6 +98,9 @@
 %        - Improved the documentation of the class
 %
 %     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%        - Added the following methods:
+%             - get_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
+%             - set_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
 %       - Altered the following properties from 'private' to 'protected'
 %       (see discussions in https://github.com/dqrobotics/matlab/pull/101
 %       to further details):
@@ -1036,13 +1039,46 @@ classdef DQ_VrepInterface < handle
             end            
         end
 
-        %% Get Joint Torques
         function [joint_torques,return_code] = get_joint_torques(obj,handles,opmode)
-            %% Get the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
-            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
-            %%  >> vi.get_joint_torques(joint_names);
+            % This method gets the joint torques of a robot in the CoppeliaSim scene.
+            % Usage:
+            %      Recommended:
+            %      joint_torques = get_joint_torques(jointnames);
+            %      [joint_torques,return_code] = get_joint_torques(jointnames);
+            %
+            %      Advanced:
+            %      joint_torques = get_joint_torques(jointnames, opmode)
+            %      [joint_torques,return_code] = get_joint_torques(jointnames, opmode);
+            %
+            %          jointnames: The joint names.
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically. 
+            %                          
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %      Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxGetJointForce
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %
+            %      % Recommended:
+            %      joint_torques = get_joint_torques(jointnames);
+            %      [joint_torques, rtn] = get_joint_torques(jointnames);
+            %
+            %      % Advanced usage:
+            %      joint_torques = get_joint_torques(jointnames, OP_STREAMING);
+            %      [joint_torques, rtn] = get_joint_torques(jointnames, OP_STREAMING);
             
             joint_torques = zeros(length(handles),1);
+
+            % If the user does not specify the opmode, it is chosen first
+            % as STREAMING and then as BUFFER, as specified by the remote
+            % API documentation.
             for joint_index=1:length(handles)
                 % First approach to the auto-management using
                 % DQ_VrepInterfaceMapElements. If the user does not specify the
@@ -1071,12 +1107,42 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        %% Set Joint Torques
         function set_joint_torques(obj,joint_names,torques,opmode)
-            %% Set the joint torques of a robot in V-REP. For joints that are in 'Torque/force mode' in V-REP
-            %%  >> joint_names = {'redundantRob_joint1','redundantRob_joint2','redundantRob_joint3','redundantRob_joint4','redundantRob_joint5','redundantRob_joint6','redundantRob_joint7'};
-            %%  >> vi.set_joint_torques(joint_names,[0 pi/2 0 pi/2 0 pi/2 0]);
+            % This method sets the joint torques of a robot in the CoppeliaSim scene.
+            % Usage:
+            %      Recommended:
+            %      set_joint_torques(jointnames, torques);
+            %
+            %      Advanced:
+            %      set_joint_torques(jointnames, torques, opmode);
+            %
+            %          jointnames: The joint names.
+            %          torques: The joint torques.
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically. 
+            %                          
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %      Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxSetJointTargetVelocity
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %      u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %
+            %      % Recommended:
+            %      set_joint_torques(jointnames, u);
+            %
+            %      % Advanced usage:
+            %      set_joint_torques(jointnames, u, opmode);
             
+            % If the user does not specify the opmode, it is chosen first
+            % as STREAMING and then as OP_ONESHOT, as specified by the
+            % remote API documentation.
             if nargin == 3
                 % The recommended mode is OP_ONESHOT
                 for joint_index=1:length(joint_names)
