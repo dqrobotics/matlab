@@ -135,18 +135,6 @@ classdef DQ_Kinematics < handle
     end
 
     methods (Access = protected)
-        function check_ith_link(obj, ith_link)
-            % This method throws an exception if the index to a link is invalid. 
-            % Usage:
-            %       check_ith_link(ith_link)
-            %
-            %          ith_link: The index to a link.
-
-            if(ith_link > obj.get_dim_configuration_space() || ith_link < 0)            
-                error("Tried to access link index " + string(ith_link) + ...
-                      " which is unnavailable.");
-            end
-        end
 
         function check_q_vec(obj, q_vec)
             % This method throws an exception if the size of the vector 'q' is 
