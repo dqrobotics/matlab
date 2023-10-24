@@ -28,6 +28,10 @@
 %       raw_pose_jacobian - Compute the pose Jacobian without taking into account base's and end-effector's rigid transformations.
 %       raw_pose_jacobian_derivative - Compute the pose Jacobian derivative without taking into account base's and end-effector's rigid transformations.
 %       set_effector - Set an arbitrary end-effector rigid transformation with respect to the last frame in the kinematic chain.
+%       get_parameters - Return a vector containing the DH parameters.
+%       get_parameter -  Return the DH parameter of the ith joint.
+%       set_parameters - Set the DH parameters.
+%       set_parameter -  Set the DH parameter of the ith joint.
 % See also DQ_SerialManipulator.
 
 % (C) Copyright 2020-2023 DQ Robotics Developers
@@ -66,7 +70,10 @@
 %
 %     3. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Added some modifications discussed at #75 (https://github.com/dqrobotics/matlab/pull/75)
-%          to define DQ_SerialManipulator as an abstract class.           
+%          to define DQ_SerialManipulator as an abstract class.   
+%
+%        - Added the following methods: get_parameter, get_parameters,
+%          set_parameter, and set_parameters.
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
     properties (Access = protected)
