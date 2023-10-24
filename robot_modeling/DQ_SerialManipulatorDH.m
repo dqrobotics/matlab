@@ -205,7 +205,7 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
 
         function ret = get_parameters(obj, parameterType)
             % This method returns a vector containing the DH parameters.
-            % Usage: get_dh_parameters(parameterType)
+            % Usage: get_parameters(parameterType)
             %           parameterType: Parameter type, which corresponds to
             %                          "THETA", "D", "A", or "ALPHA".
             arguments
