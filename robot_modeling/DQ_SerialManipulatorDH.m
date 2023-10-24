@@ -238,13 +238,13 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             end
 
             switch parameterType
-                case DQ_DHParameter.THETA
+                case DQ_ParameterDH.THETA
                     ret = obj.theta(ith_joint);
-                case DQ_DHParameter.D
+                case DQ_ParameterDH.D
                     ret = obj.d(ith_joint);
-                case DQ_DHParameter.A
+                case DQ_ParameterDH.A
                     ret = obj.a(ith_joint);
-                case DQ_DHParameter.ALPHA
+                case DQ_ParameterDH.ALPHA
                     ret = obj.alpha(ith_joint);                    
             end 
         end
