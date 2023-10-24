@@ -69,7 +69,7 @@
 %          to define DQ_SerialManipulator as an abstract class.           
 
 classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
-    properties
+    properties (Access = protected)
         theta,d,a,alpha;
     end
     
