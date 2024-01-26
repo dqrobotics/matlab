@@ -41,67 +41,21 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%        - Responsible for the original implementation
+%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%        - Updated for compatibility with the DQ_SerialVrepRobot class.
 
-classdef LBR4pVrepRobot < DQ_VrepRobot
-    
-    properties
-        joint_names;
-        base_frame_name;
-    end
-    
+classdef LBR4pVrepRobot < DQ_SerialVrepRobot
     methods
-        function obj = LBR4pVrepRobot(robot_name,vrep_interface)
-            %% Constructs an instance of a LBR4pVrepRobot
-            %  >> vi = VrepInterface()
-            %  >> vi.connect('127.0.0.1',19997);
-            %  >> robot = LBR4pVrepRobot("LBR4p", vi)
-            obj.robot_name = robot_name;
-            obj.vrep_interface = vrep_interface;
-            
-            % From the second copy of the robot and onward, VREP appends a
-            % #number in the robot's name. We check here if the robot is
-            % called by the correct name and assign an index that will be
-            % used to correctly infer the robot's joint labels.
-            splited_name = strsplit(robot_name,'#');
-            robot_label = splited_name{1};
-            if ~strcmp(robot_label,'LBR4p')
-                error('Expected LBR4p')
-            end
-            if length(splited_name) > 1
-                robot_index = splited_name{2};
-            else
-                robot_index = '';
-            end
-            
-            % Initialize joint names and base frame
-            obj.joint_names = {};
-            for i=1:7
-                current_joint_name = {robot_label,'_joint',int2str(i),robot_index};
-                obj.joint_names{i} = strjoin(current_joint_name,'');
-            end
-            obj.base_frame_name = obj.joint_names{1};
+        function obj = LBR4pVrepRobot(robot_name, vrep_interface)
+            obj@DQ_SerialVrepRobot("LBR4p", 7, robot_name, vrep_interface);
         end
-        
-        function send_q_to_vrep(obj,q)
-            %% Sends the joint configurations to VREP
-            %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi)
-            %  >> q = zeros(7,1);
-            %  >> vrep_robot.send_q_to_vrep(q)
-            obj.vrep_interface.set_joint_positions(obj.joint_names,q)
-        end
-        
-        function q = get_q_from_vrep(obj)
-            %% Obtains the joint configurations from VREP
-            %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi)
-            %  >> q = vrep_robot.get_q_from_vrep(q)
-            q = obj.vrep_interface.get_joint_positions(obj.joint_names);
-        end
-        
+
         function kin = kinematics(obj)
             %% Obtains the DQ_SerialManipulator instance that represents this LBR4p robot.
-            %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi)
-            %  >> robot_kinematics = vrep_robot.kinematics()
+            %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi);
+            %  >> robot_kinematics = vrep_robot.kinematics();
             
             LBR4p_DH_theta=[0, 0, 0, 0, 0, 0, 0];
             LBR4p_DH_d = [0.200, 0, 0.4, 0, 0.39, 0, 0];
@@ -119,8 +73,7 @@ classdef LBR4pVrepRobot < DQ_VrepRobot
             kin.set_reference_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
             kin.set_base_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
             kin.set_effector(1+0.5*DQ.E*DQ.k*0.07);
-        end
-        
+        end        
     end
 end
 
