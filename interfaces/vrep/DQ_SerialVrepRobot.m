@@ -92,7 +92,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             % Initialize joint names, link names, and base frame name
             obj.joint_names = {};
             for i=1:robot_dof
-                current_joint_name = {robot_label,'_joint',int2str(i),'#',robot_index};
+                current_joint_name = {robot_label,'_joint',int2str(i),robot_index};
                 obj.joint_names{i} = strjoin(current_joint_name,'');
             end
             obj.base_frame_name = obj.joint_names{1};

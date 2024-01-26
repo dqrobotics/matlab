@@ -50,9 +50,12 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
     properties (Constant)
         adjust = ((cos(pi/2) + DQ.i*sin(pi/2)) * (cos(pi/4) + DQ.j*sin(pi/4)))*(1+0.5*DQ.E*-0.1*DQ.k);
     end
-
-    methods (Access = protected)
-        function set_names(robot_name)
+    
+    methods
+        function obj = YouBotVrepRobot(robot_name, vrep_interface)
+            obj@DQ_SerialVrepRobot("youBot", 7, robot_name, vrep_interface);
+            
+            %% youBot don't follow the standard name convention on CoppeliaSim. Also, the use of 'set_names()', as is done in the C++ implementation, is not supported on a constructor in MATLAB
             % From the second copy of the robot and onward, VREP appends a
             % #number in the robot's name. We check here if the robot is
             % called by the correct name and assign an index that will be
@@ -74,13 +77,6 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
                 current_joint_name = {robot_label,'ArmJoint',int2str(i-1),robot_index};
                 obj.joint_names{i} = strjoin(current_joint_name,'');
             end
-        end
-    end
-    
-    methods
-        function obj = YouBotVrepRobot(robot_name, vrep_interface)
-            obj@DQ_SerialVrepRobot("youBot", 7, robot_name, vrep_interface);
-            obj.set_names(robot_name);
         end
         
         function set_configuration_space_positions(obj,q)
