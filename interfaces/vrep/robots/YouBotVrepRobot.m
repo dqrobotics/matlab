@@ -17,8 +17,8 @@
 %       will become "youBot#0", a third robot, "youBot#1", and so on.
 %
 %   YouBotVrepRobot Methods:
-%       send_q_to_vrep - Sends the joint configurations to VREP
-%       get_q_from_vrep - Obtains the joint configurations from VREP
+%       set_configuration_space_positions - Sends the joint configurations to VREP
+%       get_configuration_space_positions - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
 % (C) Copyright 2020 DQ Robotics Developers
@@ -41,28 +41,18 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%        - Responsible for the original implementation
+%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%        - Updated for compatibility with the DQ_SerialVrepRobot class.
 
-classdef YouBotVrepRobot < DQ_VrepRobot
-    
-    properties
-        joint_names;
-        base_frame_name;
-    end
-    
+classdef YouBotVrepRobot < DQ_SerialVrepRobot    
     properties (Constant)
         adjust = ((cos(pi/2) + DQ.i*sin(pi/2)) * (cos(pi/4) + DQ.j*sin(pi/4)))*(1+0.5*DQ.E*-0.1*DQ.k);
     end
-    
-    methods
-        function obj = YouBotVrepRobot(robot_name,vrep_interface)
-            %% Constructs an instance of a YouBotVrepRobot
-            %  >> vi = VrepInterface()
-            %  >> vi.connect('127.0.0.1',19997);
-            %  >> robot = YouBotVrepRobot("youBot", vi)
-            obj.robot_name = robot_name;
-            obj.vrep_interface = vrep_interface;
-            
+
+    methods (Access = protected)
+        function set_names(robot_name)
             % From the second copy of the robot and onward, VREP appends a
             % #number in the robot's name. We check here if the robot is
             % called by the correct name and assign an index that will be
@@ -84,14 +74,20 @@ classdef YouBotVrepRobot < DQ_VrepRobot
                 current_joint_name = {robot_label,'ArmJoint',int2str(i-1),robot_index};
                 obj.joint_names{i} = strjoin(current_joint_name,'');
             end
-            obj.base_frame_name = robot_name;
+        end
+    end
+    
+    methods
+        function obj = YouBotVrepRobot(robot_name, vrep_interface)
+            obj@DQ_SerialVrepRobot("youBot", 7, robot_name, vrep_interface);
+            obj.set_names(robot_name);
         end
         
-        function send_q_to_vrep(obj,q)
+        function set_configuration_space_positions(obj,q)
             %% Sends the joint configurations to VREP
             %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
             %  >> q = zeros(8,1);
-            %  >> vrep_robot.send_q_to_vrep(q)
+            %  >> vrep_robot.set_configuration_space_positions(q)
             x = q(1);
             y = q(2);
             phi = q(3);
@@ -104,10 +100,10 @@ classdef YouBotVrepRobot < DQ_VrepRobot
             obj.vrep_interface.set_object_pose(obj.base_frame_name, pose * obj.adjust');
         end
         
-        function q = get_q_from_vrep(obj)
+        function q = get_configuration_space_positions(obj)
             %% Obtains the joint configurations from VREP
             %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
-            %  >> q = vrep_robot.get_q_from_vrep(q)
+            %  >> q = vrep_robot.get_configuration_space_positions(q)
             base_x = obj.vrep_interface.get_object_pose(obj.base_frame_name) * obj.adjust;
             base_t = vec3(translation(base_x));
             base_phi = rotation_angle(rotation(base_x));
@@ -150,8 +146,7 @@ classdef YouBotVrepRobot < DQ_VrepRobot
             
             effector = 1 + E_*0.5*0.3*k_;
             kin.set_effector(effector);
-        end
-        
+        end        
     end
 end
 
