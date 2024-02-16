@@ -101,8 +101,8 @@
 %
 %     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
 %       - Added the following methods:
-%             - call_script_function (see https://github.com/dqrobotics/matlab/pull/XXX)
-%             - get_center_of_mass (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - call_script_function() (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - get_center_of_mass() (see https://github.com/dqrobotics/matlab/pull/XXX)
 %             - get_mass() (see https://github.com/dqrobotics/matlab/pull/XXX)
 %             - get_inertia_matrix() (see https://github.com/dqrobotics/matlab/pull/XXX)
 %       - Added the following properties:
@@ -793,46 +793,27 @@ classdef DQ_VrepInterface < handle
 
             if nargin == 2 % the call was 'center_of_mass = get_center_of_mass(handle)'
                 [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', obj_handle, [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
-                    fprintf(formatSpec, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    center_of_mass = double(center_of_mass);
-                end
             elseif nargin == 3 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
 
                 [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
-                    fprintf(formatSpec, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    center_of_mass = double(center_of_mass);
-                end
             elseif nargin == 4 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
 
                 [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    center_of_mass = double(center_of_mass);
-                end
             else % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name, obj_name)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
 
                 [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    center_of_mass = double(center_of_mass);
-                end
+            end
+
+            if(return_code ~= 0)
+                formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
+                fprintf(formatSpec, return_code);
+                error('Failed calling script function!');
+            else % ensure cast to double
+                center_of_mass = double(center_of_mass);
+                center_of_mass = center_of_mass(1)*DQ.i + center_of_mass(2)*DQ.j + center_of_mass(3)*DQ.k;
             end
         end
 
@@ -868,31 +849,18 @@ classdef DQ_VrepInterface < handle
 
             if nargin == 2 % the call was 'mass = get_mass(handle)'
                 [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_mass', obj_handle, [],[],[]);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function `get_mass` returned with error code %i.\n';
-                    fprintf(formatSpec, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    mass = double(mass);
-                end
             elseif nargin == 3 % the call was 'mass = get_mass(handle, function_name)'
                 [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    mass = double(mass);
-                end
             else % the call was 'mass = get_mass(handle, function_name, obj_name)'
                 [return_code,~,mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double
-                    mass = double(mass);
-                end
+            end
+
+            if(return_code ~= 0)
+                formatSpec = 'Script function %s returned with error code %i.\n';
+                fprintf(formatSpec, function_name, return_code);
+                error('Failed calling script function!');
+            else % ensure cast to double
+                mass = double(mass);
             end
         end
 
@@ -932,46 +900,26 @@ classdef DQ_VrepInterface < handle
 
             if nargin == 2 % the call was 'inertia_tensor =  get_inertia_matrix(handle)'
                 [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', obj_handle, [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function `get_inertia` returned with error code %i.\n';
-                    fprintf(formatSpec, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
-                    inertia_tensor = double(reshape(inertia_tensor,3,3));
-                end
             elseif nargin == 3 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
 
                 [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function `get_inertia` returned with error code %i.\n';
-                    fprintf(formatSpec, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
-                    inertia_tensor = double(reshape(inertia_tensor,3,3));
-                end
             elseif nargin == 4 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
 
                 [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
-                    inertia_tensor = double(reshape(inertia_tensor,3,3));
-                end
             else % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name, obj_name)'
                 ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
                 
                 [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-                if(return_code ~= 0)
-                    formatSpec = 'Script function %s returned with error code %i.\n';
-                    fprintf(formatSpec, function_name, return_code);
-                    error('Failed calling script function!');
-                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
-                    inertia_tensor = double(reshape(inertia_tensor,3,3));
-                end
+            end
+
+            if(return_code ~= 0)
+                formatSpec = 'Script function %s returned with error code %i.\n';
+                fprintf(formatSpec, function_name, return_code);
+                error('Failed calling script function!');
+            else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
+                inertia_tensor = double(reshape(inertia_tensor,3,3));
             end
         end
         
