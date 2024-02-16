@@ -101,13 +101,13 @@
 %
 %     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
 %       - Added the following methods:
-%             - call_script_function() (see https://github.com/dqrobotics/matlab/pull/XXX)
-%             - get_center_of_mass() (see https://github.com/dqrobotics/matlab/pull/XXX)
-%             - get_mass() (see https://github.com/dqrobotics/matlab/pull/XXX)
-%             - get_inertia_matrix() (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - call_script_function() (see https://github.com/dqrobotics/matlab/pull/109)
+%             - get_center_of_mass() (see https://github.com/dqrobotics/matlab/pull/109)
+%             - get_mass() (see https://github.com/dqrobotics/matlab/pull/109)
+%             - get_inertia_matrix() (see https://github.com/dqrobotics/matlab/pull/109)
 %       - Added the following properties:
-%             - DF_LUA_SCRIPT_API (see https://github.com/dqrobotics/matlab/pull/XXX)
-%             - ST_CHILD (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - DF_LUA_SCRIPT_API (see https://github.com/dqrobotics/matlab/pull/109)
+%             - ST_CHILD (see https://github.com/dqrobotics/matlab/pull/109)
 %       - Altered the following properties from 'private' to 'protected'
 %       (see discussions in https://github.com/dqrobotics/matlab/pull/101
 %       to further details):
