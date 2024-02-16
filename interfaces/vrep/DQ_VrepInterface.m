@@ -44,6 +44,9 @@
 %       set_object_rotation - Set object rotation with a unit quaternion
 %       get_object_pose - Get object pose as a unit dual quaternion
 %       set_object_pose - Set object pose with a unit dual quaternion
+%       get_center_of_mass - Get the object center of mass as a vector
+%       get_mass- Get the object mass as a real number
+%       get_inertia_matrix - Get the object inertia tensor as a matrix
 %       set_joint_positions - Set the joint positions of a robot
 %       set_joint_target_positions - Set the joint target positions of a
 %       robot
@@ -59,6 +62,7 @@
 %       get_joint_velocities - Get the joint velocities of a robot
 %
 %   DQ_VrepInterface Methods (For advanced users)
+%       call_script_function - Call a LUA script function in V-REP
 %       get_handle - Get the handle of a V-REP object
 %       get_handles - Get the handles for multiple V-REP objects
 %
@@ -96,6 +100,14 @@
 %        - Improved the documentation of the class
 %
 %     3. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%       - Added the following methods:
+%             - call_script_function (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - get_center_of_mass (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - get_mass() (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - get_inertia_matrix() (see https://github.com/dqrobotics/matlab/pull/XXX)
+%       - Added the following properties:
+%             - DF_LUA_SCRIPT_API (see https://github.com/dqrobotics/matlab/pull/XXX)
+%             - ST_CHILD (see https://github.com/dqrobotics/matlab/pull/XXX)
 %       - Altered the following properties from 'private' to 'protected'
 %       (see discussions in https://github.com/dqrobotics/matlab/pull/101
 %       to further details):
@@ -118,6 +130,8 @@ classdef DQ_VrepInterface < handle
     end
     
     properties (Constant)
+        % Constant that denotes DQ Robotic's default LUA script API with V-VREP
+        DF_LUA_SCRIPT_API = '/DQRoboticsApiCommandServer';
         % Constant that denotes the V-VREP's remote API blocking operation mode
         OP_BLOCKING  = remApi('remoteApi').simx_opmode_blocking;
         % Constant that denotes the V-VREP's remote API streaming operation mode
@@ -128,6 +142,8 @@ classdef DQ_VrepInterface < handle
         OP_BUFFER    = remApi('remoteApi').simx_opmode_buffer;
         % Constant that denotes the V-VREP's remote API joint velocity ID
         JOINT_VELOCITY_PARAMETER_ID = remApi('remoteApi').sim_jointfloatparam_velocity;
+        % Constant that denotes the V-VREP's remote API child script type
+        ST_CHILD = remApi('remoteApi').sim_scripttype_childscript;
     end
     
     methods (Access = private)
@@ -161,6 +177,67 @@ classdef DQ_VrepInterface < handle
             obj.clientID = -1;
             disp(['This version of DQ Robotics DQ_VrepInterface is compatible'...
                 ' with VREP 3.5.0']);
+        end
+
+        function [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj,obj_name,script_type,function_name,...
+                                                                                       input_ints,input_floats,input_strings,input_buffer,opmode)
+            % This method calls a LUA script function in V-REP.
+            %
+            % Usage:
+            %     Recommended:
+            %      [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj_name, script_type, function_name, input_ints, input_floats, input_strings, input_buffer)
+            %
+            %     Advanced:
+            %      [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj_name, script_type, function_name, input_ints, input_floats, input_strings, input_buffer, opmode)
+            %
+            %          obj_name: The name of the object where the script is
+            %          attached to.
+            %          script_type: The type of the script.
+            %
+            %            You can use the following types:
+            %               ST_CHILD 
+            %
+            %          function_name: The name of the script function to
+            %          call in the specified script.
+            %          input_ints: The input integer values.
+            %          input_floats: The input floating-point values.
+            %          input_strings: The input strings.
+            %          input_buffer: The input buffer.
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically.
+            %
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %
+            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxCallScriptFunction
+            %
+            % Example:
+            %      input_ints = [];
+            %      input_floats = [];
+            %      input_strings = [];
+            %      input_buffer = [];
+            %
+            %      % Recommended:
+            %      [rtn, output_ints, output_doubles, output_strings, retBuffer] = call_script_function('DQRoboticsApiCommandServer', ST_CHILD, 'my_function_name', input_ints, input_floats, input_strings, input_buffer)
+            %
+            %      % For advanced usage:
+            %      [rtn, output_ints, output_doubles, output_strings, retBuffer] = call_script_function('DQRoboticsApiCommandServer', ST_CHILD, 'my_function_name', input_ints, input_floats, input_strings, input_buffer, OP_BLOCKING)
+            
+            % If the user does not specify the opmode, it is chosen as
+            % OP_BLOCKING as specified by the remote API documentation.
+            if nargin == 8
+                [return_code,output_ints,output_floats,output_strings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, obj.OP_BLOCKING);
+                output_doubles = double(output_floats);
+            else
+                [return_code,output_ints,output_floats,output_strings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, opmode);
+                output_doubles = double(output_floats);
+            end
         end
         
         function connect(obj,ip,port)
@@ -680,6 +757,223 @@ classdef DQ_VrepInterface < handle
             end
         end
         
+        function center_of_mass = get_center_of_mass(obj, obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name)
+            % This method gets the center of mass of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %      center_of_mass = get_center_of_mass(obj_handle_or_name);
+            %
+            %     Advanced:
+            %      center_of_mass = get_center_of_mass(obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name);
+            %
+            %          obj_handle_or_name: The object's handle or name.
+            %          (optional) reference_frame:  Indicates the handle of
+            %            the relative reference frame in which you want the
+            %            center of mass. If not specified, the shape's
+            %            reference frame is used.
+            %          (optional) function_name: The name of the script
+            %            function to call in the specified script.
+            %            (Default: "get_center_of_mass")
+            %          (optional) obj_script_name: The name of the object
+            %            where the script is attached to. (Default:
+            %            'DQRoboticsApiCommandServer')
+            %
+            %
+            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeInertia.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      center_of_mass = get_center_of_mass('/Jaco/Jaco_link2');
+            %
+            %      % For advanced usage:
+            %      center_of_mass = get_center_of_mass('/Jaco/Jaco_link2', '/Jaco/Jaco_joint2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
+
+            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+
+            if nargin == 2 % the call was 'center_of_mass = get_center_of_mass(handle)'
+                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', obj_handle, [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    center_of_mass = double(center_of_mass);
+                end
+            elseif nargin == 3 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+
+                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    center_of_mass = double(center_of_mass);
+                end
+            elseif nargin == 4 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+
+                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    center_of_mass = double(center_of_mass);
+                end
+            else % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name, obj_name)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+
+                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    center_of_mass = double(center_of_mass);
+                end
+            end
+        end
+
+        function mass = get_mass(obj, obj_handle_or_name, function_name, obj_script_name)
+            % This method gets the mass of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %      mass = get_mass(obj_handle_or_name);
+            %
+            %     Advanced:
+            %      mass = get_mass(obj_handle_or_name, function_name, obj_script_name);
+            %
+            %          obj_handle_or_name: The object's handle or name.
+            %          (optional) function_name: The name of the script
+            %            function to call in the specified script.
+            %            (Default: "get_mass")
+            %          (optional) obj_script_name: The name of the object
+            %            where the script is attached to. (Default:
+            %            'DQRoboticsApiCommandServer')
+            %
+            %
+            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeMass.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      mass = get_mass('/Jaco/Jaco_link2');
+            %
+            %      % For advanced usage:
+            %      mass = get_mass('/Jaco/Jaco_link2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
+
+            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+
+            if nargin == 2 % the call was 'mass = get_mass(handle)'
+                [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_mass', obj_handle, [],[],[]);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function `get_mass` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    mass = double(mass);
+                end
+            elseif nargin == 3 % the call was 'mass = get_mass(handle, function_name)'
+                [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    mass = double(mass);
+                end
+            else % the call was 'mass = get_mass(handle, function_name, obj_name)'
+                [return_code,~,mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double
+                    mass = double(mass);
+                end
+            end
+        end
+
+        function inertia_tensor =  get_inertia_matrix(obj, obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name)
+            % This method gets the inertia tensor of an object in the CoppeliaSim scene.
+            %
+            % Usage:
+            %     Recommended:
+            %      inertia_tensor =  get_inertia_matrix(obj_handle_or_name);
+            %
+            %     Advanced:
+            %      inertia_tensor =  get_inertia_matrix(obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name);
+            %
+            %          obj_handle_or_name: The object's handle or name.
+            %          (optional) reference_frame:  Indicates the handle of
+            %            the relative reference frame in which you want the
+            %            inertia tensor. If not specified, the shape's
+            %            reference frame is used.
+            %          (optional) function_name: The name of the script
+            %            function to call in the specified script.
+            %            (Default: "get_inertia")
+            %          (optional) obj_script_name: The name of the object
+            %            where the script is attached to. (Default:
+            %            'DQRoboticsApiCommandServer')
+            %
+            %
+            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeInertia.htm
+            %
+            % Example:
+            %      % Recommended:
+            %      inertia_tensor =  get_inertia_matrix('/Jaco/Jaco_link2');
+            %
+            %      % For advanced usage:
+            %      inertia_tensor = get_inertia_matrix('/Jaco/Jaco_link2', '/Jaco/Jaco_joint2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
+
+            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+
+            if nargin == 2 % the call was 'inertia_tensor =  get_inertia_matrix(handle)'
+                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', obj_handle, [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function `get_inertia` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
+                    inertia_tensor = double(reshape(inertia_tensor,3,3));
+                end
+            elseif nargin == 3 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+
+                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function `get_inertia` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
+                    inertia_tensor = double(reshape(inertia_tensor,3,3));
+                end
+            elseif nargin == 4 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+
+                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
+                    inertia_tensor = double(reshape(inertia_tensor,3,3));
+                end
+            else % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name, obj_name)'
+                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+                
+                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+                if(return_code ~= 0)
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                    error('Failed calling script function!');
+                else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
+                    inertia_tensor = double(reshape(inertia_tensor,3,3));
+                end
+            end
+        end
         
         function set_joint_positions(obj,jointnames,joint_positions,opmode)
             % This method sets the joint positions of a robot in the CoppeliaSim scene.
