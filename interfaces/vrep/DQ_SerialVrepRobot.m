@@ -3,24 +3,31 @@
 %
 % Usage:
 %       1) Drag-and-drop a serial robot to a VREP scene. For instance, a
-%       "LBR4p" robot.
+%       "my_robot" robot.
 %       2) Run
 %           >> vi = DQ_VrepInterface();
 %           >> vi.connect('127.0.0.1',19997);
-%           >> vrep_robot = LBR4pVrepRobot("LBR4p", vi);
+%           >> vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot", vi);
 %           >> vi.start_simulation();
-%           >> robot.get_q_from_vrep();
+%           >> vrep_robot.get_q_from_vrep();
 %           >> pause(1);
 %           >> vi.stop_simulation();
 %           >> vi.disconnect();
 %       Note that the name of the robot should be EXACTLY the same as in
 %       VREP. For instance, if you drag-and-drop a second robot, its name
-%       will become "LBR4p#0", a third robot, "LBR4p#1", and so on.
+%       will become "my_robot#0", a third robot, "my_robot#1", and so on.
 %
 %   DQ_SerialVrepRobot Methods:
-%       send_q_to_vrep - Sends the joint configurations to VREP
-%       get_q_from_vrep - Obtains the joint configurations from VREP
-%       kinematics - Obtains the DQ_Kinematics implementation of this robot
+%       get_joint_names - Gets the joint names of the robot in the CoppeliaSim scene.
+%       set_configuration_space_positions - Sets the joint configurations to the robot in the CoppeliaSim scene.
+%       get_configuration_space_positions - Gets the joint configurations of the robot in the CoppeliaSim scene.
+%       set_target_configuration_space_positions - Sets the joint configurations to the robot in the CoppeliaSim scene as a target configuration for the joint controllers.
+%       get_configuration_space_velocities - Gets the joint velocities of the robot in the CoppeliaSim scene.
+%       set_target_configuration_space_velocities - Sets the joint velocities of the robot in the CoppeliaSim scene as a target velocity for the joint controllers.
+%       set_configuration_space_torques - Sets the joint torques of the robot in the CoppeliaSim scene.
+%       get_configuration_space_torques - Gets the joint torques of the robot in the CoppeliaSim scene.
+%   DQ_SerialVrepRobot Methods (Protected):
+%       update_manipulator_dynamic_parameters - Updates the dynamic parameters of the serial robot in the CoppeliaSim scene
 
 % (C) Copyright 2018-2023 DQ Robotics Developers
 %
