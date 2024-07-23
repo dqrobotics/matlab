@@ -8,7 +8,7 @@
 %           >> vi.connect('127.0.0.1',19997);
 %           >> vrep_robot = LBR4pVrepRobot("LBR4p", vi);
 %           >> vi.start_simulation();
-%           >> robot.get_q_from_vrep();
+%           >> robot.get_configuration_space_positions();
 %           >> pause(1);
 %           >> vi.stop_simulation();
 %           >> vi.disconnect();
@@ -17,8 +17,6 @@
 %       will become "LBR4p#0", a third robot, "LBR4p#1", and so on.
 %
 %   LBR4pVrepRobot Methods:
-%       send_q_to_vrep - Sends the joint configurations to VREP
-%       get_q_from_vrep - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
 % (C) Copyright 2020 DQ Robotics Developers
