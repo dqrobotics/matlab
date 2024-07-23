@@ -33,10 +33,10 @@
 %     1. Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 %       - Responsible for the original implementation.
 %     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
-%       - Altered the names of the following methods to ensure
-%       compatibility with the C++ version of the class:
-%             - 'send_q_to_vrep' became 'set_configuration_space_positions'
-%             - 'get_q_from_vrep' became 'get_configuration_space_positions'
+%       - Deprecated the following methods to ensure compatibility with the
+%       C++ version of the class:
+%             - 'send_q_to_vrep'
+%             - 'get_q_from_vrep'
 %       - Removed the following methods to ensure compatibility with the
 %       C++ version of the class:
 %             - 'kinematics'
@@ -51,6 +51,22 @@ classdef (Abstract) DQ_VrepRobot
     methods (Abstract)
         set_configuration_space_positions(obj,q);
         q = get_configuration_space_positions(obj);
+    end
+
+    methods
+        function send_q_to_vrep(obj, q)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use set_configuration_space_positions() instead.')
+            obj.set_configuration_space_positions(q)
+        end
+
+        function q = get_q_from_vrep(obj)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use get_configuration_space_positions() instead.')
+            q = obj.get_configuration_space_positions();
+        end
     end
 end
 
