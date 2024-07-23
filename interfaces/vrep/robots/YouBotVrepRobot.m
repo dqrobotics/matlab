@@ -8,7 +8,7 @@
 %           >> vi.connect('127.0.0.1',19997);
 %           >> vrep_robot = YouBotVrepRobot("youBot", vi);
 %           >> vi.start_simulation();
-%           >> robot.get_q_from_vrep();
+%           >> robot.get_configuration_space_positions();
 %           >> pause(1);
 %           >> vi.stop_simulation();
 %           >> vi.disconnect();
@@ -21,7 +21,7 @@
 %       get_configuration_space_positions - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
-% (C) Copyright 2020 DQ Robotics Developers
+% (C) Copyright 2018-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
