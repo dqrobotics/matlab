@@ -135,7 +135,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vrep_robot.set_configuration_space_positions(q);
             %     
             %     Note that this calls "set_joint_positions" in the remoteAPI, meaning that it
-            %     is only suitable for passive joints.
+            %     is only suitable for joints in kinematic mode.
 
             obj.vrep_interface.set_joint_positions(obj.joint_names, q)
         end
@@ -168,7 +168,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vrep_robot.set_target_configuration_space_positions(q_target);
             %     
             %     Note that this calls "set_joint_target_positions" in the remoteAPI, meaning that it
-            %     is only suitable for active joints.
+            %     is only suitable for joints in dynamic mode with position control.
 
             obj.vrep_interface.set_joint_target_positions(obj.joint_names, q_target)
         end
@@ -201,7 +201,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vrep_robot.set_target_configuration_space_velocities(v_target);
             %     
             %     Note that this calls "set_joint_target_velocities" in the remoteAPI, meaning that it
-            %     is only suitable for active joints.
+            %     is only suitable for joints in dynamic mode with velocity control.
 
             obj.vrep_interface.set_joint_target_velocities(obj.joint_names, v_target);
         end
@@ -220,7 +220,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vrep_robot.set_configuration_space_torques(tau);
             %     
             %     Note that this calls "set_joint_torques" in the remoteAPI, meaning that it
-            %     is only suitable for active joints.
+            %     is only suitable for joints in dynamic mode with force/torque control.
 
             obj.vrep_interface.set_joint_torques(obj.joint_names,tau)
         end
