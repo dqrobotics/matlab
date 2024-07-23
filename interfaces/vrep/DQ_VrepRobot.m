@@ -4,13 +4,11 @@
 % Usage:
 %   Inherit from this class and implement the abstract methods.
 %
-%   DQ_VrepRobot Methods:
-%       send_q_to_vrep - Sends the joint configurations to VREP
-%       get_q_from_vrep - Obtains the joint configurations from VREP
-%       kinematics - Obtains the DQ_Kinematics implementation of this
-%       robot
+%   DQ_VrepRobot Methods (Abstract):
+%       set_configuration_space_positions - Sends the joint configurations to VREP
+%       get_configuration_space_positions - Obtains the joint configurations from VREP
 
-% (C) Copyright 2020 DQ Robotics Developers
+% (C) Copyright 2018-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
