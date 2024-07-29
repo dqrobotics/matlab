@@ -55,7 +55,7 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
         function obj = YouBotVrepRobot(robot_name, vrep_interface)
             obj@DQ_SerialVrepRobot("youBot", 7, robot_name, vrep_interface);
             
-            %% youBot don't follow the standard name convention on CoppeliaSim. Also, the use of 'set_names()', as is done in the C++ implementation, is not supported on a constructor in MATLAB
+            %% youBot does not follow the standard naming convention in CoppeliaSim. Also, the use of 'set_names()', as is done in the C++ implementation, is not supported on a constructor in MATLAB
             % From the second copy of the robot and onward, VREP appends a
             % #number in the robot's name. We check here if the robot is
             % called by the correct name and assign an index that will be
