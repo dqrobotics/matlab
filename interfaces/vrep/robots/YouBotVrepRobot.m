@@ -53,7 +53,7 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
     
     methods
         function obj = YouBotVrepRobot(robot_name, vrep_interface)
-            obj@DQ_SerialVrepRobot("youBot", 7, robot_name, vrep_interface);
+            obj@DQ_SerialVrepRobot("youBot", 5, robot_name, vrep_interface);
             
             %% youBot does not follow the standard naming convention in CoppeliaSim. Also, the use of 'set_names()', as is done in the C++ implementation, is not supported on a constructor in MATLAB
             % From the second copy of the robot and onward, VREP appends a
@@ -77,6 +77,7 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
                 current_joint_name = {robot_label,'ArmJoint',int2str(i-1),robot_index};
                 obj.joint_names{i} = strjoin(current_joint_name,'');
             end
+            obj.base_frame_name = robot_name;
         end
         
         function set_configuration_space_positions(obj,q)
