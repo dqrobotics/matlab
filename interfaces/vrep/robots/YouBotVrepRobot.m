@@ -17,7 +17,7 @@
 %       will become "youBot#0", a third robot, "youBot#1", and so on.
 %
 %   YouBotVrepRobot Methods:
-%       set_configuration_space_positions - Sends the joint configurations to VREP
+%       set_configuration - Sends the joint configurations to VREP
 %       get_configuration - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
@@ -80,11 +80,11 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
             obj.base_frame_name = robot_name;
         end
         
-        function set_configuration_space_positions(obj,q)
+        function set_configuration(obj,q)
             %% Sends the joint configurations to VREP
             %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
             %  >> q = zeros(8,1);
-            %  >> vrep_robot.set_configuration_space_positions(q)
+            %  >> vrep_robot.set_configuration(q)
             x = q(1);
             y = q(2);
             phi = q(3);
