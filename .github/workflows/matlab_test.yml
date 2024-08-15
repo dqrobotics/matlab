@@ -17,6 +17,7 @@ jobs:
       run: |
         git submodule update --init --recursive
         git fetch --prune --unshallow
+        touch test.txt
     - name: Clone the matlab-tests repository (${{ matrix.testbranches }})
       run: |
         git clone -b ${{ matrix.testbranches }} https://github.com/dqrobotics/matlab-tests
