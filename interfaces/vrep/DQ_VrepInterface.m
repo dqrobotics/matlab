@@ -1086,7 +1086,7 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        function set_joint_torques(obj,joint_names,torques,opmode)
+        function set_joint_torques(obj,jointnames,torques,opmode)
             % This method sets the joint torques of a robot in the CoppeliaSim scene.
             % Usage:
             %      Recommended:
@@ -1124,17 +1124,17 @@ classdef DQ_VrepInterface < handle
             % remote API documentation.
             if nargin == 3
                 % The recommended mode is OP_ONESHOT
-                for joint_index=1:length(joint_names)
-                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                for joint_index=1:length(jointnames)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}), ...
                         sign(torques(joint_index))*10e10, obj.OP_ONESHOT);
-                    obj.vrep.simxSetJointForce(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}), ...
+                    obj.vrep.simxSetJointForce(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}), ...
                         abs(torques(joint_index)), obj.OP_ONESHOT);
                 end
             else
-                for joint_index=1:length(joint_names)
-                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(joint_names{joint_index}),...
+                for joint_index=1:length(jointnames)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}),...
                         sign(torques(joint_index))*10e10, opmode);
-                    obj.vrep.simxSetJointForce(obj.clientID,obj.handle_from_string_or_handle(joint_names{joint_index}),abs(torques(joint_index)),...
+                    obj.vrep.simxSetJointForce(obj.clientID,obj.handle_from_string_or_handle(jointnames{joint_index}),abs(torques(joint_index)),...
                         opmode);
                 end
             end
