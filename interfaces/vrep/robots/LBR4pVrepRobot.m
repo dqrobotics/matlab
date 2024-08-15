@@ -19,7 +19,7 @@
 %   LBR4pVrepRobot Methods:
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
-% (C) Copyright 2018-2024 DQ Robotics Developers
+% (C) Copyright 2011-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
