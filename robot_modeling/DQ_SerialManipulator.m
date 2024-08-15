@@ -120,6 +120,19 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                   end
             end
          end
+
+         function check_ith_link(obj, ith_link)
+            % This method throws an exception if the index to a link is invalid. 
+            % Usage:
+            %       check_ith_link(ith_link)
+            %
+            %          ith_link: The index to a link.
+
+            if(ith_link > obj.get_dim_configuration_space() || ith_link < 0)            
+                error("Tried to access link index " + string(ith_link) + ...
+                      " which is unnavailable.");
+            end
+        end
      end 
 
     methods
@@ -185,7 +198,9 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %   into account that transformation, use FKM(q)
             %   instead.
             
+            obj.check_q_vec(q);
             if nargin == 3
+                obj.check_ith_link(ith);
                 x = obj.reference_frame*obj.raw_fkm(q, ith); %Takes into account the base displacement
             else
                 x = obj.reference_frame*obj.raw_fkm(q)*obj.effector;
@@ -317,7 +332,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % q is the vector of joint variables. It takes into account
             % both base and end-effector displacements (their default
             % values are 1).
-            
+
+            obj.check_q_vec(q);
+            if nargin == 3
+                obj.check_ith_link(ith);
+            end
+
             if nargin == 3 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian is not related to the mapping between the
                 % end-effector velocities and the joint velocities, it takes
@@ -341,6 +361,12 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             % ith columns of the Jacobian time derivative.
             % This function does not take into account any base or
             % end-effector displacements.
+
+            obj.check_q_vec(q);
+            obj.check_q_vec(q_dot);
+            if nargin == 4
+                obj.check_ith_link(ith);
+            end
             
             if nargin == 4 && ith < obj.get_dim_configuration_space()
                 % If the Jacobian derivative is not related to the mapping between the
@@ -796,7 +822,8 @@ function o = plot_options(robot, optin)
             % TODO
             % This part of the code assumes we are using the 
             %  DH parametrization. We need to fix it in future versions.
-            reach = reach + abs(robot.a(i)) + abs(robot.d(i));
+            reach = reach + abs(robot.get_parameter("A",i)) + ...
+                            abs(robot.get_parameter("D",i)); 
         end
         o.workspace = [-reach reach -reach reach -reach reach];      
     else
