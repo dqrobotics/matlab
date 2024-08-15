@@ -22,7 +22,7 @@
 %       set_configuration - Sets the joint configurations of the robot in the CoppeliaSim scene.
 %       get_configuration - Gets the joint configurations of the robot in the CoppeliaSim scene.
 %       set_target_configuration - Sets the joint configurations of the robot in the CoppeliaSim scene as a target configuration for the joint controllers.
-%       get_configuration_space_velocities - Gets the joint velocities of the robot in the CoppeliaSim scene.
+%       get_configuration_velocities - Gets the joint velocities of the robot in the CoppeliaSim scene.
 %       set_target_configuration_space_velocities - Sets the joint velocities of the robot in the CoppeliaSim scene as a target velocity for the joint controllers.
 %       set_configuration_space_torques - Sets the joint torques of the robot in the CoppeliaSim scene.
 %       get_configuration_space_torques - Gets the joint torques of the robot in the CoppeliaSim scene.
