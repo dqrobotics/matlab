@@ -8,7 +8,7 @@
 %           >> vi.connect('127.0.0.1',19997);
 %           >> vrep_robot = LBR4pVrepRobot("LBR4p", vi);
 %           >> vi.start_simulation();
-%           >> robot.get_configuration_space_positions();
+%           >> robot.get_configuration();
 %           >> pause(1);
 %           >> vi.stop_simulation();
 %           >> vi.disconnect();
