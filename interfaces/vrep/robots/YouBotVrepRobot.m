@@ -8,7 +8,7 @@
 %           >> vi.connect('127.0.0.1',19997);
 %           >> vrep_robot = YouBotVrepRobot("youBot", vi);
 %           >> vi.start_simulation();
-%           >> robot.get_configuration_space_positions();
+%           >> robot.get_configuration();
 %           >> pause(1);
 %           >> vi.stop_simulation();
 %           >> vi.disconnect();
@@ -18,7 +18,7 @@
 %
 %   YouBotVrepRobot Methods:
 %       set_configuration_space_positions - Sends the joint configurations to VREP
-%       get_configuration_space_positions - Obtains the joint configurations from VREP
+%       get_configuration - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
 % (C) Copyright 2018-2024 DQ Robotics Developers
@@ -97,10 +97,10 @@ classdef YouBotVrepRobot < DQ_SerialVrepRobot
             obj.vrep_interface.set_object_pose(obj.base_frame_name, pose * obj.adjust');
         end
         
-        function q = get_configuration_space_positions(obj)
+        function q = get_configuration(obj)
             %% Obtains the joint configurations from VREP
             %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
-            %  >> q = vrep_robot.get_configuration_space_positions(q)
+            %  >> q = vrep_robot.get_configuration(q)
             base_x = obj.vrep_interface.get_object_pose(obj.base_frame_name) * obj.adjust;
             base_t = vec3(translation(base_x));
             base_phi = rotation_angle(rotation(base_x));
