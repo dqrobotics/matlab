@@ -63,6 +63,7 @@
 %     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
 %        - Added the property dim_configuration_space. 
 %        - Added the method line_to_line_angle_residual().
+%        - Added the methods check_ith_link() and check_q_vec().
 
 classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
@@ -131,6 +132,23 @@ classdef DQ_Kinematics < handle
         end
         
       
+    end
+
+    methods (Access = protected)
+
+        function check_q_vec(obj, q_vec)
+            % This method throws an exception if the size of the vector 'q' is 
+            % different from the dimension of the configuration space.
+            % Usage:
+            %       check_q_vec(q_vec)
+            %
+            %          q_vec: Vector of joint values.
+
+            if(length(q_vec) ~= obj.get_dim_configuration_space())
+              error("Input vector must have size " + ...
+                    string(obj.get_dim_configuration_space()));
+            end
+        end
     end
     
     methods (Abstract)
