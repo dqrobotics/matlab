@@ -21,7 +21,7 @@
 %       get_configuration - Obtains the joint configurations from VREP
 %       kinematics - Obtains the DQ_Kinematics implementation of this robot
 
-% (C) Copyright 2018-2024 DQ Robotics Developers
+% (C) Copyright 2011-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
