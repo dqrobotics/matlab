@@ -26,8 +26,6 @@
 %       set_target_configuration_velocities - Sets the joint velocities of the robot in the CoppeliaSim scene as a target velocity for the joint controllers.
 %       set_configuration_space_torques - Sets the joint torques of the robot in the CoppeliaSim scene.
 %       get_configuration_space_torques - Gets the joint torques of the robot in the CoppeliaSim scene.
-%   DQ_SerialVrepRobot Methods (Protected):
-%       update_manipulator_dynamic_parameters - Updates the dynamic parameters of the serial robot in the CoppeliaSim scene
 
 % (C) Copyright 2011-2024 DQ Robotics Developers
 %
