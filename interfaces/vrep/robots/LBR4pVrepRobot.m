@@ -41,8 +41,7 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     1. Murilo Marques Marinho (murilo@nml.t.u-tokyo.ac.jp)
-%        - Responsible for the original implementation.
+%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
 
 classdef LBR4pVrepRobot < DQ_VrepRobot
     
