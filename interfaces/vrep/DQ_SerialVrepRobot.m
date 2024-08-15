@@ -119,10 +119,10 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             joint_names = obj.joint_names;
         end
 
-        function set_configuration_space_positions(obj, q)
+        function set_configuration(obj, q)
             % This method sets the joint configurations of the robot in the CoppeliaSim scene.
             % Usage:
-            %     set_configuration_space_positions(q);  
+            %     set_configuration(q);  
             %          q: The joint configurations of the robot in the CoppeliaSim scene.
             %
             % Example: 
@@ -130,7 +130,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vi.connect('127.0.0.1',19997);
             %     vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot#1", vi);
             %     q = zeros(7,1);
-            %     vrep_robot.set_configuration_space_positions(q);
+            %     vrep_robot.set_configuration(q);
             %     
             %     Note that this calls "set_joint_positions" in DQ_VrepInterface, meaning that it
             %     is only suitable for joints in kinematic mode.
@@ -138,24 +138,24 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             obj.vrep_interface.set_joint_positions(obj.joint_names, q)
         end
         
-        function q = get_configuration_space_positions(obj)
+        function q = get_configuration(obj)
             % This method gets the joint configurations of the robot in the CoppeliaSim scene.
             % Usage:
-            %     get_configuration_space_positions;  
+            %     get_configuration;  
             %
             % Example: 
             %     vi = DQ_VrepInterface();
             %     vi.connect('127.0.0.1',19997);
             %     vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot#1", vi);
-            %     q = vrep_robot.get_configuration_space_positions;
+            %     q = vrep_robot.get_configuration;
 
             q = obj.vrep_interface.get_joint_positions(obj.joint_names);
         end
 
-        function set_target_configuration_space_positions(obj, q_target)
+        function set_target_configuration(obj, q_target)
             % This method sets the joint configurations of the robot in the CoppeliaSim scene as a target configuration for the joint controllers.
             % Usage:
-            %     set_target_configuration_space_positions(q_target);  
+            %     set_target_configuration(q_target);  
             %          q_target: The target joint configurations of the robot in the CoppeliaSim scene.
             %
             % Example: 
@@ -163,7 +163,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vi.connect('127.0.0.1',19997);
             %     vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot#1", vi);
             %     q_target = zeros(7,1);
-            %     vrep_robot.set_target_configuration_space_positions(q_target);
+            %     vrep_robot.set_target_configuration(q_target);
             %     
             %     Note that this calls "set_joint_target_positions" in DQ_VrepInterface, meaning that it
             %     is only suitable for joints in dynamic mode with position control.
@@ -171,24 +171,24 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             obj.vrep_interface.set_joint_target_positions(obj.joint_names, q_target)
         end
         
-        function qd = get_configuration_space_velocities(obj)
+        function qd = get_configuration_velocities(obj)
             % This method gets the joint velocities of the robot in the CoppeliaSim scene.
             % Usage:
-            %     get_configuration_space_velocities;  
+            %     get_configuration_velocities;  
             %
             % Example: 
             %     vi = DQ_VrepInterface();
             %     vi.connect('127.0.0.1',19997);
             %     vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot#1", vi);
-            %     qd = vrep_robot.get_configuration_space_velocities;
+            %     qd = vrep_robot.get_configuration_velocities;
             
             qd = obj.vrep_interface.get_joint_velocities(obj.joint_names);
         end
 
-        function set_target_configuration_space_velocities(obj, v_target)
+        function set_target_configuration_velocities(obj, v_target)
             % This method sets the joint velocities of the robot in the CoppeliaSim scene as a target velocity for the joint controllers.
             % Usage:
-            %     set_target_configuration_space_velocities(v_target);  
+            %     set_target_configuration_velocities(v_target);  
             %          v_target: The target joint velocities of the robot in the CoppeliaSim scene.
             %
             % Example: 
@@ -196,7 +196,7 @@ classdef DQ_SerialVrepRobot < DQ_VrepRobot
             %     vi.connect('127.0.0.1',19997);
             %     vrep_robot = DQ_SerialVrepRobot("my_robot", 7, "my_robot#1", vi);
             %     v_target = zeros(7,1);
-            %     vrep_robot.set_target_configuration_space_velocities(v_target);
+            %     vrep_robot.set_target_configuration_velocities(v_target);
             %     
             %     Note that this calls "set_joint_target_velocities" in DQ_VrepInterface, meaning that it
             %     is only suitable for joints in dynamic mode with velocity control.
