@@ -5,8 +5,8 @@
 %   Inherit from this class and implement the abstract methods.
 %
 %   DQ_VrepRobot Methods (Abstract):
-%       set_configuration_space_positions - Sends the joint configurations to VREP
-%       get_configuration_space_positions - Obtains the joint configurations from VREP
+%       set_configuration - Sends the joint configurations to VREP
+%       get_configuration - Obtains the joint configurations from VREP
 
 % (C) Copyright 2018-2024 DQ Robotics Developers
 %
@@ -47,23 +47,23 @@ classdef (Abstract) DQ_VrepRobot
     end
     
     methods (Abstract)
-        set_configuration_space_positions(obj,q);
-        q = get_configuration_space_positions(obj);
+        set_configuration(obj,q);
+        q = get_configuration(obj);
     end
 
     methods
         function send_q_to_vrep(obj, q)
             % For backwards compatibility only. Do not use this method.
 
-            warning('Deprecated. Use set_configuration_space_positions() instead.')
-            obj.set_configuration_space_positions(q)
+            warning('Deprecated. Use set_configuration() instead.')
+            obj.set_configuration(q)
         end
 
         function q = get_q_from_vrep(obj)
             % For backwards compatibility only. Do not use this method.
 
-            warning('Deprecated. Use get_configuration_space_positions() instead.')
-            q = obj.get_configuration_space_positions();
+            warning('Deprecated. Use get_configuration() instead.')
+            q = obj.get_configuration();
         end
     end
 end
