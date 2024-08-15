@@ -29,7 +29,7 @@
 %   DQ_SerialVrepRobot Methods (Protected):
 %       update_manipulator_dynamic_parameters - Updates the dynamic parameters of the serial robot in the CoppeliaSim scene
 
-% (C) Copyright 2018-2024 DQ Robotics Developers
+% (C) Copyright 2011-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
