@@ -1022,7 +1022,7 @@ classdef DQ_VrepInterface < handle
             end            
         end
 
-        function joint_torques = get_joint_torques(obj,handles,opmode)
+        function joint_torques = get_joint_torques(obj,jointnames,opmode)
             % This method gets the joint torques of a robot in the CoppeliaSim scene.
             % Usage:
             %      Recommended:
@@ -1053,21 +1053,21 @@ classdef DQ_VrepInterface < handle
             %      % Advanced usage:
             %      joint_torques = get_joint_torques(jointnames, OP_STREAMING);
             
-            joint_torques = zeros(length(handles),1);
+            joint_torques = zeros(length(jointnames),1);
 
             % If the user does not specify the opmode, it is chosen first
             % as STREAMING and then as BUFFER, as specified by the remote
             % API documentation.
-            for joint_index=1:length(handles)
+            for joint_index=1:length(jointnames)
                 % First approach to the auto-management using
                 % DQ_VrepInterfaceMapElements. If the user does not specify the
                 % opmode, it is chosen first as STREAMING and then as BUFFER,
                 % as specified by the remote API documentation
                 if nargin <= 2
-                    if isa(handles,'cell')
-                        element = obj.element_from_string(handles{joint_index});
+                    if isa(jointnames,'cell')
+                        element = obj.element_from_string(jointnames{joint_index});
                     else
-                        element = obj.element_from_string(handles);
+                        element = obj.element_from_string(jointnames);
                     end
                     if(~element.state_from_function_signature('get_joint_torques'))
                         [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_STREAMING);
@@ -1080,7 +1080,7 @@ classdef DQ_VrepInterface < handle
                     end
                 else
                     [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, ...
-                        obj.handle_from_string_or_handle(handles{joint_index}), opmode);
+                        obj.handle_from_string_or_handle(jointnames{joint_index}), opmode);
                 end
                 joint_torques(joint_index) = double(-tmp); % V-REP returns joint torques with an inverse sign
             end
