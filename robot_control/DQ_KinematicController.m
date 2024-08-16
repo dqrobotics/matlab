@@ -60,9 +60,9 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     1. Bruno Vihena Adorno - adorno@ufmg.br
+%     1. Bruno Vihena Adorno - adorno@ieee.org
 %        - Responsible for the original implementation
-%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%     2. Frederico Fernandes Afonso Silva - frederico.silva@ieee.org
 %        - Modified the 'reset_stability_counter()' method to ensure
 %        compatibility with its C++ version:
 %             - The flag 'system_reached_stable_region_' is now reset to
