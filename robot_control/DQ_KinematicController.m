@@ -39,7 +39,7 @@
 %   DQ_TaskspaceQuadraticProgrammingController.
 
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -60,7 +60,14 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%     1. Bruno Vihena Adorno - adorno@ufmg.br
+%        - Responsible for the original implementation
+%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%        - Modified the 'reset_stability_counter()' method to ensure
+%        compatibility with its C++ version:
+%             - The flag 'system_reached_stable_region_' is now reset to
+%             'false'.
+
 classdef DQ_KinematicController < handle
     properties (Access=protected)
         % Controlled primitive attached to the end-effector. It is
