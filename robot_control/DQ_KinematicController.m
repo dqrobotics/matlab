@@ -136,6 +136,7 @@ classdef DQ_KinematicController < handle
         function reset_stability_counter(obj)
         % Reset the stability counter to zero
             obj.stability_counter = 0;
+            obj.system_reached_stable_region_ = false;
         end
         
         function set_stability_counter_max(obj, max)
