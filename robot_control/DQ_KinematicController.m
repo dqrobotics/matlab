@@ -134,7 +134,8 @@ classdef DQ_KinematicController < handle
         end
         
         function reset_stability_counter(obj)
-        % Reset the stability counter to zero
+        % Reset the stability counter to zero and the flag indicating that
+        % the system has reached a stable region to false.
             obj.stability_counter = 0;
             obj.system_reached_stable_region_ = false;
         end
