@@ -23,8 +23,6 @@
 %        - Responsible for the original implementation.
 
 classdef (Abstract)  DQ_CoppeliaSimInterface < handle
-    %DQ_COPPELIASIM Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Access = protected) 
     end
@@ -44,7 +42,7 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
         % Example:
         %       set_stepping_mode(true)    % stepping mode enabled
         %       set_stepping_mode(false)   % stepping mode disabled
-        set_stepping_mode(true);
+        set_stepping_mode(obj, flag);
 
         % This method sends trigger signal to the CoppeliaSim scene, 
         % which performs a simulation step when the stepping mode is used.
@@ -84,15 +82,15 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
         % This method sets the joint positions of a robot in the CoppeliaSim scene.        
         set_joint_positions(obj,jointnames,joint_positions);
 
+        % This method sets the joint positions of a robot in the CoppeliaSim scene. 
+        joint_positions = get_joint_positions(obj,jointnames);
+
         % This method sets the joint target positions of a robot in the CoppeliaSim scene. 
         % It is required a dynamics enabled scene, and joints in dynamic mode 
         % with position control mode. 
         % information about joint modes:
         % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
         set_joint_target_positions(obj,jointnames,joint_target_positions);
-
-        % This method sets the joint positions of a robot in the CoppeliaSim scene. 
-        joint_positions = get_joint_positions(obj,jointnames);
 
         % This method gets the joint velocities of a robot in the CoppeliaSim scene. 
         joint_velocities = get_joint_velocities(obj,jointnames);
@@ -104,9 +102,6 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
         % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
         set_joint_target_velocities(obj,jointnames,joint_target_velocities);
 
-        % This method gets the joint torques of a robot in the CoppeliaSim scene.
-        joint_torques = get_joint_torques(obj,jointnames);
-
         % This method sets the joint torques of a robot in the CoppeliaSim scene.
         % It is required a dynamics enabled scene, and joints in dynamic mode 
         % with velocity or force/torque control mode. Check this link for more
@@ -114,6 +109,8 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
         % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
         set_joint_torques(obj,jointnames,torques);  
 
+        % This method gets the joint torques of a robot in the CoppeliaSim scene.
+        joint_torques = get_joint_torques(obj,jointnames);
     end
 end
 
