@@ -108,7 +108,7 @@
 %             - clientID
 
 
-classdef DQ_VrepInterface < handle
+classdef DQ_VrepInterface < DQ_CoppeliaSimInterface
     
     properties (Access = private)
         % a map between V-REP object names and DQ_VrepInterfaceMapElements
@@ -209,6 +209,15 @@ classdef DQ_VrepInterface < handle
                 error('Error in set_synchronous: argument must be logical, not a %s. \nExample:\n set_synchronous(true)', class(flag));
             end
             obj.vrep.simxSynchronous(obj.clientID,flag);
+        end
+
+        % This method enables or disables the stepped (synchronous) mode
+        % for the remote API server service that the client is connected to.
+        % Example:
+        %       set_stepping_mode(true)    % stepping mode enabled
+        %       set_stepping_mode(false)   % stepping mode disabled
+        function set_stepping_mode(obj, flag)
+            obj.set_synchronous(flag);
         end
 
         function trigger_next_simulation_step(obj)
