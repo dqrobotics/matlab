@@ -26,22 +26,18 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
     %DQ_COPPELIASIM Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
-        Property1
+    properties (Access = protected) 
     end
     
     methods (Access = protected) 
-        function obj = DQ_CoppeliaSim(inputArg1,inputArg2)
-            %DQ_COPPELIASIM Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
-        end
+        % function obj = DQ_CoppeliaSim(inputArg1,inputArg2)
+        % end
     end
         
     methods(Abstract)
         % This method connects to CoppeliaSim.
         % Calling this function is required before anything else can happen.
-        connect(obj, host, port);
+        connect(obj, host, port, TIMEOUT_IN_MILISECONDS);
 
         % This method enables or disables the stepped (synchronous) mode
         % for the remote API server service that the client is connected to.
@@ -67,14 +63,56 @@ classdef (Abstract)  DQ_CoppeliaSimInterface < handle
         % This method gets the handle for a given object in the CoppeliaSim scene. 
         handle = get_handle(obj,name);
 
-        get_object_translation(obj,objectname,reference_frame);
-            
+        % This method gets the translation of an object in the CoppeliaSim scene.
+        t = get_object_translation(obj,objectname);
 
+        % This method sets the translation of an object in the CoppeliaSim scene.
+        set_object_translation(obj,objectname,translation);
 
+        % This method gets the rotation of an object in the CoppeliaSim scene.
+        r = get_object_rotation(obj, objectname);
 
+        % This method sets the rotation of an object in the CoppeliaSim scene.
+        set_object_rotation(obj,objectname,rotation);
 
+        % This method gets the pose of an object in the CoppeliaSim scene. 
+        x = get_object_pose(obj,objectname);
 
-       
+        % This method sets the pose of an object in the CoppeliaSim scene. 
+        set_object_pose(obj,objectname,pose);
+
+        % This method sets the joint positions of a robot in the CoppeliaSim scene.        
+        set_joint_positions(obj,jointnames,joint_positions);
+
+        % This method sets the joint target positions of a robot in the CoppeliaSim scene. 
+        % It is required a dynamics enabled scene, and joints in dynamic mode 
+        % with position control mode. 
+        % information about joint modes:
+        % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
+        set_joint_target_positions(obj,jointnames,joint_target_positions);
+
+        % This method sets the joint positions of a robot in the CoppeliaSim scene. 
+        joint_positions = get_joint_positions(obj,jointnames);
+
+        % This method gets the joint velocities of a robot in the CoppeliaSim scene. 
+        joint_velocities = get_joint_velocities(obj,jointnames);
+
+        % This method sets the joint target velocities of a robot in the CoppeliaSim scene.
+        % It is required a dynamics enabled scene, and joints in dynamic mode 
+        % with velocity control mode. Check this link for more
+        % information about joint modes:
+        % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
+        set_joint_target_velocities(obj,jointnames,joint_target_velocities);
+
+        % This method gets the joint torques of a robot in the CoppeliaSim scene.
+        joint_torques = get_joint_torques(obj,jointnames);
+
+        % This method sets the joint torques of a robot in the CoppeliaSim scene.
+        % It is required a dynamics enabled scene, and joints in dynamic mode 
+        % with velocity or force/torque control mode. Check this link for more
+        % information about joint modes:
+        % https://www.coppeliarobotics.com/helpFiles/en/jointModes.htm
+        set_joint_torques(obj,jointnames,torques);  
 
     end
 end
