@@ -4,13 +4,11 @@
 % Usage:
 %   Inherit from this class and implement the abstract methods.
 %
-%   DQ_VrepRobot Methods:
-%       send_q_to_vrep - Sends the joint configurations to VREP
-%       get_q_from_vrep - Obtains the joint configurations from VREP
-%       kinematics - Obtains the DQ_Kinematics implementation of this
-%       robot
+%   DQ_VrepRobot Methods (Abstract):
+%       set_configuration - Sends the joint configurations to VREP
+%       get_configuration - Obtains the joint configurations from VREP
 
-% (C) Copyright 2020 DQ Robotics Developers
+% (C) Copyright 2018-2024 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -30,7 +28,16 @@
 % DQ Robotics website: dqrobotics.sourceforge.net
 %
 % Contributors to this file:
-%     Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%     1. Murilo Marques Marinho - murilo@nml.t.u-tokyo.ac.jp
+%       - Responsible for the original implementation.
+%     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
+%       - Deprecated the following methods to ensure compatibility with the
+%       C++ version of the class:
+%             - 'send_q_to_vrep'
+%             - 'get_q_from_vrep'
+%       - Removed the following methods to ensure compatibility with the
+%       C++ version of the class:
+%             - 'kinematics'
 
 classdef (Abstract) DQ_VrepRobot
     
@@ -40,9 +47,24 @@ classdef (Abstract) DQ_VrepRobot
     end
     
     methods (Abstract)
-        send_q_to_vrep(obj,q);
-        q = get_q_from_vrep(obj);
-        kin = kinematics(obj);
+        set_configuration(obj,q);
+        q = get_configuration(obj);
+    end
+
+    methods
+        function send_q_to_vrep(obj, q)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use set_configuration() instead.')
+            obj.set_configuration(q)
+        end
+
+        function q = get_q_from_vrep(obj)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use get_configuration() instead.')
+            q = obj.get_configuration();
+        end
     end
 end
 

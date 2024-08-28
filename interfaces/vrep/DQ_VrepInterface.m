@@ -60,6 +60,8 @@
 %       set_joint_target_velocities -  Set the joint target velocities of a
 %       robot
 %       get_joint_velocities - Get the joint velocities of a robot
+%       get_joint_torques - Get the joint torques of a robot
+%       set_joint_torques - Set the joint torques of a robot
 %
 %   DQ_VrepInterface Methods (For advanced users)
 %       call_script_function - Call a LUA script function in V-REP
@@ -108,6 +110,9 @@
 %       - Added the following properties:
 %             - DF_LUA_SCRIPT_API (see https://github.com/dqrobotics/matlab/pull/109)
 %             - ST_CHILD (see https://github.com/dqrobotics/matlab/pull/109)
+%       - Added the following methods:
+%             - get_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
+%             - set_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
 %       - Altered the following properties from 'private' to 'protected'
 %       (see discussions in https://github.com/dqrobotics/matlab/pull/101
 %       to further details):
@@ -258,7 +263,6 @@ classdef DQ_VrepInterface < handle
                 error('Failed to connect to remote API server');
             end
         end
-        
       
         function disconnect(obj)
             % This method ends the communication between the client and
@@ -266,13 +270,11 @@ classdef DQ_VrepInterface < handle
             obj.vrep.simxFinish(obj.clientID);
         end
         
-        
         function disconnect_all(obj)
             % This method ends all running communication threads with the 
             % CoppeliaSim scene. This should be the very last method called.
             obj.vrep.simxFinish(-1);
         end
-
 
         function set_synchronous(obj,flag)
             % This method enables or disables the stepped (synchronous) mode
@@ -286,13 +288,11 @@ classdef DQ_VrepInterface < handle
             obj.vrep.simxSynchronous(obj.clientID,flag);
         end
 
-
         function trigger_next_simulation_step(obj)
             % This method sends a synchronization trigger signal to the CoppeliaSim scene, 
             % which performs a simulation step when the synchronous mode is used.
             obj.vrep.simxSynchronousTrigger(obj.clientID);
         end
-
 
         function ping_time = wait_for_simulation_step_to_end(obj)
             % This method returns the time needed for a command to be sent 
@@ -300,18 +300,15 @@ classdef DQ_VrepInterface < handle
             [~, ping_time] =  obj.vrep.simxGetPingTime(obj.clientID);
         end
         
-        
         function start_simulation(obj)
             % This method starts the CoppeliaSim simulation.
             obj.vrep.simxStartSimulation(obj.clientID,obj.vrep.simx_opmode_oneshot);
         end
         
-        
         function stop_simulation(obj)
             % This method stops the CoppeliaSim simulation.
             obj.vrep.simxStopSimulation(obj.clientID,obj.vrep.simx_opmode_blocking);
         end
-        
         
         function handles = get_handles(obj,names)
             % This method gets the handles for a cell array of 
@@ -336,7 +333,6 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        
         function handle = get_handle(obj,name)
             % This method gets the handle for a given object in the CoppeliaSim scene. 
             % 
@@ -351,7 +347,6 @@ classdef DQ_VrepInterface < handle
                 name,...
                 obj.vrep.simx_opmode_blocking);
         end
-        
         
         function t = get_object_translation(obj,objectname,reference_frame,opmode)
             % This method gets the translation of an object in the CoppeliaSim scene.
@@ -430,7 +425,6 @@ classdef DQ_VrepInterface < handle
             t = DQ([0,double(object_position)]);
         end
         
-        
         function set_object_translation(obj,objectname,translation,reference_frame,opmode)
             % This method sets the translation of an object in the CoppeliaSim scene.
             % Usage:
@@ -484,7 +478,6 @@ classdef DQ_VrepInterface < handle
                     opmode);
             end
         end
-        
         
         function r = get_object_rotation(obj, objectname, reference_frame, opmode)
             % This method gets the rotation of an object in the CoppeliaSim scene.
@@ -570,7 +563,6 @@ classdef DQ_VrepInterface < handle
                 object_rotation_double(3)]));
         end
         
-        
         function set_object_rotation(obj,objectname,rotation,reference_frame,opmode)
             % This method sets the rotation of an object in the CoppeliaSim scene.
             % Usage:
@@ -627,7 +619,6 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        
         function x = get_object_pose(obj,objectname,reference_frame,opmode)
             % This method gets the pose of an object in the CoppeliaSim scene.
             %
@@ -682,7 +673,6 @@ classdef DQ_VrepInterface < handle
             end
             x = r + 0.5*DQ.E*t*r;
         end
-        
         
         function set_object_pose(obj,objectname,pose,reference_frame,opmode)
             % This method sets the pose of an object in the CoppeliaSim scene.
@@ -984,8 +974,7 @@ classdef DQ_VrepInterface < handle
                 end
             end
         end
-        
-        
+            
         function set_joint_target_positions(obj,jointnames,joint_target_positions,opmode)
             % This method sets the joint target positions of a robot in the CoppeliaSim scene. 
             % It is required a dynamics enabled scene, and joints in dynamic mode 
@@ -1048,7 +1037,6 @@ classdef DQ_VrepInterface < handle
                 end                
             end            
         end
-        
         
         function [joint_positions,retval]=get_joint_positions(obj,jointnames,opmode)
             % This method gets the joint positions of a robot in the CoppeliaSim scene.
@@ -1140,8 +1128,7 @@ classdef DQ_VrepInterface < handle
             joint_positions = thetas;
         end
 
-
-       function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
+        function joint_velocities = get_joint_velocities(obj,jointnames,opmode)
             % This method gets the joint velocities of a robot in the CoppeliaSim scene.
             % Usage:
             %      Recommended:
@@ -1172,7 +1159,7 @@ classdef DQ_VrepInterface < handle
             %
             %      % Advanced usage:
             %      joint_velocities = get_joint_velocities(jointnames, OP_ONESHOT);
-
+        
             joint_velocities = zeros(length(jointnames),1);
             for joint_index=1:length(jointnames)
                 % First approach to the auto-management using
@@ -1276,10 +1263,126 @@ classdef DQ_VrepInterface < handle
                         opmode);
                 end                
             end            
-        end         
+        end
+
+        function joint_torques = get_joint_torques(obj,jointnames,opmode)
+            % This method gets the joint torques of a robot in the CoppeliaSim scene.
+            % Usage:
+            %      Recommended:
+            %      joint_torques = get_joint_torques(jointnames);
+            %
+            %      Advanced:
+            %      joint_torques = get_joint_torques(jointnames, opmode)
+            %
+            %          jointnames: The joint names.
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically. 
+            %                          
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %      Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxGetJointForce
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %
+            %      % Recommended:
+            %      joint_torques = get_joint_torques(jointnames);
+            %
+            %      % Advanced usage:
+            %      joint_torques = get_joint_torques(jointnames, OP_STREAMING);
+            
+            joint_torques = zeros(length(jointnames),1);
+
+            % If the user does not specify the opmode, it is chosen first
+            % as STREAMING and then as BUFFER, as specified by the remote
+            % API documentation.
+            for joint_index=1:length(jointnames)
+                % First approach to the auto-management using
+                % DQ_VrepInterfaceMapElements. If the user does not specify the
+                % opmode, it is chosen first as STREAMING and then as BUFFER,
+                % as specified by the remote API documentation
+                if nargin <= 2
+                    if isa(jointnames,'cell')
+                        element = obj.element_from_string(jointnames{joint_index});
+                    else
+                        element = obj.element_from_string(jointnames);
+                    end
+                    if(~element.state_from_function_signature('get_joint_torques'))
+                        [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_STREAMING);
+                        return_code = 1;
+                        while(return_code == 1)
+                            [return_code,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                        end
+                    else
+                        [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, element.handle, obj.OP_BUFFER);
+                    end
+                else
+                    [~,tmp] = obj.vrep.simxGetJointForce(obj.clientID, ...
+                        obj.handle_from_string_or_handle(jointnames{joint_index}), opmode);
+                end
+                joint_torques(joint_index) = double(-tmp); % V-REP returns joint torques with an inverse sign
+            end
+        end
+        
+        function set_joint_torques(obj,jointnames,torques,opmode)
+            % This method sets the joint torques of a robot in the CoppeliaSim scene.
+            % Usage:
+            %      Recommended:
+            %      set_joint_torques(jointnames, torques);
+            %
+            %      Advanced:
+            %      set_joint_torques(jointnames, torques, opmode);
+            %
+            %          jointnames: The joint names.
+            %          torques: The joint torques.
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically. 
+            %                          
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %      Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxSetJointTargetVelocity
+            %
+            % Example:
+            %      jointnames={'LBR4p_joint1','LBR4p_joint2','LBR4p_joint3','LBR4p_joint4',...
+            %                  'LBR4p_joint5','LBR4p_joint6','LBR4p_joint7'};
+            %      u = [0.1 0.1 0.1 0.1 0.1 0.1 0.1];
+            %
+            %      % Recommended:
+            %      set_joint_torques(jointnames, u);
+            %
+            %      % Advanced usage:
+            %      set_joint_torques(jointnames, u, opmode);
+            
+            % If the user does not specify the opmode, it is chosen first
+            % as STREAMING and then as OP_ONESHOT, as specified by the
+            % remote API documentation.
+            if nargin == 3
+                % The recommended mode is OP_ONESHOT
+                for joint_index=1:length(jointnames)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}), ...
+                        sign(torques(joint_index))*10e10, obj.OP_ONESHOT);
+                    obj.vrep.simxSetJointForce(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}), ...
+                        abs(torques(joint_index)), obj.OP_ONESHOT);
+                end
+            else
+                for joint_index=1:length(jointnames)
+                    obj.vrep.simxSetJointTargetVelocity(obj.clientID, obj.handle_from_string_or_handle(jointnames{joint_index}),...
+                        sign(torques(joint_index))*10e10, opmode);
+                    obj.vrep.simxSetJointForce(obj.clientID,obj.handle_from_string_or_handle(jointnames{joint_index}),abs(torques(joint_index)),...
+                        opmode);
+                end
+            end
+        end
+        
     end
     
 end
-
-
-
