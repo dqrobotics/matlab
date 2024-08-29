@@ -815,23 +815,21 @@ classdef DQ_VrepInterface < handle
             end
         end
 
-        function mass = get_mass(obj, obj_handle_or_name, function_name, obj_script_name)
+        function mass = get_mass(obj, objectname, function_name, obj_script_name)
             % This method gets the mass of an object in the CoppeliaSim scene.
             %
             % Usage:
             %     Recommended:
-            %      mass = get_mass(obj_handle_or_name);
+            %      mass = get_mass(objectname);
             %
             %     Advanced:
-            %      mass = get_mass(obj_handle_or_name, function_name, obj_script_name);
+            %      mass = get_mass(objectname, function_name, obj_script_name);
             %
-            %          obj_handle_or_name: The object's handle or name.
-            %          (optional) function_name: The name of the script
-            %            function to call in the specified script.
+            %          objectname: The object's name.
+            %          (optional) function_name: The name of the script function to call in the specified script.
             %            (Default: "get_mass")
-            %          (optional) obj_script_name: The name of the object
-            %            where the script is attached to. (Default:
-            %            'DQRoboticsApiCommandServer')
+            %          (optional) obj_script_name: The name of the object where the script is attached to.
+            %            (Default: 'DQRoboticsApiCommandServer')
             %
             %
             %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeMass.htm
@@ -843,14 +841,14 @@ classdef DQ_VrepInterface < handle
             %      % For advanced usage:
             %      mass = get_mass('/Jaco/Jaco_link2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
 
-            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+            obj_handle = obj.handle_from_string_or_handle(objectname);
 
-            if nargin == 2 % the call was 'mass = get_mass(handle)'
-                [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_mass', obj_handle, [],[],[]);
-            elseif nargin == 3 % the call was 'mass = get_mass(handle, function_name)'
-                [return_code,~,mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
-            else % the call was 'mass = get_mass(handle, function_name, obj_name)'
-                [return_code,~,mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, obj_handle, [],[],[]);
+            if nargin == 2 % the call was: mass = get_mass(objectname)
+                [return_code, ~, mass, ~] = obj.call_script_function('get_mass', obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
+            elseif nargin == 3 % the call was: mass = get_mass(objectname, function_name)
+                [return_code, ~, mass, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
+            else % the call was: mass = get_mass(objectname, function_name, obj_name)
+                [return_code, ~, mass, ~] = obj.call_script_function(function_name, obj_script_name, obj_handle, [], [], obj.ST_CHILD);
             end
 
             if(return_code ~= 0)
