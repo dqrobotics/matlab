@@ -152,6 +152,61 @@ classdef DQ_VrepInterface < handle
     end
     
     methods (Access = private)
+        function [return_code, output_ints, output_doubles, output_strings] = call_script_function(obj, function_name, obj_name, input_ints, input_floats, input_strings, script_type, opmode)
+            % This method calls a LUA script function in CoppeliaSim.
+            %
+            % Usage:
+            %     Recommended:
+            %      [return_code, output_ints, output_doubles, output_strings] = call_script_function(function_name, obj_name, input_ints, input_floats, input_strings, script_type)
+            %
+            %     Advanced:
+            %      [return_code, output_ints, output_doubles, output_strings] = call_script_function(function_name, obj_name, input_ints, input_floats, input_strings, script_type, opmode)
+            %
+            %          function_name: The name of the script function to call in the specified script.
+            %          obj_name: The name of the object where the script is attached to.
+            %          input_ints: The input integer values.
+            %          input_floats: The input floating-point values.
+            %          input_strings: The input strings.
+            %          script_type: The type of the script.
+            %
+            %            You can use the following types:
+            %               ST_CHILD 
+            %
+            %          (optional) opmode: The operation mode. If not
+            %            specified, the opmode will be set automatically.
+            %
+            %            You can use the following modes:
+            %               OP_BLOCKING 
+            %               OP_STREAMING 
+            %               OP_ONESHOT 
+            %               OP_BUFFER;
+            %
+            %
+            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxCallScriptFunction
+            %
+            % Example:
+            %      input_ints = [];
+            %      input_floats = [];
+            %      input_strings = [];
+            %
+            %      % Recommended:
+            %      [rtn, output_ints, output_doubles, output_strings] = call_script_function('my_function_name', 'DQRoboticsApiCommandServer', input_ints, input_floats, input_strings, ST_CHILD)
+            %
+            %      % For advanced usage:
+            %      [rtn, output_ints, output_doubles, output_strings] = call_script_function('my_function_name', 'DQRoboticsApiCommandServer', input_ints, input_floats, input_strings, ST_CHILD, OP_BLOCKING)
+            
+            % If the user does not specify the opmode, it is chosen as
+            % OP_BLOCKING as specified by the remote API documentation.
+            if nargin == 8
+                [return_code, output_ints, output_floats, output_strings, ~] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                                                script_type, function_name, input_ints, input_floats , input_strings, [], obj.OP_BLOCKING);
+                output_doubles = double(output_floats);
+            else
+                [return_code, output_ints, output_floats, output_strings, ~] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
+                                                                                script_type, function_name, input_ints, input_floats , input_strings, [], opmode);
+                output_doubles = double(output_floats);
+            end
+        end
         
         function handle = handle_from_string_or_handle(obj,name_or_handle)
             if(ischar(name_or_handle))
@@ -182,67 +237,6 @@ classdef DQ_VrepInterface < handle
             obj.clientID = -1;
             disp(['This version of DQ Robotics DQ_VrepInterface is compatible'...
                 ' with VREP 3.5.0']);
-        end
-
-        function [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj,obj_name,script_type,function_name,...
-                                                                                       input_ints,input_floats,input_strings,input_buffer,opmode)
-            % This method calls a LUA script function in V-REP.
-            %
-            % Usage:
-            %     Recommended:
-            %      [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj_name, script_type, function_name, input_ints, input_floats, input_strings, input_buffer)
-            %
-            %     Advanced:
-            %      [return_code,output_ints,output_doubles,output_strings,retBuffer] = call_script_function(obj_name, script_type, function_name, input_ints, input_floats, input_strings, input_buffer, opmode)
-            %
-            %          obj_name: The name of the object where the script is
-            %          attached to.
-            %          script_type: The type of the script.
-            %
-            %            You can use the following types:
-            %               ST_CHILD 
-            %
-            %          function_name: The name of the script function to
-            %          call in the specified script.
-            %          input_ints: The input integer values.
-            %          input_floats: The input floating-point values.
-            %          input_strings: The input strings.
-            %          input_buffer: The input buffer.
-            %          (optional) opmode: The operation mode. If not
-            %            specified, the opmode will be set automatically.
-            %
-            %            You can use the following modes:
-            %               OP_BLOCKING 
-            %               OP_STREAMING 
-            %               OP_ONESHOT 
-            %               OP_BUFFER;
-            %
-            %
-            %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsMatlab.htm#simxCallScriptFunction
-            %
-            % Example:
-            %      input_ints = [];
-            %      input_floats = [];
-            %      input_strings = [];
-            %      input_buffer = [];
-            %
-            %      % Recommended:
-            %      [rtn, output_ints, output_doubles, output_strings, retBuffer] = call_script_function('DQRoboticsApiCommandServer', ST_CHILD, 'my_function_name', input_ints, input_floats, input_strings, input_buffer)
-            %
-            %      % For advanced usage:
-            %      [rtn, output_ints, output_doubles, output_strings, retBuffer] = call_script_function('DQRoboticsApiCommandServer', ST_CHILD, 'my_function_name', input_ints, input_floats, input_strings, input_buffer, OP_BLOCKING)
-            
-            % If the user does not specify the opmode, it is chosen as
-            % OP_BLOCKING as specified by the remote API documentation.
-            if nargin == 8
-                [return_code,output_ints,output_floats,output_strings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
-                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, obj.OP_BLOCKING);
-                output_doubles = double(output_floats);
-            else
-                [return_code,output_ints,output_floats,output_strings,retBuffer] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
-                                                script_type, function_name, input_ints, input_floats , input_strings, input_buffer, opmode);
-                output_doubles = double(output_floats);
-            end
         end
         
         function connect(obj,ip,port)
