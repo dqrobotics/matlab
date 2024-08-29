@@ -110,6 +110,8 @@
 %       - Added the following properties:
 %             - DF_LUA_SCRIPT_API (see https://github.com/dqrobotics/matlab/pull/109)
 %             - ST_CHILD (see https://github.com/dqrobotics/matlab/pull/109)
+%             - BODY_FRAME (see https://github.com/dqrobotics/matlab/pull/109)
+%             - ABSOLUTE_FRAME (see https://github.com/dqrobotics/matlab/pull/109)
 %       - Added the following methods:
 %             - get_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
 %             - set_joint_torques() (see https://github.com/dqrobotics/matlab/pull/104)
@@ -135,7 +137,7 @@ classdef DQ_VrepInterface < handle
     end
     
     properties (Constant)
-        % Constant that denotes DQ Robotic's default LUA script API with V-VREP
+        % Constant that denotes DQ Robotic's default LUA script API with CoppeliaSim
         DF_LUA_SCRIPT_API = '/DQRoboticsApiCommandServer';
         % Constant that denotes the V-VREP's remote API blocking operation mode
         OP_BLOCKING  = remApi('remoteApi').simx_opmode_blocking;
@@ -147,8 +149,12 @@ classdef DQ_VrepInterface < handle
         OP_BUFFER    = remApi('remoteApi').simx_opmode_buffer;
         % Constant that denotes the V-VREP's remote API joint velocity ID
         JOINT_VELOCITY_PARAMETER_ID = remApi('remoteApi').sim_jointfloatparam_velocity;
-        % Constant that denotes the V-VREP's remote API child script type
+        % Constant that denotes the CoppeliaSim's remote API child script type
         ST_CHILD = remApi('remoteApi').sim_scripttype_childscript;
+        % Constant that denotes the shape frame in a CoppeliaSim's object
+        BODY_FRAME = 'body_frame';
+        % Constant that denotes the inertial frame in a CoppeliaSim's scene
+        ABSOLUTE_FRAME = 'absolute_frame';
     end
     
     methods (Access = private)
@@ -197,7 +203,7 @@ classdef DQ_VrepInterface < handle
             
             % If the user does not specify the opmode, it is chosen as
             % OP_BLOCKING as specified by the remote API documentation.
-            if nargin == 8
+            if nargin == 7
                 [return_code, output_ints, output_floats, output_strings, ~] = obj.vrep.simxCallScriptFunction(obj.clientID, obj_name, ...
                                                                                 script_type, function_name, input_ints, input_floats , input_strings, [], obj.OP_BLOCKING);
                 output_doubles = double(output_floats);
@@ -741,27 +747,23 @@ classdef DQ_VrepInterface < handle
             end
         end
         
-        function center_of_mass = get_center_of_mass(obj, obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name)
+        function center_of_mass = get_center_of_mass(obj, objectname, reference_frame, function_name, obj_script_name)
             % This method gets the center of mass of an object in the CoppeliaSim scene.
             %
             % Usage:
             %     Recommended:
-            %      center_of_mass = get_center_of_mass(obj_handle_or_name);
+            %      center_of_mass = get_center_of_mass(objectname);
             %
             %     Advanced:
-            %      center_of_mass = get_center_of_mass(obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name);
+            %      center_of_mass = get_center_of_mass(objectname, ref_frame_handle_or_name, function_name, obj_script_name);
             %
-            %          obj_handle_or_name: The object's handle or name.
-            %          (optional) reference_frame:  Indicates the handle of
-            %            the relative reference frame in which you want the
-            %            center of mass. If not specified, the shape's
-            %            reference frame is used.
-            %          (optional) function_name: The name of the script
-            %            function to call in the specified script.
+            %          objectname: The object's name.
+            %          (optional) reference_frame:  Indicates the handle of the relative reference frame in which you want the center of mass.
+            %             If not specified, the shape's reference frame is used.
+            %          (optional) function_name: The name of the script function to call in the specified script.
             %            (Default: "get_center_of_mass")
-            %          (optional) obj_script_name: The name of the object
-            %            where the script is attached to. (Default:
-            %            'DQRoboticsApiCommandServer')
+            %          (optional) obj_script_name: The name of the object where the script is attached to.
+            %            (Default: 'DQRoboticsApiCommandServer')
             %
             %
             %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeInertia.htm
@@ -771,24 +773,36 @@ classdef DQ_VrepInterface < handle
             %      center_of_mass = get_center_of_mass('/Jaco/Jaco_link2');
             %
             %      % For advanced usage:
-            %      center_of_mass = get_center_of_mass('/Jaco/Jaco_link2', '/Jaco/Jaco_joint2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
+            %      center_of_mass = get_center_of_mass('/Jaco/Jaco_link2', 'my_reference_frame', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
 
-            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+            obj_handle = obj.handle_from_string_or_handle(objectname);
 
-            if nargin == 2 % the call was 'center_of_mass = get_center_of_mass(handle)'
-                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', obj_handle, [], [], []);
-            elseif nargin == 3 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+            if nargin == 2 % the call was: center_of_mass = get_center_of_mass(objectname)
+                [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
+            elseif nargin == 3 % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    ref_frame_handle = -1;
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                end
 
-                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_center_of_mass', [obj_handle, ref_frame_handle], [], [], []);
-            elseif nargin == 4 % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+                [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
+            elseif nargin == 4 % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame, function_name)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    ref_frame_handle = -1;
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                end
 
-                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-            else % the call was 'center_of_mass = get_center_of_mass(handle, reference_frame, function_name, obj_name)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
+                [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
+            else % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame, function_name, obj_name)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    ref_frame_handle = -1;
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                end
 
-                [return_code,~,center_of_mass,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+                [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
             end
 
             if(return_code ~= 0)
