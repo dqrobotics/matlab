@@ -824,9 +824,9 @@ classdef DQ_VrepInterface < handle
             %
             %          objectname: The object's name.
             %          (optional) function_name: The name of the script function to call in the specified script.
-            %            (Default: "get_mass")
+            %             (Default: "get_mass")
             %          (optional) obj_script_name: The name of the object where the script is attached to.
-            %            (Default: 'DQRoboticsApiCommandServer')
+            %             (Default: 'DQRoboticsApiCommandServer')
             %
             %
             %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeMass.htm
@@ -857,27 +857,23 @@ classdef DQ_VrepInterface < handle
             end
         end
 
-        function inertia_tensor =  get_inertia_matrix(obj, obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name)
+        function inertia_tensor =  get_inertia_matrix(obj, objectname, reference_frame, function_name, obj_script_name)
             % This method gets the inertia tensor of an object in the CoppeliaSim scene.
             %
             % Usage:
             %     Recommended:
-            %      inertia_tensor =  get_inertia_matrix(obj_handle_or_name);
+            %      inertia_tensor =  get_inertia_matrix(objectname);
             %
             %     Advanced:
-            %      inertia_tensor =  get_inertia_matrix(obj_handle_or_name, ref_frame_handle_or_name, function_name, obj_script_name);
+            %      inertia_tensor =  get_inertia_matrix(objectname, ref_frame_handle_or_name, function_name, obj_script_name);
             %
-            %          obj_handle_or_name: The object's handle or name.
-            %          (optional) reference_frame:  Indicates the handle of
-            %            the relative reference frame in which you want the
-            %            inertia tensor. If not specified, the shape's
-            %            reference frame is used.
-            %          (optional) function_name: The name of the script
-            %            function to call in the specified script.
-            %            (Default: "get_inertia")
-            %          (optional) obj_script_name: The name of the object
-            %            where the script is attached to. (Default:
-            %            'DQRoboticsApiCommandServer')
+            %          objectname: The object's handle or name.
+            %          (optional) reference_frame:  Indicates the handle of the relative reference frame in which you want the inertia tensor.
+            %             If not specified, the shape's reference frame is used.
+            %          (optional) function_name: The name of the script function to call in the specified script.
+            %             (Default: "get_inertia")
+            %          (optional) obj_script_name: The name of the object where the script is attached to.
+            %             (Default: 'DQRoboticsApiCommandServer')
             %
             %
             %     Check this link for more details: https://www.coppeliarobotics.com/helpFiles/en/regularApi/simGetShapeInertia.htm
@@ -887,24 +883,33 @@ classdef DQ_VrepInterface < handle
             %      inertia_tensor =  get_inertia_matrix('/Jaco/Jaco_link2');
             %
             %      % For advanced usage:
-            %      inertia_tensor = get_inertia_matrix('/Jaco/Jaco_link2', '/Jaco/Jaco_joint2', 'my_get_center_of_mass', 'my_DQRoboticsApiCommandServer');
+            %      inertia_tensor = get_inertia_matrix('/Jaco/Jaco_link2', '/Jaco/Jaco_joint2', 'my_get_inertia_matrix', 'my_DQRoboticsApiCommandServer');
 
-            obj_handle = obj.handle_from_string_or_handle(obj_handle_or_name);
+            obj_handle = obj.handle_from_string_or_handle(objectname);
 
-            if nargin == 2 % the call was 'inertia_tensor =  get_inertia_matrix(handle)'
-                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', obj_handle, [], [], []);
-            elseif nargin == 3 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
-
-                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, 'get_inertia', [obj_handle, ref_frame_handle], [], [], []);
-            elseif nargin == 4 % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
-
-                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj.DF_LUA_SCRIPT_API, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
-            else % the call was 'inertia_tensor =  get_inertia_matrix(handle, reference_frame, function_name, obj_name)'
-                ref_frame_handle = obj.handle_from_string_or_handle(ref_frame_handle_or_name);
-                
-                [return_code,~,inertia_tensor,~,~] = obj.call_script_function(obj_script_name, obj.ST_CHILD, function_name, [obj_handle, ref_frame_handle], [], [], []);
+            if nargin == 2 % the call was: inertia_tensor =  get_inertia_matrix(objectname)
+                [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
+            elseif nargin == 3 % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
+                end
+            elseif nargin == 4 % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame, function_name)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
+                end
+            else % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame, function_name, obj_name)
+                if(reference_frame == obj.ABSOLUTE_FRAME)
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj_script_name, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                else
+                    ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
+                end
             end
 
             if(return_code ~= 0)
