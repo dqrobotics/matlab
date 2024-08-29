@@ -803,8 +803,13 @@ classdef DQ_VrepInterface < handle
             end
 
             if(return_code ~= 0)
-                formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
-                fprintf(formatSpec, return_code);
+                if nargin <= 3
+                    formatSpec = 'Script function `get_center_of_mass` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                else
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                end
                 error('Failed calling script function!');
             else % ensure cast to double
                 center_of_mass = double(center_of_mass);
@@ -849,8 +854,13 @@ classdef DQ_VrepInterface < handle
             end
 
             if(return_code ~= 0)
-                formatSpec = 'Script function %s returned with error code %i.\n';
-                fprintf(formatSpec, function_name, return_code);
+                if nargin == 2
+                    formatSpec = 'Script function `get_mass` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                else
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                end
                 error('Failed calling script function!');
             else % ensure cast to double
                 mass = double(mass);
@@ -913,8 +923,13 @@ classdef DQ_VrepInterface < handle
             end
 
             if(return_code ~= 0)
-                formatSpec = 'Script function %s returned with error code %i.\n';
-                fprintf(formatSpec, function_name, return_code);
+                if nargin <= 3
+                    formatSpec = 'Script function `get_inertia` returned with error code %i.\n';
+                    fprintf(formatSpec, return_code);
+                else
+                    formatSpec = 'Script function %s returned with error code %i.\n';
+                    fprintf(formatSpec, function_name, return_code);
+                end
                 error('Failed calling script function!');
             else % ensure cast to double and reshape the 1x9 vector to a 3x3 matrix
                 inertia_tensor = double(reshape(inertia_tensor,3,3));
