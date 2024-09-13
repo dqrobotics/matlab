@@ -1,4 +1,4 @@
-% CLASS LBR4pVrepRobot - Concrete class to interface with the "KUKA LBR4+"
+% CLASS LBR4pCoppeliaSimRobot - Concrete class to interface with the "KUKA LBR4+"
 % robot in VREP.
 %
 % Usage:
@@ -44,15 +44,37 @@
 %     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
 %        - Updated for compatibility with the DQ_SerialVrepRobot class.
 %     3. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
-%        - The class now inherits from LBR4pCoppeliaSimRobot
+%        - Renamed the class from LBR4pVrepRobot to LBR4pCoppeliaSimRobot
 
 
-classdef LBR4pVrepRobot < LBR4pCoppeliaSimRobot
+classdef LBR4pCoppeliaSimRobot < DQ_SerialCoppeliaSimRobot
     methods
-        function obj = LBR4pVrepRobot(robot_name, vrep_interface)
-            warning('Deprecated. Use LBR4pCoppeliaSimRobot instead.')
-            obj@LBR4pCoppeliaSimRobot(robot_name, vrep_interface);
+        function obj = LBR4pCoppeliaSimRobot(robot_name, vrep_interface)
+            obj@DQ_SerialCoppeliaSimRobot("LBR4p", 7, robot_name, vrep_interface);
         end
+
+        function kin = kinematics(obj)
+            %% Obtains the DQ_SerialManipulator instance that represents this LBR4p robot.
+            %  >> vrep_robot = LBR4pVrepRobot("LBR4p", vi);
+            %  >> robot_kinematics = vrep_robot.kinematics();
+            
+            LBR4p_DH_theta=[0, 0, 0, 0, 0, 0, 0];
+            LBR4p_DH_d = [0.200, 0, 0.4, 0, 0.39, 0, 0];
+            LBR4p_DH_a = [0, 0, 0, 0, 0, 0, 0];
+            LBR4p_DH_alpha = [pi/2, -pi/2, pi/2, -pi/2, pi/2, -pi/2, 0];
+            LBR4p_DH_type = double(repmat(DQ_JointType.REVOLUTE,1,7));
+            LBR4p_DH_matrix = [LBR4p_DH_theta;
+                LBR4p_DH_d;
+                LBR4p_DH_a;
+                LBR4p_DH_alpha
+                LBR4p_DH_type];
+            
+            kin = DQ_SerialManipulatorDH(LBR4p_DH_matrix);
+            
+            kin.set_reference_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
+            kin.set_base_frame(obj.vrep_interface.get_object_pose(obj.base_frame_name));
+            kin.set_effector(1+0.5*DQ.E*DQ.k*0.07);
+        end        
     end
 end
 

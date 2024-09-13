@@ -45,105 +45,15 @@
 %        - Responsible for the original implementation
 %     2. Frederico Fernandes Afonso Silva (frederico.silva@ieee.org)
 %        - Updated for compatibility with the DQ_SerialVrepRobot class.
+%     3. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+%        - The class now inherits from YouBotCoppeliaSimRobot
 
-classdef YouBotVrepRobot < DQ_SerialVrepRobot    
-    properties (Constant)
-        adjust = ((cos(pi/2) + DQ.i*sin(pi/2)) * (cos(pi/4) + DQ.j*sin(pi/4)))*(1+0.5*DQ.E*-0.1*DQ.k);
-    end
-    
+
+classdef YouBotVrepRobot < YouBotCoppeliaSimRobot   
     methods
         function obj = YouBotVrepRobot(robot_name, vrep_interface)
-            obj@DQ_SerialVrepRobot("youBot", 5, robot_name, vrep_interface);
-            
-            %% youBot does not follow the standard naming convention in CoppeliaSim. Also, the use of 'set_names()', as is done in the C++ implementation, is not supported on a constructor in MATLAB
-            % From the second copy of the robot and onward, VREP appends a
-            % #number in the robot's name. We check here if the robot is
-            % called by the correct name and assign an index that will be
-            % used to correctly infer the robot's joint labels.
-            splited_name = strsplit(robot_name,'#');
-            robot_label = splited_name{1};
-            if ~strcmp(robot_label,'youBot')
-                error('Expected youBot')
-            end
-            if length(splited_name) > 1
-                robot_index = splited_name{2};
-            else
-                robot_index = '';
-            end
-            
-            % Initialize joint names and base frame
-            obj.joint_names = {};
-            for i=1:5
-                current_joint_name = {robot_label,'ArmJoint',int2str(i-1),robot_index};
-                obj.joint_names{i} = strjoin(current_joint_name,'');
-            end
-            obj.base_frame_name = robot_name;
-        end
-        
-        function set_configuration(obj,q)
-            %% Sends the joint configurations to VREP
-            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
-            %  >> q = zeros(8,1);
-            %  >> vrep_robot.set_configuration(q)
-            x = q(1);
-            y = q(2);
-            phi = q(3);
-            
-            r = cos(phi/2.0)+DQ.k*sin(phi/2.0);
-            p = x * DQ.i + y * DQ.j;
-            pose = (1 + DQ.E*0.5*p)*r;
-            
-            obj.vrep_interface.set_joint_positions(obj.joint_names,q(4:8));
-            obj.vrep_interface.set_object_pose(obj.base_frame_name, pose * obj.adjust');
-        end
-        
-        function q = get_configuration(obj)
-            %% Obtains the joint configurations from VREP
-            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
-            %  >> q = vrep_robot.get_configuration(q)
-            base_x = obj.vrep_interface.get_object_pose(obj.base_frame_name) * obj.adjust;
-            base_t = vec3(translation(base_x));
-            base_phi = rotation_angle(rotation(base_x));
-            base_arm_q = obj.vrep_interface.get_joint_positions(obj.joint_names);
-            
-            q = [base_t(1); base_t(2); base_phi; base_arm_q];
-        end
-        
-        function kin = kinematics(obj)
-            %% Obtains the DQ_WholeBody instance that represents this youBot robot.
-            %  >> vrep_robot = YouBotVrepRobot("youBot", vi)
-            %  >> robot_kinematics = vrep_robot.kinematics()
-            
-            include_namespace_dq
-            % The DH parameters and other geometric parameters are based on
-            % Kuka's documentation:
-            % http://www.youbot-store.com/wiki/index.php/YouBot_Detailed_Specifications
-            % https://www.generationrobots.com/img/Kuka-YouBot-Technical-Specs.pdf
-            pi2 = pi/2;
-            arm_DH_theta = [    0,    pi2,       0,      pi2,        0];
-            arm_DH_d =   [  0.147,      0,       0,        0,    0.218];
-            arm_DH_a =   [  0.033,  0.155,   0.135,        0,        0];
-            arm_DH_alpha =   [pi2,      0,       0,      pi2,        0];
-            arm_DH_type = double(repmat(DQ_JointType.REVOLUTE,1,5));
-            arm_DH_matrix = [arm_DH_theta;
-                arm_DH_d;
-                arm_DH_a;
-                arm_DH_alpha
-                arm_DH_type];
-            
-            arm =  DQ_SerialManipulatorDH(arm_DH_matrix);
-            base = DQ_HolonomicBase();
-            
-            x_bm = 1 + E_*0.5*(0.165*i_ + 0.11*k_);
-            
-            base.set_frame_displacement(x_bm);
-            
-            kin = DQ_WholeBody(base);
-            kin.add(arm);
-            
-            effector = 1 + E_*0.5*0.3*k_;
-            kin.set_effector(effector);
-        end        
+            obj@YouBotCoppeliaSimRobot(robot_name, vrep_interface);
+        end    
     end
 end
 
