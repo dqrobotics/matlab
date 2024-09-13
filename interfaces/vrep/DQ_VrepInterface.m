@@ -113,6 +113,7 @@
 classdef DQ_VrepInterface < DQ_CoppeliaSimLegacyInterface
     methods
         function obj = DQ_VrepInterface()
+            warning('Deprecated. Use DQ_CoppeliaSimLegacyInterface instead.')
             obj@DQ_CoppeliaSimLegacyInterface();
         end
     end
