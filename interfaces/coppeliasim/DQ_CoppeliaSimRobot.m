@@ -1,4 +1,4 @@
-% CLASS DQ_VrepRobot - Abstract class with methods to send and receive 
+% CLASS DQ_CoppeliaSimRobot - Abstract class with methods to send and receive 
 % robot information to and from VREP.
 %
 % Usage:
@@ -39,13 +39,33 @@
 %       C++ version of the class:
 %             - 'kinematics'
 %     3. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
-%        - The class now inherits from DQ_CoppeliaSimRobot
+%        - Renamed the class from DQ_VrepRobot to DQ_CoppeliaSimRobot
 
-classdef (Abstract) DQ_VrepRobot < DQ_CoppeliaSimRobot
+classdef (Abstract) DQ_CoppeliaSimRobot
+    
+    properties
+        robot_name
+        vrep_interface
+    end
+    
+    methods (Abstract)
+        set_configuration(obj,q);
+        q = get_configuration(obj);
+    end
+
     methods
-        function obj = DQ_VrepRobot()
-            warning('Deprecated. Use DQ_CoppeliaSimRobot instead.')
-            obj@DQ_CoppeliaSimRobot();
+        function send_q_to_vrep(obj, q)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use set_configuration() instead.')
+            obj.set_configuration(q)
+        end
+
+        function q = get_q_from_vrep(obj)
+            % For backwards compatibility only. Do not use this method.
+
+            warning('Deprecated. Use get_configuration() instead.')
+            q = obj.get_configuration();
         end
     end
 end
