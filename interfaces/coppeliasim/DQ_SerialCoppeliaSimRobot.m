@@ -51,7 +51,8 @@
 %        - Responsible for the original implementation, based on the C++ version:
 %           - DQ_VrepInterface.h: https://github.com/dqrobotics/cpp-interface-vrep/blob/master/include/dqrobotics/interfaces/vrep/DQ_VrepInterface.h
 %           - DQ_SerialVrepRobot.cpp: https://github.com/dqrobotics/cpp-interface-vrep/blob/master/src/dqrobotics/interfaces/vrep/DQ_SerialVrepRobot.cpp
-
+%     2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+%        - Renamed the class from DQ_SerialVrepRobot to DQ_SerialCoppeliaSimRobot 
 classdef DQ_SerialCoppeliaSimRobot < DQ_CoppeliaSimRobot
     properties
         joint_names;
