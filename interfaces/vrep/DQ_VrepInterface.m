@@ -780,22 +780,28 @@ classdef DQ_VrepInterface < handle
             if nargin == 2 % the call was: center_of_mass = get_center_of_mass(objectname)
                 [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
             elseif nargin == 3 % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function('get_center_of_mass', obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
                 end
             elseif nargin == 4 % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame, function_name)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
                 end
             else % the call was: center_of_mass = get_center_of_mass(objectname, reference_frame, function_name, obj_name)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj_script_name, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, center_of_mass, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
@@ -900,22 +906,28 @@ classdef DQ_VrepInterface < handle
             if nargin == 2 % the call was: inertia_tensor =  get_inertia_matrix(objectname)
                 [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, obj_handle, [], [], obj.ST_CHILD);
             elseif nargin == 3 % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function('get_inertia', obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
                 end
             elseif nargin == 4 % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame, function_name)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj.DF_LUA_SCRIPT_API, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
                 end
             else % the call was: inertia_tensor =  get_inertia_matrix(objectname, reference_frame, function_name, obj_name)
-                if(reference_frame == obj.ABSOLUTE_FRAME)
+                if(strcmp(reference_frame, obj.ABSOLUTE_FRAME))
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj_script_name, obj_handle, [], obj.ABSOLUTE_FRAME, obj.ST_CHILD);
+                elseif(strcmp(reference_frame, obj.BODY_FRAME))
+                    [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, obj_handle], [], [], obj.ST_CHILD);
                 else
                     ref_frame_handle = obj.handle_from_string_or_handle(reference_frame);
                     [return_code, ~, inertia_tensor, ~] = obj.call_script_function(function_name, obj_script_name, [obj_handle, ref_frame_handle], [], [], obj.ST_CHILD);
