@@ -52,6 +52,7 @@
 classdef YouBotVrepRobot < YouBotCoppeliaSimRobot   
     methods
         function obj = YouBotVrepRobot(robot_name, vrep_interface)
+            warning('Deprecated. Use YouBotCoppeliaSimRobot instead.')
             obj@YouBotCoppeliaSimRobot(robot_name, vrep_interface);
         end    
     end
