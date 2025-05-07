@@ -14,7 +14,7 @@
 % See also DQ_HolonomicBase.
 
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2025 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -34,7 +34,11 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%    1.  Bruno Vihena Adorno - adorno@ufmg.br
+%
+%    2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+%        - Added the method pose_jacobian_derivative(). 
+%          However, the method is not implemented yet.
 
 classdef DQ_DifferentialDriveRobot < DQ_HolonomicBase
     
@@ -77,6 +81,18 @@ classdef DQ_DifferentialDriveRobot < DQ_HolonomicBase
             % q = [x,y,phi] is the robot configuration
             J_holonomic = pose_jacobian@DQ_HolonomicBase(obj,q);
             J = J_holonomic*obj.constraint_jacobian(q(3));
+        end
+
+        function J_dot = pose_jacobian_derivative(obj, q, q_dot)
+        % J_dot = pose_jacobian_derivative(q, q_dot) returns the time
+        % derivative of the Jacobian matrix that satisfies 
+        % vec8(h_dot_dot) = J_dot*[wr,wl]' + J*[wr_dot,wl_dot]', where h_dot is the time
+        % derivative of the unit dual quaternion that represent the
+        % mobile base pose and  wr and wl are the angular velocities of the
+        % right and left wheels, respectively. 
+        % q = [x,y,phi] is the robot configuration
+
+            error('pose_jacobian_derivative is not implemented yet');
         end
     end
 end
