@@ -173,6 +173,13 @@ classdef DQ_Kinematics < handle
         % POSE_JACOBIAN(q, to_ith_link) calculates the forward kinematic model up to
         % the ith element in the chain.
         J = pose_jacobian(obj, q, to_ith_link);
+
+        % POSE_JACOBIAN_DERIVATIVE(q, q_dot) returns the Jacobian derivative 'J_dot' that satisfies
+        % vec8(x_pose_dot_dot) = J_dot * q_dot + J*q_dot_dot, where x_pose = fkm(q), 'x_pose_dot_dot' is 
+        % the second time derivative of the 'x_pose' and 'q_dot' represents the robot configuration velocities.
+        % J_dot = pose_jacobian_derivative(obj, q, q_dot, to_ith_link) calculates the jacobian derivative up 
+        % to the ith element in the chain.
+        J_dot = pose_jacobian_derivative(obj, q, q_dot, to_ith_link);
     end
     
     methods(Static)
