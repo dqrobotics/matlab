@@ -42,7 +42,7 @@
 %
 % See also DQ_kinematics, DQ_MobileBase
 
-% (C) Copyright 2011-2023 DQ Robotics Developers
+% (C) Copyright 2011-2025 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -62,7 +62,11 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno -  adorno@ieee.org
+%    1.  Bruno Vihena Adorno - adorno@ufmg.br
+%
+%    2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+%        - Added the method pose_jacobian_derivative(). 
+%          However, the method is not implemented yet.
 
 classdef DQ_WholeBody < DQ_Kinematics
     properties (Access = protected)
@@ -477,6 +481,19 @@ classdef DQ_WholeBody < DQ_Kinematics
                 error(['set_effector() is available only if the last element'...
                     ' in the kinematic chain is a DQ_SerialManipulator object']);
             end
+        end
+
+
+        function J_dot = pose_jacobian_derivative(obj, q, q_dot, ith)
+            % Returns the whole-body pose Jacobian.
+            % J_dot = POSE_JACOBIAN_DERIVATIVE(q, q_dot) receives the configuration vector q and configuration 
+            % velocity vector q_dot of the whole kinematic chain and returns the jacobian derivative J_dot that satisfies
+            % vec8(xdot_dot) = J_dot*q_dot + J*q_dot_dot, where q_dot is the configuration velocity
+            % and xdot is the time derivative of the unit dual quaternion that represents the end-effector pose.
+            % J = POSE_JACOBIAN_DERIVATIVE(q, q_dot, ith) calculates the Jacobian derivative up to the ith
+            % link of the combined kinematic chain.
+
+            error('pose_jacobian_derivative is not implemented yet');
         end
     end
 end
