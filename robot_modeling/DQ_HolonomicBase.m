@@ -16,7 +16,7 @@
 %
 %       See also DQ_MobileBase, DQ_DifferentialDriveRobot
 
-% (C) Copyright 2011-2019 DQ Robotics Developers
+% (C) Copyright 2011-2025 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -36,7 +36,11 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%     Bruno Vihena Adorno - adorno@ufmg.br
+%    1.  Bruno Vihena Adorno - adorno@ufmg.br
+%
+%    2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+%        - Added the method pose_jacobian_derivative(). 
+%          However, the method is not implemented yet.
 
 classdef DQ_HolonomicBase < DQ_MobileBase
     
@@ -136,6 +140,16 @@ classdef DQ_HolonomicBase < DQ_MobileBase
                 % DQ_Kinematics objects.
                  J = haminus8(obj.frame_displacement)*obj.raw_pose_jacobian(q);
             end
+        end
+
+        function J_dot = pose_jacobian_derivative(obj, q, q_dot, ~)
+        % POSE_JACOBIAN_DERIVATIVE(q, q_dot) returns, given the configuration
+        % q = [x,y,phi]', the mobile-base pose Jacobian derivative J_dot that satisfies 
+        % x_dot_dot = J_dot*q_dot + J*q_dot_dot, where x_dot is the time derivative 
+        % of the unit dual quaternion that represents the mobile-base pose. It takes into
+        % consideration the base frame displacement (e.g., base height). 
+
+            error('pose_jacobian_derivative is not implemented yet');
         end
         
         function set_base_diameter(obj,diameter)
