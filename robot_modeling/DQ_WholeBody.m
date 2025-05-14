@@ -62,7 +62,7 @@
 % DQ Robotics website: dqrobotics.github.io
 %
 % Contributors to this file:
-%    1.  Bruno Vihena Adorno - adorno@ufmg.br
+%    1.  Bruno Vihena Adorno - adorno@ieee.org
 %
 %    2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
 %        - Added the method pose_jacobian_derivative(). 
