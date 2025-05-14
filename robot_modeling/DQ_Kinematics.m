@@ -37,7 +37,7 @@
 %       translation_jacobian - Compute the translation Jacobian.
 % See also DQ_SerialManipulator, DQ_MobileBase, DQ_CooperativeDualTaskSpace.
 
-% (C) Copyright 2011-2023 DQ Robotics Developers
+% (C) Copyright 2011-2025 DQ Robotics Developers
 %
 % This file is part of DQ Robotics.
 %
@@ -60,10 +60,11 @@
 %     1. Bruno Vihena Adorno (adorno@ieee.org)
 %          Responsible for the original implementation. 
 %
-%     2. Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+%     2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
 %        - Added the property dim_configuration_space. 
 %        - Added the method line_to_line_angle_residual().
 %        - Added the methods check_ith_link() and check_q_vec().
+%        - Added the method pose_jacobian_derivative().
 
 classdef DQ_Kinematics < handle
     % DQ_Kinematics inherits the HANDLE superclass to avoid unnecessary copies
@@ -172,6 +173,13 @@ classdef DQ_Kinematics < handle
         % POSE_JACOBIAN(q, to_ith_link) calculates the forward kinematic model up to
         % the ith element in the chain.
         J = pose_jacobian(obj, q, to_ith_link);
+
+        % POSE_JACOBIAN_DERIVATIVE(q, q_dot) returns the Jacobian derivative 'J_dot' that satisfies
+        % vec8(x_pose_dot_dot) = J_dot * q_dot + J*q_dot_dot, where x_pose = fkm(q), 'x_pose_dot_dot' is 
+        % the second time derivative of the 'x_pose' and 'q_dot' represents the robot configuration velocities.
+        % J_dot = pose_jacobian_derivative(obj, q, q_dot, to_ith_link) calculates the jacobian derivative up 
+        % to the ith element in the chain.
+        J_dot = pose_jacobian_derivative(obj, q, q_dot, to_ith_link);
     end
     
     methods(Static)
