@@ -49,3 +49,10 @@ Although the library is self-contained and it suffices to know only basic dual q
 ## Contributing
 
 Contributing to **dqrobotics-matlab** follows the [same criteria](https://github.com/dqrobotics/.github/blob/master/profile/README.md#contributing) as for other parts of DQ Robotics. More information about the procedures for contributing can be found [here](https://github.com/dqrobotics/matlab/blob/master/CONTRIBUTING.md).
+
+## Developer information
+
+### Setting up `GithubActions`
+
+- Set up a self-hosted runner with tag `MATLAB`: https://github.com/organizations/dqrobotics/settings/actions/runners
+- Install and add MATLAB to the path of the machine so that the command `matlab` runs the binary for the desired MATLAB version. (See `workflow` https://github.com/dqrobotics/matlab/blob/49971ba20560b521c36be323dca284a82baac62b/.github/workflows/matlab_test.yml#L32)
