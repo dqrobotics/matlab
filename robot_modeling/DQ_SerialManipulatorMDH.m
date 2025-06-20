@@ -201,7 +201,7 @@ classdef DQ_SerialManipulatorMDH < DQ_SerialManipulator
         function x = get_link_transformation(obj, q, ith)
             %   This method exposes the protected method get_link2dq(),
             %   which calculates  the corresponding dual quaternion for a
-            %   given link's DH parameters.
+            %   given link's MDH parameters.
             % Usage:
             %     get_link_transformation(q, ith)
             %          q: The joint value.
