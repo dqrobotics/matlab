@@ -203,6 +203,22 @@ classdef DQ_SerialManipulatorDH < DQ_SerialManipulator
             obj.set_joint_types(A(5,:));
         end
 
+        function x = get_link_transformation(obj, q, ith)
+            %   This method exposes the protected method get_link2dq(),
+            %   which calculates  the corresponding dual quaternion for a
+            %   given link's DH parameters.
+            % Usage:
+            %     get_link_transformation(q, ith)
+            %          q: The joint value.
+            %          ith: The link number.
+            %
+            % Example: 
+            %      robot = KukaLwr4Robot.kinematics();
+            %      x = robot.get_link_transformation(pi/2, 3);
+
+            x = get_link2dq(obj, q, ith);
+        end
+
         function ret = get_parameters(obj, parameterType)
             % This method returns a vector containing the DH parameters.
             % Usage: get_parameters(parameterType)
