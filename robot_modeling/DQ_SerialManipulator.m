@@ -86,6 +86,11 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
         st = get_supported_joint_types();
      end
 
+     methods (Abstract)
+         % This method returns the corresponding dual quaternion for a given link's parameters.
+         get_link_transformation(q, ith);
+     end
+
      methods (Access = protected)  
          function check_joint_types(obj)
             %  CHECK_JOINT_TYPES() throws an exception if the joint types
