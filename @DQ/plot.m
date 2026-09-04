@@ -78,7 +78,7 @@ noaxisname = false; % Default behavior is to print the axes names
 
 if optargin > 0
     % All parameters in the variable-length list have the form <type>
-    % folowed by the corresponding type value. Therefore, length(varargin)
+    % followed by the corresponding type value. Therefore, length(varargin)
     % is always even.
     for j = 1:2:optargin
         
@@ -252,7 +252,7 @@ switch primitive_type
             v = DQ.j*(plane_length/2); %DQ.k would be another obvious option
         end
         
-        % u,v,n are perpedicular
+        % u,v,n are perpendicular
         % u has the same length of v because n has unit norm.
         u = cross(n,v); 
         

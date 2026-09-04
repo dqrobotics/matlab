@@ -194,7 +194,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
             %
             %   FKM(q, ith) calculates the FKM up to the ith link.
             %   If ith is the last link, it DOES NOT take into account the
-            %   trasformation given by set_effector. If you want to take
+            %   transformation given by set_effector. If you want to take
             %   into account that transformation, use FKM(q)
             %   instead.
             
@@ -312,7 +312,7 @@ classdef (Abstract) DQ_SerialManipulator < DQ_Kinematics
                 % a 1 x 0 vector, differently from the expected
                 % behavior, which is to return a 0 x 1 matrix.
                 % Therefore, we have to deal with the case i = 0
-                % explictly.
+                % explicitly.
                 if i ~= 0
                     vec_zdot = 0.5*(haminus8(w*x') + ...
                         hamiplus8(x*w)*DQ.C8) * ...

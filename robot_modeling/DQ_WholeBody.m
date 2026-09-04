@@ -211,7 +211,7 @@ classdef DQ_WholeBody < DQ_Kinematics
                     % If the first kinematic chain is a fixed-base serial
                     % chain *and* reversed, we must adapt its base frame so
                     % that the DQ_Kinematics/plot function, which always
-                    % start ploting from its base frame, plots the serial
+                    % start plotting from its base frame, plots the serial
                     % chain with the end-effector coinciding with the
                     % whole-body base frame. (Note that each individual chain
                     % has its own base frame used to determine its spatial
@@ -236,7 +236,7 @@ classdef DQ_WholeBody < DQ_Kinematics
             for i = 2:length(obj.chain)
                 % If the first element in the kinematic chain is a mobile
                 % base, its fkm coincides with the base location, already
-                % considering a frame displacement, if aplicable (e.g., in case
+                % considering a frame displacement, if applicable (e.g., in case
                 % the mobile base frame is not in its center).
                 if isa(obj.chain{1}, 'DQ_MobileBase')
                     current_base_frame = obj.fkm(q,i-1);
