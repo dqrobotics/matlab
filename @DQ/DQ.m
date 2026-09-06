@@ -301,7 +301,7 @@ classdef DQ
             %where w is the angular velocity and v is the linear velocity, and considering x_dot as the time
             %derivative of x, then G
             %is the matrix that satisfies vec(xi)=G*vec(x_dot).
-            %For more informations, see 
+            %For more information, see 
             %        B. V. Adorno, "Two-arm Manipulation: From Manipulators to Enhanced Human-Robot Collaboration 
             %          [Contribution ? la manipulation ? deux bras : des manipulateurs ? la collaboration homme-robot]," 
             %          Universit? Montpellier 2, 2011.

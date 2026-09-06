@@ -24,7 +24,7 @@ This is a set of guidelines for contributing to [DQ Robotics](https://dqrobotics
 
 ## Case 2 (Very rare cases)
 
-- In some cases, your modifications would fail some tests because of incompatibility with the current version of [matlab-tests](https://github.com/dqrobotics/matlab-tests) and/or [matlab-examples](https://github.com/dqrobotics/matlab-examples). In thoses cases, you must propose changes in [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples) to make them compatible with your new version of the dqrobotics/matlab. 
+- In some cases, your modifications would fail some tests because of incompatibility with the current version of [matlab-tests](https://github.com/dqrobotics/matlab-tests) and/or [matlab-examples](https://github.com/dqrobotics/matlab-examples). In those cases, you must propose changes in [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples) to make them compatible with your new version of the dqrobotics/matlab. 
 - A designated member of our team will review all the changes proposed in both [matlab-tests](https://github.com/dqrobotics/matlab-tests) and [matlab-examples](https://github.com/dqrobotics/matlab-examples). They will accept the modifications in the master branch after all necessary adjustments. At this point, it is expected that your pull request passes all the tests in the master branch but fails in the release branch.
 
 ![master_and_release](https://user-images.githubusercontent.com/23158313/150379489-cabc85bb-dbe4-41be-a405-7b254a36092a.png)
@@ -40,7 +40,7 @@ This is a set of guidelines for contributing to [DQ Robotics](https://dqrobotics
 
 ## Clone the forked repository
 
-For instance, if your forked matlab respository is https://github.com/juanjqo/matlab, then
+For instance, if your forked matlab repository is https://github.com/juanjqo/matlab, then
 
 Type in your terminal:
 
@@ -63,7 +63,7 @@ Please indicate in your commit message, using brackets, the modified file. For i
 
 ![add_commit_push](https://user-images.githubusercontent.com/23158313/149603960-d69a8202-a3b1-4af5-a2d8-e1197cc26a81.gif)
 
-However, if your explanation is longer or affects more than one file, you must write a more meaninful commit using a text editor, and hence **would not** use the `-m` option.
+However, if your explanation is longer or affects more than one file, you must write a more meaningful commit using a text editor, and hence **would not** use the `-m` option.
 
 For example, this is how a longer commit would be written:
 ```

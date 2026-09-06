@@ -3,7 +3,7 @@
 % j_ = DQ.j;
 % k_ = DQ.k;
 % E_ = DQ.E;
-% Define shorcuts for the conjugator matrices:
+% Define shortcuts for the conjugator matrices:
 % C4 = DQ.C4
 % C8 = DQ.C8;
 

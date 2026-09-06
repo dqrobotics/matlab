@@ -52,7 +52,7 @@ classdef (Abstract) DQ_MobileBase < DQ_Kinematics
     
     methods
         function obj = DQ_MobileBase()
-            % At the begining, there is no frame displacement (e.g., a 
+            % At the beginning, there is no frame displacement (e.g., a 
             % displacement related to the mobile base height).
             obj.frame_displacement = DQ(1);
         end

@@ -1,4 +1,4 @@
-% Define the control objetives to be used with the DQ_KinematicController class.
+% Define the control objectives to be used with the DQ_KinematicController class.
 %
 % The following objectives are currently implemented:
 %   Distance,
