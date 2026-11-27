@@ -48,7 +48,6 @@
 %       Adsharp - sharp adjoint operation
 %       cross - cross product between two pure dual quaternions
 %       dot - dot product between two pure dual quaternions
-%       dec_mult - _same_ as .*
 %
 %   DQ Methods (unary operations):
 %       ' (ctranspose) - dual quaternion conjugate 
